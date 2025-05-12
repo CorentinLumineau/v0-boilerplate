@@ -47,26 +47,33 @@ export function UserDropdown() {
   }
 
   const colorThemes = [
-    { value: "default", label: "Default", color: "bg-[hsl(0,0%,0%)]" },
+    // Red family
     { value: "red", label: "Red", color: "bg-[hsl(0,72%,51%)]" },
     { value: "rose", label: "Rose", color: "bg-[hsl(336,80%,58%)]" },
+    // Orange family
     { value: "orange", label: "Orange", color: "bg-[hsl(24,95%,53%)]" },
-    { value: "green", label: "Green", color: "bg-[hsl(142,50%,40%)]" },
-    { value: "blue", label: "Blue", color: "bg-[hsl(221,83%,53%)]" },
-    { value: "yellow", label: "Yellow", color: "bg-[hsl(48,96%,53%)]" },
-    { value: "violet", label: "Violet", color: "bg-[hsl(271,81%,56%)]" },
-    { value: "teal", label: "Teal", color: "bg-[hsl(171,70%,40%)]" },
-    { value: "purple", label: "Purple", color: "bg-[hsl(280,75%,45%)]" },
-    { value: "pink", label: "Pink", color: "bg-[hsl(330,85%,60%)]" },
-    { value: "slate", label: "Slate", color: "bg-[hsl(215,30%,40%)]" },
     { value: "amber", label: "Amber", color: "bg-[hsl(45,90%,45%)]" },
-    { value: "lime", label: "Lime", color: "bg-[hsl(85,80%,40%)]" },
-    { value: "emerald", label: "Emerald", color: "bg-[hsl(160,84%,39%)]" },
-    { value: "cyan", label: "Cyan", color: "bg-[hsl(190,90%,50%)]" },
-    { value: "indigo", label: "Indigo", color: "bg-[hsl(245,70%,50%)]" },
-    { value: "fuchsia", label: "Fuchsia", color: "bg-[hsl(300,95%,60%)]" },
     { value: "brown", label: "Brown", color: "bg-[hsl(30,60%,35%)]" },
+    // Yellow family
+    { value: "yellow", label: "Yellow", color: "bg-[hsl(48,96%,53%)]" },
+    { value: "lime", label: "Lime", color: "bg-[hsl(85,80%,40%)]" },
+    // Green family
+    { value: "green", label: "Green", color: "bg-[hsl(142,50%,40%)]" },
+    { value: "emerald", label: "Emerald", color: "bg-[hsl(160,84%,39%)]" },
+    { value: "teal", label: "Teal", color: "bg-[hsl(171,70%,40%)]" },
+    { value: "cyan", label: "Cyan", color: "bg-[hsl(190,90%,50%)]" },
+    // Blue family
+    { value: "blue", label: "Blue", color: "bg-[hsl(221,83%,53%)]" },
+    { value: "indigo", label: "Indigo", color: "bg-[hsl(245,70%,50%)]" },
+    // Purple family
+    { value: "violet", label: "Violet", color: "bg-[hsl(271,81%,56%)]" },
+    { value: "purple", label: "Purple", color: "bg-[hsl(280,75%,45%)]" },
+    { value: "fuchsia", label: "Fuchsia", color: "bg-[hsl(300,95%,60%)]" },
+    { value: "pink", label: "Pink", color: "bg-[hsl(330,85%,60%)]" },
+    // Neutral
+    { value: "default", label: "Default", color: "bg-[hsl(0,0%,0%)]" },
     { value: "gray", label: "Gray", color: "bg-[hsl(0,0%,25%)]" },
+    { value: "slate", label: "Slate", color: "bg-[hsl(215,30%,40%)]" },
   ]
 
   const radiusValues = [
