@@ -25,6 +25,9 @@ const translations = {
     french: "French",
     wip: "This boilerplate is currently in WIP",
     username: "Username",
+    settings: "Settings",
+    colorTheme: "Color Theme",
+    borderRadius: "Border Radius",
   },
   fr: {
     home: "Accueil",
@@ -38,6 +41,9 @@ const translations = {
     french: "Français",
     wip: "Ce modèle est actuellement en cours de développement",
     username: "Nom d'utilisateur",
+    settings: "Paramètres",
+    colorTheme: "Thème de couleur",
+    borderRadius: "Rayon de bordure",
   },
 }
 

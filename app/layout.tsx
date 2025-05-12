@@ -1,32 +1,15 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Montserrat, Merriweather, Source_Code_Pro } from "next/font/google"
+import { Inter } from "next/font/google"
 import "./globals.css"
 
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LanguageProvider } from "@/hooks/use-language"
+import { SettingsProvider } from "@/hooks/use-settings"
 
-// Load fonts
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-})
-
-const merriweather = Merriweather({
-  subsets: ["latin"],
-  weight: ["300", "400", "700", "900"],
-  variable: "--font-serif",
-  display: "swap",
-})
-
-const sourceCodePro = Source_Code_Pro({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  display: "swap",
-})
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Boilerplate App",
@@ -42,22 +25,20 @@ export default function RootLayout({
   const version = "1.0.0"
 
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${montserrat.variable} ${merriweather.variable} ${sourceCodePro.variable}`}
-    >
-      <body className={montserrat.className}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <LanguageProvider>
-            <div className="flex h-screen">
-              <Sidebar version={version} />
-              <div className="flex flex-1 flex-col overflow-hidden">
-                <Header />
-                <main className="flex-1 overflow-auto p-4">{children}</main>
+          <SettingsProvider>
+            <LanguageProvider>
+              <div className="flex h-screen">
+                <Sidebar version={version} />
+                <div className="flex flex-1 flex-col overflow-hidden">
+                  <Header />
+                  <main className="flex-1 overflow-auto p-4">{children}</main>
+                </div>
               </div>
-            </div>
-          </LanguageProvider>
+            </LanguageProvider>
+          </SettingsProvider>
         </ThemeProvider>
       </body>
     </html>

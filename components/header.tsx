@@ -23,6 +23,7 @@ export function Header() {
   // Convert pathname to breadcrumb segments
   const segments = pathname.split("/").filter(Boolean)
   const isHome = segments.length === 0
+  const isSettings = pathname === "/settings"
 
   return (
     <header className="sticky top-0 z-40 flex w-full h-16 items-center justify-between border-b bg-background px-4 shadow-sm">
@@ -33,30 +34,38 @@ export function Header() {
         </Button>
         <Breadcrumb className="py-1">
           <BreadcrumbList>
-            <BreadcrumbItem>
-              {isHome ? (
-                <BreadcrumbPage>{t("home")}</BreadcrumbPage>
-              ) : (
-                <BreadcrumbLink href="/">{t("home")}</BreadcrumbLink>
-              )}
-            </BreadcrumbItem>
-            {segments.map((segment, index) => {
-              const href = `/${segments.slice(0, index + 1).join("/")}`
-              const isLast = index === segments.length - 1
+            {isSettings ? (
+              <BreadcrumbItem>
+                <BreadcrumbPage>{t("settings")}</BreadcrumbPage>
+              </BreadcrumbItem>
+            ) : (
+              <>
+                <BreadcrumbItem>
+                  {isHome ? (
+                    <BreadcrumbPage>{t("home")}</BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink href="/">{t("home")}</BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+                {segments.map((segment, index) => {
+                  const href = `/${segments.slice(0, index + 1).join("/")}`
+                  const isLast = index === segments.length - 1
 
-              return (
-                <React.Fragment key={segment}>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    {isLast ? (
-                      <BreadcrumbPage>{segment}</BreadcrumbPage>
-                    ) : (
-                      <BreadcrumbLink href={href}>{segment}</BreadcrumbLink>
-                    )}
-                  </BreadcrumbItem>
-                </React.Fragment>
-              )
-            })}
+                  return (
+                    <React.Fragment key={segment}>
+                      <BreadcrumbSeparator />
+                      <BreadcrumbItem>
+                        {isLast ? (
+                          <BreadcrumbPage>{segment}</BreadcrumbPage>
+                        ) : (
+                          <BreadcrumbLink href={href}>{segment}</BreadcrumbLink>
+                        )}
+                      </BreadcrumbItem>
+                    </React.Fragment>
+                  )
+                })}
+              </>
+            )}
           </BreadcrumbList>
         </Breadcrumb>
       </div>

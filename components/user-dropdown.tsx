@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { LogOut, Monitor, Moon, Sun } from "lucide-react"
+import { LogOut, Monitor, Moon, Settings, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
 import { useLanguage } from "@/hooks/use-language"
@@ -55,6 +55,15 @@ export function UserDropdown() {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 z-50" align="end">
           <DropdownMenuLabel>{username}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem asChild>
+              <a href="/settings" className="flex w-full cursor-pointer items-center">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>{t("settings")}</span>
+              </a>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <div className="px-2 py-1.5">
