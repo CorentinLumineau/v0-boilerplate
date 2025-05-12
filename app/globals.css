@@ -4,25 +4,41 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* Base colors that will be overridden by JS */
+    --background-light: 0 0% 100%;
+    --card-light: 0 0% 100%;
+    --popover-light: 0 0% 100%;
+    --secondary-light: 142 10% 90%;
+    --muted-light: 142 5% 95%;
+    --accent-light: 142 10% 90%;
+
+    --background-dark: 140 5% 8%;
+    --card-dark: 140 5% 10%;
+    --popover-dark: 140 5% 10%;
+    --secondary-dark: 140 5% 15%;
+    --muted-dark: 140 5% 13%;
+    --accent-dark: 140 5% 15%;
+
+    /* Light theme defaults */
+    --background: var(--background-light);
     --foreground: 142 30% 10%;
 
-    --card: 0 0% 100%;
+    --card: var(--card-light);
     --card-foreground: 142 30% 10%;
 
-    --popover: 0 0% 100%;
+    --popover: var(--popover-light);
     --popover-foreground: 142 30% 10%;
 
     --primary: 142 50% 40%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 142 10% 90%;
+    --secondary: var(--secondary-light);
     --secondary-foreground: 142 30% 10%;
 
-    --muted: 142 5% 95%;
+    --muted: var(--muted-light);
     --muted-foreground: 142 10% 40%;
 
-    --accent: 142 10% 90%;
+    --accent: var(--accent-light);
     --accent-foreground: 142 30% 10%;
 
     --destructive: 0 84.2% 60.2%;
@@ -36,25 +52,25 @@
   }
 
   .dark {
-    --background: 140 5% 8%;
+    --background: var(--background-dark);
     --foreground: 0 0% 95%;
 
-    --card: 140 5% 10%;
+    --card: var(--card-dark);
     --card-foreground: 0 0% 95%;
 
-    --popover: 140 5% 10%;
+    --popover: var(--popover-dark);
     --popover-foreground: 0 0% 95%;
 
     --primary: 142 40% 35%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 140 5% 15%;
+    --secondary: var(--secondary-dark);
     --secondary-foreground: 0 0% 95%;
 
-    --muted: 140 5% 13%;
+    --muted: var(--muted-dark);
     --muted-foreground: 0 0% 60%;
 
-    --accent: 140 5% 15%;
+    --accent: var(--accent-dark);
     --accent-foreground: 0 0% 95%;
 
     --destructive: 0 90% 65%;
