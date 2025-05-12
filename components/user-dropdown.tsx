@@ -49,31 +49,59 @@ export function UserDropdown() {
   const colorThemes = [
     // Red family
     { value: "red", label: "Red", color: "bg-[hsl(0,72%,51%)]" },
+    { value: "ruby", label: "Ruby", color: "bg-[hsl(350,75%,45%)]" },
+    { value: "crimson", label: "Crimson", color: "bg-[hsl(345,75%,45%)]" },
     { value: "rose", label: "Rose", color: "bg-[hsl(336,80%,58%)]" },
-    // Orange family
-    { value: "orange", label: "Orange", color: "bg-[hsl(24,95%,53%)]" },
-    { value: "amber", label: "Amber", color: "bg-[hsl(45,90%,45%)]" },
-    { value: "brown", label: "Brown", color: "bg-[hsl(30,60%,35%)]" },
-    // Yellow family
-    { value: "yellow", label: "Yellow", color: "bg-[hsl(48,96%,53%)]" },
-    { value: "lime", label: "Lime", color: "bg-[hsl(85,80%,40%)]" },
-    // Green family
-    { value: "green", label: "Green", color: "bg-[hsl(142,50%,40%)]" },
-    { value: "emerald", label: "Emerald", color: "bg-[hsl(160,84%,39%)]" },
-    { value: "teal", label: "Teal", color: "bg-[hsl(171,70%,40%)]" },
-    { value: "cyan", label: "Cyan", color: "bg-[hsl(190,90%,50%)]" },
-    // Blue family
-    { value: "blue", label: "Blue", color: "bg-[hsl(221,83%,53%)]" },
-    { value: "indigo", label: "Indigo", color: "bg-[hsl(245,70%,50%)]" },
-    // Purple family
-    { value: "violet", label: "Violet", color: "bg-[hsl(271,81%,56%)]" },
-    { value: "purple", label: "Purple", color: "bg-[hsl(280,75%,45%)]" },
-    { value: "fuchsia", label: "Fuchsia", color: "bg-[hsl(300,95%,60%)]" },
     { value: "pink", label: "Pink", color: "bg-[hsl(330,85%,60%)]" },
-    // Neutral
+    { value: "magenta", label: "Magenta", color: "bg-[hsl(320,80%,55%)]" },
+    { value: "fuchsia", label: "Fuchsia", color: "bg-[hsl(300,95%,60%)]" },
+    { value: "plum", label: "Plum", color: "bg-[hsl(290,70%,50%)]" },
+
+    // Purple family
+    { value: "purple", label: "Purple", color: "bg-[hsl(280,75%,45%)]" },
+    { value: "violet", label: "Violet", color: "bg-[hsl(271,81%,56%)]" },
+    { value: "lavender", label: "Lavender", color: "bg-[hsl(255,70%,65%)]" },
+
+    // Blue family
+    { value: "indigo", label: "Indigo", color: "bg-[hsl(245,70%,50%)]" },
+    { value: "navy", label: "Navy", color: "bg-[hsl(230,70%,40%)]" },
+    { value: "blue", label: "Blue", color: "bg-[hsl(221,83%,53%)]" },
+    { value: "azure", label: "Azure", color: "bg-[hsl(215,80%,50%)]" },
+    { value: "sky", label: "Sky", color: "bg-[hsl(205,85%,55%)]" },
+
+    // Cyan/Teal family
+    { value: "cyan", label: "Cyan", color: "bg-[hsl(190,90%,50%)]" },
+    { value: "aqua", label: "Aqua", color: "bg-[hsl(185,85%,45%)]" },
+    { value: "turquoise", label: "Turquoise", color: "bg-[hsl(175,80%,40%)]" },
+    { value: "teal", label: "Teal", color: "bg-[hsl(171,70%,40%)]" },
+
+    // Green family
+    { value: "mint", label: "Mint", color: "bg-[hsl(150,55%,45%)]" },
+    { value: "emerald", label: "Emerald", color: "bg-[hsl(160,84%,39%)]" },
+    { value: "green", label: "Green", color: "bg-[hsl(142,50%,40%)]" },
+    { value: "forest", label: "Forest", color: "bg-[hsl(135,60%,35%)]" },
+    { value: "olive", label: "Olive", color: "bg-[hsl(110,40%,40%)]" },
+
+    // Yellow/Lime family
+    { value: "chartreuse", label: "Chartreuse", color: "bg-[hsl(90,65%,45%)]" },
+    { value: "lime", label: "Lime", color: "bg-[hsl(85,80%,40%)]" },
+    { value: "yellow", label: "Yellow", color: "bg-[hsl(48,96%,53%)]" },
+    { value: "gold", label: "Gold", color: "bg-[hsl(50,85%,45%)]" },
+    { value: "amber", label: "Amber", color: "bg-[hsl(45,90%,45%)]" },
+
+    // Orange/Brown family
+    { value: "peach", label: "Peach", color: "bg-[hsl(35,85%,65%)]" },
+    { value: "orange", label: "Orange", color: "bg-[hsl(24,95%,53%)]" },
+    { value: "copper", label: "Copper", color: "bg-[hsl(25,70%,45%)]" },
+    { value: "rust", label: "Rust", color: "bg-[hsl(15,80%,40%)]" },
+    { value: "brown", label: "Brown", color: "bg-[hsl(30,60%,35%)]" },
+
+    // Neutral/Gray family
     { value: "default", label: "Default", color: "bg-[hsl(0,0%,0%)]" },
     { value: "gray", label: "Gray", color: "bg-[hsl(0,0%,25%)]" },
     { value: "slate", label: "Slate", color: "bg-[hsl(215,30%,40%)]" },
+    { value: "zinc", label: "Zinc", color: "bg-[hsl(240,5%,35%)]" },
+    { value: "stone", label: "Stone", color: "bg-[hsl(60,5%,35%)]" },
   ]
 
   const radiusValues = [

@@ -19,6 +19,26 @@ import { indigoTheme } from "./indigo"
 import { fuchsiaTheme } from "./fuchsia"
 import { brownTheme } from "./brown"
 import { grayTheme } from "./gray"
+import { turquoiseTheme } from "./turquoise"
+import { skyTheme } from "./sky"
+import { lavenderTheme } from "./lavender"
+import { crimsonTheme } from "./crimson"
+import { mintTheme } from "./mint"
+import { rubyTheme } from "./ruby"
+import { magentaTheme } from "./magenta"
+import { plumTheme } from "./plum"
+import { navyTheme } from "./navy"
+import { azureTheme } from "./azure"
+import { aquaTheme } from "./aqua"
+import { forestTheme } from "./forest"
+import { oliveTheme } from "./olive"
+import { chartreuseTheme } from "./chartreuse"
+import { goldTheme } from "./gold"
+import { peachTheme } from "./peach"
+import { copperTheme } from "./copper"
+import { rustTheme } from "./rust"
+import { zincTheme } from "./zinc"
+import { stoneTheme } from "./stone"
 
 export type ColorTheme =
   | "default"
@@ -41,6 +61,26 @@ export type ColorTheme =
   | "fuchsia"
   | "brown"
   | "gray"
+  | "turquoise"
+  | "sky"
+  | "lavender"
+  | "crimson"
+  | "mint"
+  | "ruby"
+  | "magenta"
+  | "plum"
+  | "navy"
+  | "azure"
+  | "aqua"
+  | "forest"
+  | "olive"
+  | "chartreuse"
+  | "gold"
+  | "peach"
+  | "copper"
+  | "rust"
+  | "zinc"
+  | "stone"
 export type ThemeMode = "light" | "dark"
 
 export const themes: Record<ColorTheme, ColorThemeDefinition> = {
@@ -64,6 +104,26 @@ export const themes: Record<ColorTheme, ColorThemeDefinition> = {
   fuchsia: fuchsiaTheme,
   brown: brownTheme,
   gray: grayTheme,
+  turquoise: turquoiseTheme,
+  sky: skyTheme,
+  lavender: lavenderTheme,
+  crimson: crimsonTheme,
+  mint: mintTheme,
+  ruby: rubyTheme,
+  magenta: magentaTheme,
+  plum: plumTheme,
+  navy: navyTheme,
+  azure: azureTheme,
+  aqua: aquaTheme,
+  forest: forestTheme,
+  olive: oliveTheme,
+  chartreuse: chartreuseTheme,
+  gold: goldTheme,
+  peach: peachTheme,
+  copper: copperTheme,
+  rust: rustTheme,
+  zinc: zincTheme,
+  stone: stoneTheme,
 }
 
 // Function to get theme variables based on color theme and mode
