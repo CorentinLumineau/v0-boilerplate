@@ -20,7 +20,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 export function UserDropdown() {
   const { theme, setTheme } = useTheme()
   const { language, setLanguage, t } = useLanguage()
-  // Add state to track dropdown open status for debugging
   const [open, setOpen] = useState(false)
 
   const handleThemeChange = (value: string) => {
@@ -61,28 +60,13 @@ export function UserDropdown() {
             <div className="px-2 py-1.5">
               <p className="text-sm mb-2">{t("theme")}</p>
               <ToggleGroup type="single" value={theme || "system"} onValueChange={handleThemeChange} className="w-full">
-                <ToggleGroupItem
-                  value="light"
-                  aria-label="Light Mode"
-                  title="Light Mode"
-                  className="flex-1 px-2 data-[state=on]:bg-secondary"
-                >
+                <ToggleGroupItem value="light" aria-label="Light Mode" title="Light Mode" className="flex-1 px-2">
                   <Sun className="h-5 w-5" />
                 </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="dark"
-                  aria-label="Dark Mode"
-                  title="Dark Mode"
-                  className="flex-1 px-2 data-[state=on]:bg-secondary"
-                >
+                <ToggleGroupItem value="dark" aria-label="Dark Mode" title="Dark Mode" className="flex-1 px-2">
                   <Moon className="h-5 w-5" />
                 </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="system"
-                  aria-label="System Mode"
-                  title="System Mode"
-                  className="flex-1 px-2 data-[state=on]:bg-secondary"
-                >
+                <ToggleGroupItem value="system" aria-label="System Mode" title="System Mode" className="flex-1 px-2">
                   <Monitor className="h-5 w-5" />
                 </ToggleGroupItem>
               </ToggleGroup>
@@ -93,22 +77,12 @@ export function UserDropdown() {
             <div className="px-2 py-1.5">
               <p className="text-sm mb-2">{t("language")}</p>
               <ToggleGroup type="single" value={language} onValueChange={handleLanguageChange} className="w-full">
-                <ToggleGroupItem
-                  value="en"
-                  aria-label="English"
-                  title="English"
-                  className="flex-1 px-2 data-[state=on]:bg-secondary"
-                >
+                <ToggleGroupItem value="en" aria-label="English" title="English" className="flex-1 px-2">
                   <span className="flex items-center justify-center">
                     <span className="mr-1">🇬🇧</span>
                   </span>
                 </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="fr"
-                  aria-label="French"
-                  title="French"
-                  className="flex-1 px-2 data-[state=on]:bg-secondary"
-                >
+                <ToggleGroupItem value="fr" aria-label="French" title="French" className="flex-1 px-2">
                   <span className="flex items-center justify-center">
                     <span className="mr-1">🇫🇷</span>
                   </span>

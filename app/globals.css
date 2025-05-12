@@ -36,7 +36,7 @@
   }
 
   .dark {
-    /* Adjusted dark mode to be 95% dark with just a subtle green tint */
+    /* Predominantly dark with subtle green tint (95% dark with 5% green) */
     --background: 140 5% 8%;
     --foreground: 0 0% 95%;
 
@@ -46,13 +46,14 @@
     --popover: 140 5% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 142 30% 40%;
-    --primary-foreground: 0 0% 98%;
+    /* Increased contrast for primary (selected items) */
+    --primary: 142 40% 35%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 140 5% 15%;
     --secondary-foreground: 0 0% 95%;
 
-    --muted: 140 5% 15%;
+    --muted: 140 5% 13%;
     --muted-foreground: 0 0% 60%;
 
     --accent: 140 5% 15%;
