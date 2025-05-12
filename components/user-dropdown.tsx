@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
+import { FlagGB, FlagFR } from "@/components/flags"
 
 export function UserDropdown() {
   const { theme, setTheme } = useTheme()
@@ -54,6 +55,18 @@ export function UserDropdown() {
     { value: "blue", label: "Blue", color: "bg-[hsl(221,83%,53%)]" },
     { value: "yellow", label: "Yellow", color: "bg-[hsl(48,96%,53%)]" },
     { value: "violet", label: "Violet", color: "bg-[hsl(271,81%,56%)]" },
+    { value: "teal", label: "Teal", color: "bg-[hsl(171,70%,40%)]" },
+    { value: "purple", label: "Purple", color: "bg-[hsl(280,75%,45%)]" },
+    { value: "pink", label: "Pink", color: "bg-[hsl(330,85%,60%)]" },
+    { value: "slate", label: "Slate", color: "bg-[hsl(215,30%,40%)]" },
+    { value: "amber", label: "Amber", color: "bg-[hsl(45,90%,45%)]" },
+    { value: "lime", label: "Lime", color: "bg-[hsl(85,80%,40%)]" },
+    { value: "emerald", label: "Emerald", color: "bg-[hsl(160,84%,39%)]" },
+    { value: "cyan", label: "Cyan", color: "bg-[hsl(190,90%,50%)]" },
+    { value: "indigo", label: "Indigo", color: "bg-[hsl(245,70%,50%)]" },
+    { value: "fuchsia", label: "Fuchsia", color: "bg-[hsl(300,95%,60%)]" },
+    { value: "brown", label: "Brown", color: "bg-[hsl(30,60%,35%)]" },
+    { value: "gray", label: "Gray", color: "bg-[hsl(0,0%,25%)]" },
   ]
 
   const radiusValues = [
@@ -101,12 +114,12 @@ export function UserDropdown() {
               <ToggleGroup type="single" value={language} onValueChange={handleLanguageChange} className="w-full">
                 <ToggleGroupItem value="en" aria-label="English" title="English" className="flex-1 px-2">
                   <span className="flex items-center justify-center">
-                    <span className="mr-1">🇬🇧</span>
+                    <FlagGB className="mr-1" />
                   </span>
                 </ToggleGroupItem>
                 <ToggleGroupItem value="fr" aria-label="French" title="French" className="flex-1 px-2">
                   <span className="flex items-center justify-center">
-                    <span className="mr-1">🇫🇷</span>
+                    <FlagFR className="mr-1" />
                   </span>
                 </ToggleGroupItem>
               </ToggleGroup>
@@ -116,7 +129,7 @@ export function UserDropdown() {
           <DropdownMenuGroup>
             <div className="px-2 py-1.5">
               <p className="text-sm mb-2">{t("colorTheme")}</p>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-5 gap-2">
                 {colorThemes.map((theme) => (
                   <button
                     key={theme.value}

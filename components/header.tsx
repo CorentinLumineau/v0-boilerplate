@@ -26,7 +26,7 @@ export function Header() {
   const isSettings = pathname === "/settings"
 
   return (
-    <header className="sticky top-0 z-40 flex w-full h-16 items-center justify-between border-b bg-background px-4 shadow-sm">
+    <header className="sticky top-0 z-40 flex w-full h-16 items-center justify-between border-b bg-background px-4">
       <div className="flex items-center">
         <Button variant="ghost" size="icon" className="mr-2 md:hidden">
           <Menu className="h-5 w-5" />

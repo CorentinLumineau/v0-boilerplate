@@ -7,8 +7,40 @@ import { greenTheme } from "./green"
 import { blueTheme } from "./blue"
 import { yellowTheme } from "./yellow"
 import { violetTheme } from "./violet"
+import { tealTheme } from "./teal"
+import { purpleTheme } from "./purple"
+import { pinkTheme } from "./pink"
+import { slateTheme } from "./slate"
+import { amberTheme } from "./amber"
+import { limeTheme } from "./lime"
+import { emeraldTheme } from "./emerald"
+import { cyanTheme } from "./cyan"
+import { indigoTheme } from "./indigo"
+import { fuchsiaTheme } from "./fuchsia"
+import { brownTheme } from "./brown"
+import { grayTheme } from "./gray"
 
-export type ColorTheme = "default" | "red" | "rose" | "orange" | "green" | "blue" | "yellow" | "violet"
+export type ColorTheme =
+  | "default"
+  | "red"
+  | "rose"
+  | "orange"
+  | "green"
+  | "blue"
+  | "yellow"
+  | "violet"
+  | "teal"
+  | "purple"
+  | "pink"
+  | "slate"
+  | "amber"
+  | "lime"
+  | "emerald"
+  | "cyan"
+  | "indigo"
+  | "fuchsia"
+  | "brown"
+  | "gray"
 export type ThemeMode = "light" | "dark"
 
 export const themes: Record<ColorTheme, ColorThemeDefinition> = {
@@ -20,6 +52,18 @@ export const themes: Record<ColorTheme, ColorThemeDefinition> = {
   blue: blueTheme,
   yellow: yellowTheme,
   violet: violetTheme,
+  teal: tealTheme,
+  purple: purpleTheme,
+  pink: pinkTheme,
+  slate: slateTheme,
+  amber: amberTheme,
+  lime: limeTheme,
+  emerald: emeraldTheme,
+  cyan: cyanTheme,
+  indigo: indigoTheme,
+  fuchsia: fuchsiaTheme,
+  brown: brownTheme,
+  gray: grayTheme,
 }
 
 // Function to get theme variables based on color theme and mode
