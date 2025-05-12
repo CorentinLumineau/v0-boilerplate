@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { LogOut, Monitor, Moon, Settings, Sun } from "lucide-react"
+import { LogOut, Monitor, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
 import { useLanguage } from "@/hooks/use-language"
+import { useSettings } from "@/hooks/use-settings"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -16,10 +17,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { cn } from "@/lib/utils"
 
 export function UserDropdown() {
   const { theme, setTheme } = useTheme()
   const { language, setLanguage, t } = useLanguage()
+  const { colorTheme, setColorTheme, radiusValue, setRadiusValue } = useSettings()
   const [open, setOpen] = useState(false)
 
   const handleThemeChange = (value: string) => {
@@ -42,6 +45,21 @@ export function UserDropdown() {
     }
   }
 
+  const colorThemes = [
+    { value: "default", label: "Default", color: "bg-[hsl(0,0%,0%)]" },
+    { value: "red", label: "Red", color: "bg-[hsl(0,72%,51%)]" },
+    { value: "blue", label: "Blue", color: "bg-[hsl(221,83%,53%)]" },
+    { value: "green", label: "Green", color: "bg-[hsl(142,50%,40%)]" },
+  ]
+
+  const radiusValues = [
+    { value: "0", label: "0" },
+    { value: "0.3", label: "0.3" },
+    { value: "0.5", label: "0.5" },
+    { value: "0.75", label: "0.75" },
+    { value: "1.0", label: "1.0" },
+  ]
+
   // Using "username" as a placeholder for now
   const username = "username"
 
@@ -53,17 +71,8 @@ export function UserDropdown() {
             {username}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 z-50" align="end">
+        <DropdownMenuContent className="w-64 z-50" align="end">
           <DropdownMenuLabel>{username}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem asChild>
-              <a href="/settings" className="flex w-full cursor-pointer items-center">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>{t("settings")}</span>
-              </a>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <div className="px-2 py-1.5">
@@ -97,6 +106,51 @@ export function UserDropdown() {
                   </span>
                 </ToggleGroupItem>
               </ToggleGroup>
+            </div>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <div className="px-2 py-1.5">
+              <p className="text-sm mb-2">{t("colorTheme")}</p>
+              <div className="grid grid-cols-4 gap-2">
+                {colorThemes.map((theme) => (
+                  <button
+                    key={theme.value}
+                    className={cn(
+                      "relative flex h-8 w-full items-center justify-center rounded-md border-2 bg-background text-sm font-medium transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                      colorTheme === theme.value ? "border-primary" : "border-border",
+                    )}
+                    onClick={() => setColorTheme(theme.value as any)}
+                    title={theme.label}
+                  >
+                    <span className={cn("absolute inset-1 rounded-sm", theme.color)} />
+                    {colorTheme === theme.value && <span className="absolute h-4 w-4 text-white">✓</span>}
+                    <span className="sr-only">{theme.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <div className="px-2 py-1.5">
+              <p className="text-sm mb-2">{t("borderRadius")}</p>
+              <div className="flex flex-wrap gap-1">
+                {radiusValues.map((radius) => (
+                  <button
+                    key={radius.value}
+                    className={cn(
+                      "flex h-8 min-w-[36px] items-center justify-center rounded-md border px-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                      radiusValue === radius.value
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
+                    )}
+                    onClick={() => setRadiusValue(radius.value as any)}
+                  >
+                    {radius.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
