@@ -29,7 +29,7 @@ export function Sidebar({ version }: SidebarProps) {
 
   if (isMobile) {
     return (
-      <div className="fixed bottom-0 left-0 z-30 flex w-full items-center justify-around border-t bg-background pb-1 pt-2">
+      <div className="fixed bottom-0 left-0 z-30 flex w-full items-center justify-around border-t bg-background pb-1 pt-2 shadow-md">
         {navigation.map((item) => (
           <Link
             key={item.name}
@@ -45,10 +45,10 @@ export function Sidebar({ version }: SidebarProps) {
   }
 
   return (
-    <div className="hidden w-64 border-r bg-background md:block">
-      <div className="flex h-16 items-center border-b px-4">
+    <div className="hidden w-64 border-r bg-sidebar text-sidebar-foreground md:block">
+      <div className="flex h-16 items-center border-b border-sidebar-border px-4">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex aspect-square size-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <div className="flex aspect-square size-10 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
             <GalleryVerticalEnd className="size-5" />
           </div>
           <div className="flex flex-col gap-0.5 leading-none">
@@ -64,7 +64,9 @@ export function Sidebar({ version }: SidebarProps) {
               key={item.name}
               href={item.href}
               className={`flex items-center gap-3 rounded-md px-3 py-3 text-base transition-colors ${
-                item.current ? "bg-secondary text-secondary-foreground" : "text-foreground hover:bg-secondary/50"
+                item.current
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent/50"
               }`}
             >
               <item.icon className="h-5 w-5" />
