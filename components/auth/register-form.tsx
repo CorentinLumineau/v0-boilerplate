@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
-import { GithubIcon } from "lucide-react"
 
 export function RegisterForm() {
   const router = useRouter()
@@ -107,7 +106,7 @@ export function RegisterForm() {
             <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid">
           <Button variant="outline" onClick={() => signIn("google", { callbackUrl: "/dashboard" })}>
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -128,10 +127,6 @@ export function RegisterForm() {
               />
             </svg>
             Google
-          </Button>
-          <Button variant="outline" onClick={() => signIn("github", { callbackUrl: "/dashboard" })}>
-            <GithubIcon className="mr-2 h-4 w-4" />
-            GitHub
           </Button>
         </div>
       </CardContent>

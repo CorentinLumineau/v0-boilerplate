@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { GithubIcon } from "lucide-react"
 import Link from "next/link"
 
 export function LoginForm() {
@@ -92,7 +91,7 @@ export function LoginForm() {
             <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid">
           <Button variant="outline" onClick={() => signIn("google", { callbackUrl: "/dashboard" })}>
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -113,10 +112,6 @@ export function LoginForm() {
               />
             </svg>
             Google
-          </Button>
-          <Button variant="outline" onClick={() => signIn("github", { callbackUrl: "/dashboard" })}>
-            <GithubIcon className="mr-2 h-4 w-4" />
-            GitHub
           </Button>
         </div>
       </CardContent>
