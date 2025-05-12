@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { GalleryVerticalEnd, Home, Settings } from "lucide-react"
 
-import { useSettings } from "@/hooks/use-settings"
+import { useLanguage } from "@/hooks/use-language"
 
 interface SidebarProps {
   version: string
@@ -13,7 +13,7 @@ interface SidebarProps {
 
 export function Sidebar({ version }: SidebarProps) {
   const pathname = usePathname()
-  const { t } = useSettings()
+  const { t } = useLanguage()
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -25,7 +25,6 @@ export function Sidebar({ version }: SidebarProps) {
     return () => window.removeEventListener("resize", checkIfMobile)
   }, [])
 
-  // Update the mainNavigation array to remove the theme test page
   const mainNavigation = [{ name: t("home"), href: "/", icon: Home, current: pathname === "/" }]
 
   const bottomNavigation = [

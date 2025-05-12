@@ -3,54 +3,30 @@
 import type React from "react"
 
 import { createContext, useContext, useEffect, useState } from "react"
-import { useTheme as useNextTheme } from "next-themes"
-import { type Language, translations } from "@/lib/translations"
+import { type ColorTheme, applyTheme } from "@/lib/theme"
+import { useTheme } from "next-themes"
 
-type ColorTheme = "default" | "red" | "rose" | "orange" | "green" | "blue" | "yellow" | "violet"
 type RadiusValue = "0" | "0.3" | "0.5" | "0.75" | "1.0"
-type ThemeMode = "light" | "dark" | "system"
 
 interface SettingsContextType {
-  // Theme settings
-  theme: ThemeMode
-  setTheme: (theme: ThemeMode) => void
-
-  // Color theme settings
   colorTheme: ColorTheme
   setColorTheme: (theme: ColorTheme) => void
-
-  // Border radius settings
   radiusValue: RadiusValue
   setRadiusValue: (value: RadiusValue) => void
-
-  // Language settings
-  language: Language
-  setLanguage: (language: Language) => void
-  t: (key: string, params?: Record<string, string>) => string
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  // Theme settings (light/dark/system)
-  const { theme: nextTheme, setTheme: setNextTheme, resolvedTheme } = useNextTheme()
-
-  // Color theme and radius settings
   const [colorTheme, setColorTheme] = useState<ColorTheme>("default")
   const [radiusValue, setRadiusValue] = useState<RadiusValue>("0.5")
-
-  // Language settings
-  const [language, setLanguage] = useState<Language>("en")
+  const { theme } = useTheme()
 
   // Load settings from localStorage on mount
   useEffect(() => {
     try {
-      // Load color theme and radius
       const storedColorTheme = localStorage.getItem("colorTheme") as ColorTheme
       const storedRadiusValue = localStorage.getItem("radiusValue") as RadiusValue
-
-      // Load language
-      const storedLanguage = localStorage.getItem("language") as Language
 
       if (storedColorTheme) {
         setColorTheme(storedColorTheme)
@@ -59,89 +35,31 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       if (storedRadiusValue) {
         setRadiusValue(storedRadiusValue)
       }
-
-      if (storedLanguage && (storedLanguage === "en" || storedLanguage === "fr")) {
-        setLanguage(storedLanguage)
-      }
     } catch (error) {
       console.error("Error loading settings from localStorage:", error)
     }
   }, [])
 
-  // Save settings to localStorage when they change
+  // Apply theme when colorTheme or theme mode changes
   useEffect(() => {
     try {
-      localStorage.setItem("colorTheme", colorTheme)
-      localStorage.setItem("radiusValue", radiusValue)
-      localStorage.setItem("language", language)
-
       // Apply radius value to CSS variable
       document.documentElement.style.setProperty("--radius", `${radiusValue}rem`)
 
-      // Apply color theme class to body
-      document.body.classList.remove(
-        "theme-default",
-        "theme-red",
-        "theme-rose",
-        "theme-orange",
-        "theme-green",
-        "theme-blue",
-        "theme-yellow",
-        "theme-violet",
-      )
-      document.body.classList.add(`theme-${colorTheme}`)
+      // Apply theme based on current mode and color theme
+      const mode = theme === "dark" ? "dark" : "light"
+      applyTheme(colorTheme, mode)
 
-      // Log theme application for debugging
-      console.log(`Applied theme: ${colorTheme} in ${resolvedTheme || "system"} mode`)
+      // Save settings to localStorage
+      localStorage.setItem("colorTheme", colorTheme)
+      localStorage.setItem("radiusValue", radiusValue)
     } catch (error) {
-      console.error("Error saving settings to localStorage:", error)
+      console.error("Error applying theme:", error)
     }
-  }, [colorTheme, radiusValue, language, resolvedTheme])
-
-  // Enhanced translation function with parameter support
-  const t = (key: string, params?: Record<string, string>): string => {
-    try {
-      let translation = translations[language][key as keyof (typeof translations)[typeof language]] || key
-
-      // Replace parameters if provided
-      if (params) {
-        Object.entries(params).forEach(([param, value]) => {
-          translation = translation.replace(`{${param}}`, value)
-        })
-      }
-
-      return translation
-    } catch (error) {
-      console.error(`Translation error for key: ${key}`, error)
-      return key
-    }
-  }
-
-  // Wrapper for setTheme to ensure it's always one of our allowed values
-  const setTheme = (value: ThemeMode) => {
-    if (value && (value === "light" || value === "dark" || value === "system")) {
-      try {
-        setNextTheme(value)
-      } catch (error) {
-        console.error("Error setting theme:", error)
-      }
-    }
-  }
+  }, [colorTheme, radiusValue, theme])
 
   return (
-    <SettingsContext.Provider
-      value={{
-        theme: (nextTheme as ThemeMode) || "system",
-        setTheme,
-        colorTheme,
-        setColorTheme,
-        radiusValue,
-        setRadiusValue,
-        language,
-        setLanguage,
-        t,
-      }}
-    >
+    <SettingsContext.Provider value={{ colorTheme, setColorTheme, radiusValue, setRadiusValue }}>
       {children}
     </SettingsContext.Provider>
   )
