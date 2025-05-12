@@ -6,7 +6,6 @@ import "./globals.css"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 import { ThemeProvider } from "@/components/theme-provider"
-import { LanguageProvider } from "@/hooks/use-language"
 import { SettingsProvider } from "@/hooks/use-settings"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -29,15 +28,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SettingsProvider>
-            <LanguageProvider>
-              <div className="flex h-screen">
-                <Sidebar version={version} />
-                <div className="flex flex-1 flex-col overflow-hidden">
-                  <Header />
-                  <main className="flex-1 overflow-auto p-4">{children}</main>
-                </div>
+            <div className="flex h-screen">
+              <Sidebar version={version} />
+              <div className="flex flex-1 flex-col overflow-hidden">
+                <Header />
+                <main className="flex-1 overflow-auto p-4">{children}</main>
               </div>
-            </LanguageProvider>
+            </div>
           </SettingsProvider>
         </ThemeProvider>
       </body>

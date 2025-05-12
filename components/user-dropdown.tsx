@@ -2,9 +2,7 @@
 
 import { useState } from "react"
 import { LogOut, Monitor, Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
 
-import { useLanguage } from "@/hooks/use-language"
 import { useSettings } from "@/hooks/use-settings"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,30 +18,10 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 
 export function UserDropdown() {
-  const { theme, setTheme } = useTheme()
-  const { language, setLanguage, t } = useLanguage()
-  const { colorTheme, setColorTheme, radiusValue, setRadiusValue } = useSettings()
+  const { theme, setTheme, language, setLanguage, t, colorTheme, setColorTheme, radiusValue, setRadiusValue } =
+    useSettings()
+
   const [open, setOpen] = useState(false)
-
-  const handleThemeChange = (value: string) => {
-    if (value) {
-      try {
-        setTheme(value)
-      } catch (error) {
-        console.error("Error setting theme:", error)
-      }
-    }
-  }
-
-  const handleLanguageChange = (value: string) => {
-    if (value && (value === "en" || value === "fr")) {
-      try {
-        setLanguage(value as "en" | "fr")
-      } catch (error) {
-        console.error("Error setting language:", error)
-      }
-    }
-  }
 
   const colorThemes = [
     { value: "default", label: "Default", color: "bg-[hsl(0,0%,0%)]" },
@@ -81,7 +59,12 @@ export function UserDropdown() {
           <DropdownMenuGroup>
             <div className="px-2 py-1.5">
               <p className="text-sm mb-2">{t("theme")}</p>
-              <ToggleGroup type="single" value={theme || "system"} onValueChange={handleThemeChange} className="w-full">
+              <ToggleGroup
+                type="single"
+                value={theme}
+                onValueChange={(value) => value && setTheme(value as any)}
+                className="w-full"
+              >
                 <ToggleGroupItem value="light" aria-label="Light Mode" title="Light Mode" className="flex-1 px-2">
                   <Sun className="h-5 w-5" />
                 </ToggleGroupItem>
@@ -98,7 +81,12 @@ export function UserDropdown() {
           <DropdownMenuGroup>
             <div className="px-2 py-1.5">
               <p className="text-sm mb-2">{t("language")}</p>
-              <ToggleGroup type="single" value={language} onValueChange={handleLanguageChange} className="w-full">
+              <ToggleGroup
+                type="single"
+                value={language}
+                onValueChange={(value) => value && setLanguage(value as any)}
+                className="w-full"
+              >
                 <ToggleGroupItem value="en" aria-label="English" title="English" className="flex-1 px-2">
                   <span className="flex items-center justify-center">
                     <span className="mr-1">🇬🇧</span>
