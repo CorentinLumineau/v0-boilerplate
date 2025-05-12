@@ -1,16 +1,17 @@
 "use client"
 
 import { useLanguage } from "@/hooks/use-language"
+import { useSettings } from "@/hooks/use-settings"
 import { useTheme } from "next-themes"
 import { Moon, Sun, Monitor } from "lucide-react"
 
-import { ColorThemeSelector } from "./color-theme-selector"
-import { RadiusSelector } from "./radius-selector"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { cn } from "@/lib/utils"
 
 export function SettingsPanel() {
   const { theme, setTheme } = useTheme()
   const { language, setLanguage, t } = useLanguage()
+  const { colorTheme, setColorTheme, radiusValue, setRadiusValue } = useSettings()
 
   const handleThemeChange = (value: string) => {
     if (value) {
@@ -31,6 +32,25 @@ export function SettingsPanel() {
       }
     }
   }
+
+  const colorThemes = [
+    { value: "default", label: "Default", color: "bg-[hsl(0,0%,0%)]" },
+    { value: "red", label: "Red", color: "bg-[hsl(0,72%,51%)]" },
+    { value: "rose", label: "Rose", color: "bg-[hsl(336,80%,58%)]" },
+    { value: "orange", label: "Orange", color: "bg-[hsl(24,95%,53%)]" },
+    { value: "green", label: "Green", color: "bg-[hsl(142,50%,40%)]" },
+    { value: "blue", label: "Blue", color: "bg-[hsl(221,83%,53%)]" },
+    { value: "yellow", label: "Yellow", color: "bg-[hsl(48,96%,53%)]" },
+    { value: "violet", label: "Violet", color: "bg-[hsl(271,81%,56%)]" },
+  ]
+
+  const radiusValues = [
+    { value: "0", label: "0" },
+    { value: "0.3", label: "0.3" },
+    { value: "0.5", label: "0.5" },
+    { value: "0.75", label: "0.75" },
+    { value: "1.0", label: "1.0" },
+  ]
 
   return (
     <div className="space-y-6">
@@ -72,12 +92,43 @@ export function SettingsPanel() {
 
       <div>
         <h3 className="mb-3 text-lg font-medium">{t("colorTheme")}</h3>
-        <ColorThemeSelector />
+        <div className="grid grid-cols-4 gap-3">
+          {colorThemes.map((theme) => (
+            <button
+              key={theme.value}
+              className={cn(
+                "relative flex h-10 w-full items-center justify-center rounded-md border-2 bg-background text-sm font-medium transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                colorTheme === theme.value ? "border-primary" : "border-border",
+              )}
+              onClick={() => setColorTheme(theme.value as any)}
+              title={theme.label}
+            >
+              <span className={cn("absolute inset-1 rounded-sm", theme.color)} />
+              {colorTheme === theme.value && <span className="absolute h-4 w-4 text-white">✓</span>}
+              <span className="sr-only">{theme.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div>
         <h3 className="mb-3 text-lg font-medium">{t("borderRadius")}</h3>
-        <RadiusSelector />
+        <div className="flex flex-wrap gap-2">
+          {radiusValues.map((radius) => (
+            <button
+              key={radius.value}
+              className={cn(
+                "flex h-10 min-w-[48px] items-center justify-center rounded-md border px-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                radiusValue === radius.value
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
+              )}
+              onClick={() => setRadiusValue(radius.value as any)}
+            >
+              {radius.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )

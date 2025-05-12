@@ -48,8 +48,12 @@ export function UserDropdown() {
   const colorThemes = [
     { value: "default", label: "Default", color: "bg-[hsl(0,0%,0%)]" },
     { value: "red", label: "Red", color: "bg-[hsl(0,72%,51%)]" },
-    { value: "blue", label: "Blue", color: "bg-[hsl(221,83%,53%)]" },
+    { value: "rose", label: "Rose", color: "bg-[hsl(336,80%,58%)]" },
+    { value: "orange", label: "Orange", color: "bg-[hsl(24,95%,53%)]" },
     { value: "green", label: "Green", color: "bg-[hsl(142,50%,40%)]" },
+    { value: "blue", label: "Blue", color: "bg-[hsl(221,83%,53%)]" },
+    { value: "yellow", label: "Yellow", color: "bg-[hsl(48,96%,53%)]" },
+    { value: "violet", label: "Violet", color: "bg-[hsl(271,81%,56%)]" },
   ]
 
   const radiusValues = [
