@@ -1,0 +1,16 @@
+{
+  "home": "Home",
+  "theme": "Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "system": "System",
+  "logout": "Logout",
+  "language": "Language",
+  "english": "English",
+  "french": "French",
+  "wip": "This boilerplate is currently in WIP",
+  "username": "Username",
+  "settings": "Settings",
+  "colorTheme": "Color Theme",
+  "borderRadius": "Border Radius"
+}

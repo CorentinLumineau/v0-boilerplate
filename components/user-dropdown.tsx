@@ -4,8 +4,8 @@ import { useState } from "react"
 import { LogOut, Monitor, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
-import { useLanguage } from "@/hooks/use-language"
-import { useSettings } from "@/hooks/use-settings"
+// Update imports to use the consolidated file
+import { useThemeSettings, useLanguageSettings } from "@/hooks/use-settings-store"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -22,8 +22,9 @@ import { FlagGB, FlagFR } from "@/components/flags"
 
 export function UserDropdown() {
   const { theme, setTheme } = useTheme()
-  const { language, setLanguage, t } = useLanguage()
-  const { colorTheme, setColorTheme, radiusValue, setRadiusValue } = useSettings()
+  const { colorTheme, setColorTheme, radiusValue, setRadiusValue } = useThemeSettings()
+  const { language, setLanguage, t } = useLanguageSettings()
+
   const [open, setOpen] = useState(false)
 
   const handleThemeChange = (value: string) => {
@@ -113,7 +114,7 @@ export function UserDropdown() {
   ]
 
   // Using "username" as a placeholder for now
-  const username = "username"
+  const username = t("username")
 
   return (
     <div className="relative z-50">

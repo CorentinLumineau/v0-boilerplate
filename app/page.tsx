@@ -1,9 +1,10 @@
 "use client"
 
-import { useLanguage } from "@/hooks/use-language"
+// Update import to use the consolidated file
+import { useLanguageSettings } from "@/hooks/use-settings-store"
 
 export default function Page() {
-  const { t } = useLanguage()
+  const { t } = useLanguageSettings()
 
   return (
     <div>

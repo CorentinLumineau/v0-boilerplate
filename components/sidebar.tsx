@@ -5,7 +5,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { GalleryVerticalEnd, Home, Settings } from "lucide-react"
 
-import { useLanguage } from "@/hooks/use-language"
+// Update import to use the consolidated file
+import { useLanguageSettings } from "@/hooks/use-settings-store"
 
 interface SidebarProps {
   version: string
@@ -13,7 +14,7 @@ interface SidebarProps {
 
 export function Sidebar({ version }: SidebarProps) {
   const pathname = usePathname()
-  const { t } = useLanguage()
+  const { t } = useLanguageSettings()
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {

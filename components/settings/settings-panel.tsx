@@ -1,7 +1,5 @@
 "use client"
 
-import { useLanguage } from "@/hooks/use-language"
-import { useSettings } from "@/hooks/use-settings"
 import { useTheme } from "next-themes"
 import { Moon, Sun, Monitor } from "lucide-react"
 import { FlagGB, FlagFR } from "@/components/flags"
@@ -9,10 +7,13 @@ import { FlagGB, FlagFR } from "@/components/flags"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 
+// Update imports to use the consolidated file
+import { useThemeSettings, useLanguageSettings } from "@/hooks/use-settings-store"
+
 export function SettingsPanel() {
   const { theme, setTheme } = useTheme()
-  const { language, setLanguage, t } = useLanguage()
-  const { colorTheme, setColorTheme, radiusValue, setRadiusValue } = useSettings()
+  const { colorTheme, setColorTheme, radiusValue, setRadiusValue } = useThemeSettings()
+  const { language, setLanguage, t } = useLanguageSettings()
 
   const handleThemeChange = (value: string) => {
     if (value) {

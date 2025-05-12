@@ -1,0 +1,16 @@
+{
+  "home": "Accueil",
+  "theme": "Thème",
+  "light": "Clair",
+  "dark": "Sombre",
+  "system": "Système",
+  "logout": "Déconnexion",
+  "language": "Langue",
+  "english": "Anglais",
+  "french": "Français",
+  "wip": "Ce modèle est actuellement en cours de développement",
+  "username": "Nom d'utilisateur",
+  "settings": "Paramètres",
+  "colorTheme": "Thème de couleur",
+  "borderRadius": "Rayon de bordure"
+}

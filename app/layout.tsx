@@ -6,8 +6,8 @@ import "./globals.css"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 import { ThemeProvider } from "@/components/theme-provider"
-import { LanguageProvider } from "@/hooks/use-language"
-import { SettingsProvider } from "@/hooks/use-settings"
+// Import the correct provider
+import { SettingsStoreProvider } from "@/hooks/use-settings-store"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -28,17 +28,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SettingsProvider>
-            <LanguageProvider>
-              <div className="flex h-screen">
-                <Sidebar version={version} />
-                <div className="flex flex-1 flex-col overflow-hidden">
-                  <Header />
-                  <main className="flex-1 overflow-auto p-4">{children}</main>
-                </div>
+          {/* Use the correct provider */}
+          <SettingsStoreProvider>
+            <div className="flex h-screen">
+              <Sidebar version={version} />
+              <div className="flex flex-1 flex-col overflow-hidden">
+                <Header />
+                <main className="flex-1 overflow-auto p-4">{children}</main>
               </div>
-            </LanguageProvider>
-          </SettingsProvider>
+            </div>
+          </SettingsStoreProvider>
         </ThemeProvider>
       </body>
     </html>
