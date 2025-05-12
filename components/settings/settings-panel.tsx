@@ -1,7 +1,6 @@
 "use client"
 
-import { useLanguage } from "@/hooks/use-language"
-import { useTheme } from "next-themes"
+import { useSettings } from "@/hooks/use-settings"
 import { Moon, Sun, Monitor } from "lucide-react"
 
 import { ColorThemeSelector } from "./color-theme-selector"
@@ -9,34 +8,18 @@ import { RadiusSelector } from "./radius-selector"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 export function SettingsPanel() {
-  const { theme, setTheme } = useTheme()
-  const { language, setLanguage, t } = useLanguage()
-
-  const handleThemeChange = (value: string) => {
-    if (value) {
-      try {
-        setTheme(value)
-      } catch (error) {
-        console.error("Error setting theme:", error)
-      }
-    }
-  }
-
-  const handleLanguageChange = (value: string) => {
-    if (value && (value === "en" || value === "fr")) {
-      try {
-        setLanguage(value as "en" | "fr")
-      } catch (error) {
-        console.error("Error setting language:", error)
-      }
-    }
-  }
+  const { themeMode, setThemeMode, language, setLanguage, t } = useSettings()
 
   return (
     <div className="space-y-6">
       <div>
         <h3 className="mb-3 text-lg font-medium">{t("theme")}</h3>
-        <ToggleGroup type="single" value={theme || "system"} onValueChange={handleThemeChange} className="w-full">
+        <ToggleGroup
+          type="single"
+          value={themeMode}
+          onValueChange={(value) => value && setThemeMode(value as any)}
+          className="w-full"
+        >
           <ToggleGroupItem value="light" aria-label="Light Mode" title="Light Mode" className="flex-1 px-2">
             <Sun className="mr-2 h-4 w-4" />
             <span>{t("light")}</span>
@@ -54,7 +37,12 @@ export function SettingsPanel() {
 
       <div>
         <h3 className="mb-3 text-lg font-medium">{t("language")}</h3>
-        <ToggleGroup type="single" value={language} onValueChange={handleLanguageChange} className="w-full">
+        <ToggleGroup
+          type="single"
+          value={language}
+          onValueChange={(value) => value && setLanguage(value as any)}
+          className="w-full"
+        >
           <ToggleGroupItem value="en" aria-label="English" title="English" className="flex-1 px-2">
             <span className="flex items-center justify-center">
               <span className="mr-2">🇬🇧</span>

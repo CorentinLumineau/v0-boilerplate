@@ -1,9 +1,9 @@
 "use client"
 
-import { useLanguage } from "@/hooks/use-language"
+import { useSettings } from "@/hooks/use-settings"
 
 export default function Page() {
-  const { t } = useLanguage()
+  const { t } = useSettings()
 
   return (
     <div>

@@ -13,12 +13,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { useLanguage } from "@/hooks/use-language"
+import { useSettings } from "@/hooks/use-settings"
 import { Button } from "@/components/ui/button"
 
 export function Header() {
   const pathname = usePathname()
-  const { t } = useLanguage()
+  const { t } = useSettings()
 
   // Convert pathname to breadcrumb segments
   const segments = pathname.split("/").filter(Boolean)
