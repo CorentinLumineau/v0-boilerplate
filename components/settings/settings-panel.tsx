@@ -1,16 +1,15 @@
 "use client"
 
-import { Moon, Sun, Monitor, ExternalLink } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { Moon, Sun, Monitor } from "lucide-react"
 
 import { useSettings } from "@/hooks/use-settings"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
+import { ThemeTestPreview } from "@/components/settings/theme-test-preview"
 
 export function SettingsPanel() {
   const { theme, setTheme, language, setLanguage, t, colorTheme, setColorTheme, radiusValue, setRadiusValue } =
     useSettings()
-  const router = useRouter()
 
   const colorThemes = [
     { value: "default", label: "Default", color: "bg-[hsl(0,0%,0%)]" },
@@ -120,15 +119,8 @@ export function SettingsPanel() {
         </div>
       </div>
 
-      <div className="pt-4 border-t">
-        <button
-          onClick={() => router.push("/theme-test")}
-          className="flex items-center justify-center w-full gap-2 p-3 text-sm font-medium transition-colors rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          {t("testTheme")} <ExternalLink className="w-4 h-4 ml-1" />
-        </button>
-        <p className="mt-2 text-sm text-muted-foreground text-center">{t("testThemeDescription")}</p>
-      </div>
+      {/* Integrated Theme Test Preview */}
+      <ThemeTestPreview />
     </div>
   )
 }

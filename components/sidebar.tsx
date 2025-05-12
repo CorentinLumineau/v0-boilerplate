@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { GalleryVerticalEnd, Home, Palette, Settings } from "lucide-react"
+import { GalleryVerticalEnd, Home, Settings } from "lucide-react"
 
 import { useSettings } from "@/hooks/use-settings"
 
@@ -25,11 +25,8 @@ export function Sidebar({ version }: SidebarProps) {
     return () => window.removeEventListener("resize", checkIfMobile)
   }, [])
 
-  // Update the mainNavigation array to use the translated text for the theme test page
-  const mainNavigation = [
-    { name: t("home"), href: "/", icon: Home, current: pathname === "/" },
-    { name: t("themeTest"), href: "/theme-test", icon: Palette, current: pathname === "/theme-test" },
-  ]
+  // Update the mainNavigation array to remove the theme test page
+  const mainNavigation = [{ name: t("home"), href: "/", icon: Home, current: pathname === "/" }]
 
   const bottomNavigation = [
     { name: t("settings"), href: "/settings", icon: Settings, current: pathname === "/settings" },

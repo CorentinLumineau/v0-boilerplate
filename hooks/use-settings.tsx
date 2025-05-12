@@ -26,7 +26,7 @@ interface SettingsContextType {
   // Language settings
   language: Language
   setLanguage: (language: Language) => void
-  t: (key: string) => string
+  t: (key: string, params?: Record<string, string>) => string
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
@@ -98,10 +98,19 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [colorTheme, radiusValue, language, resolvedTheme])
 
-  // Translation function
-  const t = (key: string): string => {
+  // Enhanced translation function with parameter support
+  const t = (key: string, params?: Record<string, string>): string => {
     try {
-      return translations[language][key as keyof (typeof translations)[typeof language]] || key
+      let translation = translations[language][key as keyof (typeof translations)[typeof language]] || key
+
+      // Replace parameters if provided
+      if (params) {
+        Object.entries(params).forEach(([param, value]) => {
+          translation = translation.replace(`{${param}}`, value)
+        })
+      }
+
+      return translation
     } catch (error) {
       console.error(`Translation error for key: ${key}`, error)
       return key
