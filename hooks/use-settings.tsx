@@ -33,7 +33,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   // Theme settings (light/dark/system)
-  const { theme: nextTheme, setTheme: setNextTheme } = useNextTheme()
+  const { theme: nextTheme, setTheme: setNextTheme, resolvedTheme } = useNextTheme()
 
   // Color theme and radius settings
   const [colorTheme, setColorTheme] = useState<ColorTheme>("default")

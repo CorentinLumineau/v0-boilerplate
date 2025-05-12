@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { GalleryVerticalEnd, Home, Settings } from "lucide-react"
+import { GalleryVerticalEnd, Home, Palette, Settings } from "lucide-react"
 
 import { useSettings } from "@/hooks/use-settings"
 
@@ -25,7 +25,10 @@ export function Sidebar({ version }: SidebarProps) {
     return () => window.removeEventListener("resize", checkIfMobile)
   }, [])
 
-  const mainNavigation = [{ name: t("home"), href: "/", icon: Home, current: pathname === "/" }]
+  const mainNavigation = [
+    { name: t("home"), href: "/", icon: Home, current: pathname === "/" },
+    { name: "Theme Test", href: "/theme-test", icon: Palette, current: pathname === "/theme-test" },
+  ]
 
   const bottomNavigation = [
     { name: t("settings"), href: "/settings", icon: Settings, current: pathname === "/settings" },

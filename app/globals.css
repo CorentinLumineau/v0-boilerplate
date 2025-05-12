@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Base theme */
+    /* Base theme - Light mode */
     --background: 0 0% 100%;
     --foreground: 0 0% 10%;
 
@@ -37,6 +37,7 @@
   }
 
   .dark {
+    /* Base theme - Dark mode */
     --background: 0 0% 7%;
     --foreground: 0 0% 95%;
 
