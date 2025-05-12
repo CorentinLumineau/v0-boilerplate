@@ -31,7 +31,7 @@ export function Header() {
           <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle menu</span>
         </Button>
-        <Breadcrumb>
+        <Breadcrumb className="py-1">
           <BreadcrumbList>
             <BreadcrumbItem>
               {isHome ? (
