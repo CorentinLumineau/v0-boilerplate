@@ -313,6 +313,8 @@
 }
 
 /* Color themes - Dark Mode */
+/* Update the dark mode theme classes to ensure proper color blending */
+
 .dark.theme-default {
   --background: 0 0% 7%;
   --foreground: 0 0% 95%;

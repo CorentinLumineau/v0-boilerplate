@@ -6,17 +6,32 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ArrowLeft, Moon, Sun } from "lucide-react"
+import Link from "next/link"
 
 export default function ThemeTestPage() {
   const { t, colorTheme, theme } = useSettings()
 
   return (
     <div className="container mx-auto py-6 space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold mb-2">Theme Test Page</h1>
-        <p className="text-muted-foreground">
-          This page demonstrates how the selected color theme ({colorTheme}) appears in {theme} mode.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">{t("themeTest")}</h1>
+          <p className="text-muted-foreground">
+            {theme === "dark" ? (
+              <Moon className="inline-block mr-2 h-4 w-4" />
+            ) : (
+              <Sun className="inline-block mr-2 h-4 w-4" />
+            )}
+            {t("theme")}: <span className="font-medium">{theme}</span> |{t("colorTheme")}:{" "}
+            <span className="font-medium capitalize">{colorTheme}</span>
+          </p>
+        </div>
+        <Link href="/settings">
+          <Button variant="outline" className="gap-2">
+            <ArrowLeft className="h-4 w-4" /> {t("settings")}
+          </Button>
+        </Link>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -181,6 +196,50 @@ export default function ThemeTestPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Theme Blending Verification</CardTitle>
+          <CardDescription>
+            In dark mode, the background should blend 95% black with 5% of the selected color theme.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="p-4 bg-background rounded-md border">
+              <p className="font-medium">Background Color</p>
+              <p className="text-sm text-muted-foreground">
+                This element uses the background color variable. In dark mode with the {colorTheme} theme, it should
+                have a subtle {colorTheme} tint.
+              </p>
+            </div>
+
+            <div className="p-4 bg-card rounded-md border">
+              <p className="font-medium">Card Color</p>
+              <p className="text-sm text-muted-foreground">
+                This element uses the card color variable. In dark mode with the {colorTheme} theme, it should have a
+                subtle {colorTheme} tint.
+              </p>
+            </div>
+
+            <div className="p-4 bg-secondary rounded-md border">
+              <p className="font-medium text-secondary-foreground">Secondary Color</p>
+              <p className="text-sm text-secondary-foreground opacity-70">
+                This element uses the secondary color variable. In dark mode with the {colorTheme} theme, it should have
+                a subtle {colorTheme} tint.
+              </p>
+            </div>
+
+            <div className="p-4 bg-muted rounded-md border">
+              <p className="font-medium text-muted-foreground">Muted Color</p>
+              <p className="text-sm text-muted-foreground">
+                This element uses the muted color variable. In dark mode with the {colorTheme} theme, it should have a
+                subtle {colorTheme} tint.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

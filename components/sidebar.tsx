@@ -25,9 +25,10 @@ export function Sidebar({ version }: SidebarProps) {
     return () => window.removeEventListener("resize", checkIfMobile)
   }, [])
 
+  // Update the mainNavigation array to use the translated text for the theme test page
   const mainNavigation = [
     { name: t("home"), href: "/", icon: Home, current: pathname === "/" },
-    { name: "Theme Test", href: "/theme-test", icon: Palette, current: pathname === "/theme-test" },
+    { name: t("themeTest"), href: "/theme-test", icon: Palette, current: pathname === "/theme-test" },
   ]
 
   const bottomNavigation = [

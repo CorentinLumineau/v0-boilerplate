@@ -90,10 +90,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         "theme-violet",
       )
       document.body.classList.add(`theme-${colorTheme}`)
+
+      // Log theme application for debugging
+      console.log(`Applied theme: ${colorTheme} in ${resolvedTheme || "system"} mode`)
     } catch (error) {
       console.error("Error saving settings to localStorage:", error)
     }
-  }, [colorTheme, radiusValue, language])
+  }, [colorTheme, radiusValue, language, resolvedTheme])
 
   // Translation function
   const t = (key: string): string => {

@@ -18,6 +18,9 @@ export const translations = {
     borderRadius: "Border Radius",
     preferences: "Preferences",
     appearance: "Appearance",
+    testTheme: "Test Theme Settings",
+    testThemeDescription: "Preview how your theme settings look across different UI components",
+    themeTest: "Theme Test",
   },
   fr: {
     home: "Accueil",
@@ -36,5 +39,8 @@ export const translations = {
     borderRadius: "Rayon de bordure",
     preferences: "Préférences",
     appearance: "Apparence",
+    testTheme: "Tester les paramètres du thème",
+    testThemeDescription: "Prévisualisez l'apparence de vos paramètres de thème sur différents composants d'interface",
+    themeTest: "Test de thème",
   },
 }
