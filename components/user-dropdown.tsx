@@ -91,7 +91,7 @@ export function UserDropdown() {
             </div>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive">
+          <DropdownMenuItem className="text-destructive hover:bg-destructive/10 font-medium">
             <LogOut className="mr-2 h-4 w-4" />
             <span>{t("logout")}</span>
           </DropdownMenuItem>

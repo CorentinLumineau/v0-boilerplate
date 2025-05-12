@@ -25,6 +25,7 @@
     --accent: 142 10% 90%;
     --accent-foreground: 142 30% 10%;
 
+    /* Light mode destructive color */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
@@ -59,8 +60,9 @@
     --accent: 140 5% 15%;
     --accent-foreground: 0 0% 95%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 95%;
+    /* Enhanced destructive color for dark mode - brighter and more saturated for better visibility */
+    --destructive: 0 90% 65%;
+    --destructive-foreground: 0 0% 100%;
 
     --border: 140 5% 15%;
     --input: 140 5% 15%;
