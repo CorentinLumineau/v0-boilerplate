@@ -1,7 +1,6 @@
-import NextAuth from "next-auth/next"
+import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
-import pool from "./lib/db"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
@@ -23,10 +22,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         try {
-          // Query the database directly using the pool
-          const result = await pool.query('SELECT * FROM "User" WHERE email = $1', [credentials.email])
+          // Fetch user from API route
+          const response = await fetch(
+            `${process.env.NEXTAUTH_URL}/api/user?email=${encodeURIComponent(credentials.email)}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            },
+          )
 
-          const user = result.rows[0]
+          if (!response.ok) {
+            return null
+          }
+
+          const user = await response.json()
 
           if (!user || !user.password) {
             return null
@@ -38,12 +49,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return null
           }
 
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            image: user.image,
-          }
+          // Return user without password
+          const { password, ...userWithoutPassword } = user
+          return userWithoutPassword
         } catch (error) {
           console.error("Error in authorize function:", error)
           return null

@@ -1,11 +1,6 @@
-import { Pool } from "pg"
+import { neon } from "@neondatabase/serverless"
 
-// Create a connection pool to the Neon database
-const pool = new Pool({
-  connectionString: process.env.NEON_NEON_DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-})
+// Create a SQL executor using the Neon serverless driver
+const sql = neon(process.env.NEON_NEON_DATABASE_URL || "")
 
-export default pool
+export default sql
