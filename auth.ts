@@ -1,8 +1,12 @@
-import NextAuth from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
+import type { NextAuthConfig } from "next-auth"
+import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+// Import the specific functions we need
+import { getServerSession, NextAuth } from "next-auth/next"
+
+// Define the NextAuth configuration
+const authConfig: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
@@ -10,7 +14,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
   providers: [
-    CredentialsProvider({
+    Credentials({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
@@ -73,4 +77,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token
     },
   },
-})
+}
+
+// Create the NextAuth handler
+const { auth, handlers, signIn, signOut } = NextAuth(authConfig)
+
+// Export the functions
+export { auth, handlers, signIn, signOut }
+
+// Helper function to get the session on the server
+export const getSession = () => getServerSession(authConfig)

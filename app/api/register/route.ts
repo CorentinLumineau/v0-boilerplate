@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
-import sql from "@/lib/db"
+import { neon } from "@neondatabase/serverless"
+
+// Create a SQL executor using the Neon serverless driver
+const sql = neon(process.env.NEON_NEON_DATABASE_URL || "")
 
 const userSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -22,9 +25,9 @@ export async function POST(req: Request) {
     const { name, email, password } = body
 
     // Check if user already exists
-    const existingUser = await sql`SELECT * FROM "User" WHERE email = ${email} LIMIT 1`
+    const existingUsers = await sql`SELECT * FROM "User" WHERE email = ${email} LIMIT 1`
 
-    if (existingUser && existingUser.length > 0) {
+    if (existingUsers && existingUsers.length > 0) {
       return NextResponse.json({ message: "User with this email already exists" }, { status: 400 })
     }
 

@@ -6,6 +6,7 @@ export default auth((req) => {
   const isLoggedIn = !!auth?.user
   const isAuthPage = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/register")
 
+  // Allow access to login and register pages when not logged in
   if (isAuthPage) {
     if (isLoggedIn) {
       return NextResponse.redirect(new URL("/dashboard", nextUrl))
@@ -13,7 +14,8 @@ export default auth((req) => {
     return NextResponse.next()
   }
 
-  if (!isLoggedIn && nextUrl.pathname.startsWith("/dashboard")) {
+  // Redirect to login if trying to access protected pages when not logged in
+  if (!isLoggedIn && (nextUrl.pathname.startsWith("/dashboard") || nextUrl.pathname.startsWith("/profile"))) {
     return NextResponse.redirect(new URL("/login", nextUrl))
   }
 

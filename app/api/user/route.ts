@@ -1,5 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
-import sql from "@/lib/db"
+import { neon } from "@neondatabase/serverless"
+
+// Create a SQL executor using the Neon serverless driver
+const sql = neon(process.env.NEON_NEON_DATABASE_URL || "")
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,13 +14,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Query the database using the Neon serverless driver
-    const user = await sql`SELECT * FROM "User" WHERE email = ${email} LIMIT 1`
+    const users = await sql`SELECT * FROM "User" WHERE email = ${email} LIMIT 1`
 
-    if (!user || user.length === 0) {
+    if (!users || users.length === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    return NextResponse.json(user[0])
+    return NextResponse.json(users[0])
   } catch (error) {
     console.error("Error fetching user:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
