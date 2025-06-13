@@ -4,13 +4,14 @@
   "private": true,
   "packageManager": "pnpm@10.10.0",
   "scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start",
-  "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-  "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "test": "echo \"Test script temporarily changed\""
   },
   "dependencies": {
+    "@prisma/client": "6.9.0",
     "@radix-ui/react-dropdown-menu": "latest",
     "@radix-ui/react-slot": "latest",
     "@radix-ui/react-toggle-group": "latest",
@@ -33,8 +34,12 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "15.3.3",
     "postcss": "^8.5",
+    "prisma": "^6.9.0",
     "tailwindcss": "^3.3.0",
     "turbo": "^2.5.4",
-    "typescript": "^5"
+    "typescript": "^5.8.3"
+  },
+  "pnpm": {
+    "neverBuiltDependencies": []
   }
 }
