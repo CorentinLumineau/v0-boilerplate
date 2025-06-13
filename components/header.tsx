@@ -17,6 +17,11 @@ import {
 import { useLanguageSettings } from "@/hooks/use-settings-store"
 import { Button } from "@/components/ui/button"
 
+/**
+ * Renders the application header with dynamic breadcrumb navigation and a user dropdown.
+ *
+ * The breadcrumb adapts to the current URL path, displaying localized labels for "home" and "settings" when appropriate. Each path segment is shown as a breadcrumb item, with links for intermediate segments and a page label for the current location.
+ */
 export function Header() {
   const pathname = usePathname()
   const { t } = useLanguageSettings()
