@@ -29,10 +29,6 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 flex w-full h-16 items-center justify-between border-b bg-background px-4">
       <div className="flex items-center">
-        <Button variant="ghost" size="icon" className="mr-2 md:hidden">
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle menu</span>
-        </Button>
         <Breadcrumb className="py-1">
           <BreadcrumbList>
             {isSettings ? (
