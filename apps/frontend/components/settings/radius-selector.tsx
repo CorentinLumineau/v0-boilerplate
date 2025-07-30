@@ -1,6 +1,6 @@
 "use client"
 
-import { useSettings } from "@/hooks/use-settings"
+import { useSettings } from "@/hooks"
 import { cn } from "@/lib/utils"
 
 const radiusValues = [

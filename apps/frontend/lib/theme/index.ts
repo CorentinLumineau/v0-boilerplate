@@ -1,130 +1,39 @@
 import { type ColorThemeDefinition, type ThemeDefinition, baseTheme } from "./base"
 import { defaultTheme } from "./default"
 import { redTheme } from "./red"
-import { roseTheme } from "./rose"
 import { orangeTheme } from "./orange"
 import { greenTheme } from "./green"
 import { blueTheme } from "./blue"
-import { yellowTheme } from "./yellow"
-import { violetTheme } from "./violet"
 import { tealTheme } from "./teal"
 import { purpleTheme } from "./purple"
 import { pinkTheme } from "./pink"
-import { slateTheme } from "./slate"
-import { amberTheme } from "./amber"
-import { limeTheme } from "./lime"
-import { emeraldTheme } from "./emerald"
-import { cyanTheme } from "./cyan"
-import { indigoTheme } from "./indigo"
-import { fuchsiaTheme } from "./fuchsia"
-import { brownTheme } from "./brown"
-import { grayTheme } from "./gray"
-import { turquoiseTheme } from "./turquoise"
-import { skyTheme } from "./sky"
-import { lavenderTheme } from "./lavender"
-import { crimsonTheme } from "./crimson"
-import { mintTheme } from "./mint"
-import { rubyTheme } from "./ruby"
-import { magentaTheme } from "./magenta"
-import { plumTheme } from "./plum"
-import { navyTheme } from "./navy"
-import { azureTheme } from "./azure"
-import { aquaTheme } from "./aqua"
-import { forestTheme } from "./forest"
-import { oliveTheme } from "./olive"
-import { chartreuseTheme } from "./chartreuse"
-import { goldTheme } from "./gold"
-import { peachTheme } from "./peach"
-import { copperTheme } from "./copper"
-import { rustTheme } from "./rust"
-import { zincTheme } from "./zinc"
-import { stoneTheme } from "./stone"
+import { getAvailableThemes, getDefaultTheme, type ThemeName } from "../project-config"
 
-export type ColorTheme =
-  | "default"
-  | "red"
-  | "rose"
-  | "orange"
-  | "green"
-  | "blue"
-  | "yellow"
-  | "violet"
-  | "teal"
-  | "purple"
-  | "pink"
-  | "slate"
-  | "amber"
-  | "lime"
-  | "emerald"
-  | "cyan"
-  | "indigo"
-  | "fuchsia"
-  | "brown"
-  | "gray"
-  | "turquoise"
-  | "sky"
-  | "lavender"
-  | "crimson"
-  | "mint"
-  | "ruby"
-  | "magenta"
-  | "plum"
-  | "navy"
-  | "azure"
-  | "aqua"
-  | "forest"
-  | "olive"
-  | "chartreuse"
-  | "gold"
-  | "peach"
-  | "copper"
-  | "rust"
-  | "zinc"
-  | "stone"
+export type ColorTheme = ThemeName
 export type ThemeMode = "light" | "dark"
 
-export const themes: Record<ColorTheme, ColorThemeDefinition> = {
+// Import theme definitions based on available themes from config
+const themeDefinitions = {
   default: defaultTheme,
   red: redTheme,
-  rose: roseTheme,
   orange: orangeTheme,
   green: greenTheme,
   blue: blueTheme,
-  yellow: yellowTheme,
-  violet: violetTheme,
   teal: tealTheme,
   purple: purpleTheme,
   pink: pinkTheme,
-  slate: slateTheme,
-  amber: amberTheme,
-  lime: limeTheme,
-  emerald: emeraldTheme,
-  cyan: cyanTheme,
-  indigo: indigoTheme,
-  fuchsia: fuchsiaTheme,
-  brown: brownTheme,
-  gray: grayTheme,
-  turquoise: turquoiseTheme,
-  sky: skyTheme,
-  lavender: lavenderTheme,
-  crimson: crimsonTheme,
-  mint: mintTheme,
-  ruby: rubyTheme,
-  magenta: magentaTheme,
-  plum: plumTheme,
-  navy: navyTheme,
-  azure: azureTheme,
-  aqua: aquaTheme,
-  forest: forestTheme,
-  olive: oliveTheme,
-  chartreuse: chartreuseTheme,
-  gold: goldTheme,
-  peach: peachTheme,
-  copper: copperTheme,
-  rust: rustTheme,
-  zinc: zincTheme,
-  stone: stoneTheme,
 }
+
+// Create themes object with only available themes from config
+export const themes: Record<ColorTheme, ColorThemeDefinition> = getAvailableThemes().reduce(
+  (acc: Record<ColorTheme, ColorThemeDefinition>, themeName: ThemeName) => {
+    if (themeName in themeDefinitions) {
+      acc[themeName] = themeDefinitions[themeName as keyof typeof themeDefinitions]
+    }
+    return acc
+  },
+  {} as Record<ColorTheme, ColorThemeDefinition>
+)
 
 // Function to get theme variables based on color theme and mode
 export function getThemeVariables(colorTheme: ColorTheme, mode: ThemeMode): ThemeDefinition {

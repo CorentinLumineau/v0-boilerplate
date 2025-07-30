@@ -2,7 +2,7 @@
 
 import React from "react"
 
-import { useSettings } from "@/hooks/use-settings"
+import { useSettings } from "@/hooks"
 import { useTheme } from "next-themes"
 import { themes } from "@/lib/theme"
 

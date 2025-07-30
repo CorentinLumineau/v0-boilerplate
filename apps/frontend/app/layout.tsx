@@ -3,11 +3,12 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 
-import { Sidebar } from "@/components/sidebar"
-import { Header } from "@/components/header"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthGuard } from "@/components/auth/auth-guard"
+import { AppLayout } from "@/components/app-layout"
 // Import the correct provider
 import { SettingsStoreProvider } from "@/hooks/use-settings-store"
+import { getVersion } from "@/lib/project-config"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -22,7 +23,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const version = "1.0.0"
+  const version = getVersion()
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -30,13 +31,9 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {/* Use the correct provider */}
           <SettingsStoreProvider>
-            <div className="flex h-screen">
-              <Sidebar version={version} />
-              <div className="flex flex-1 flex-col overflow-hidden">
-                <Header />
-                <main className="flex-1 overflow-auto p-4">{children}</main>
-              </div>
-            </div>
+            <AuthGuard>
+              <AppLayout version={version}>{children}</AppLayout>
+            </AuthGuard>
           </SettingsStoreProvider>
         </ThemeProvider>
       </body>

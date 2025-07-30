@@ -1,14 +1,9 @@
+import baseConfig from '@boilerplate/config/next.config.base.js'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    unoptimized: true,
-  },
+  ...baseConfig,
+  // Frontend-specific configuration can be added here
 }
 
 export default nextConfig

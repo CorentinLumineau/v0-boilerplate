@@ -49,3 +49,4 @@ Thumbs.db
 # API specific
 /uploads/
 /temp/
+/generated/prisma

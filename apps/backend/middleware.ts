@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getFrontendUrl } from './lib/project-config'
 
 export function middleware(request: NextRequest) {
   // Handle CORS for API routes
@@ -6,9 +7,22 @@ export function middleware(request: NextRequest) {
     const response = NextResponse.next()
     
     // Add CORS headers
-    response.headers.set('Access-Control-Allow-Origin', process.env.FRONTEND_URL || '*')
+    const allowedOrigins = [
+      getFrontendUrl(),
+      'http://localhost:3100', // fallback for development
+      process.env.FRONTEND_URL,
+      process.env.NEXT_PUBLIC_APP_URL
+    ].filter(Boolean)
+    
+    const origin = request.headers.get('origin')
+    const isAllowedOrigin = allowedOrigins.includes(origin || '')
+    
+    if (isAllowedOrigin) {
+      response.headers.set('Access-Control-Allow-Origin', origin!)
+    }
+    
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie')
     response.headers.set('Access-Control-Allow-Credentials', 'true')
 
     // Handle preflight requests

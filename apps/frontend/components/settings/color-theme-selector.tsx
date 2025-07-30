@@ -2,19 +2,28 @@
 
 import { Check } from "lucide-react"
 
-import { useSettings } from "@/hooks/use-settings"
+import { useSettings } from "@/hooks"
 import { cn } from "@/lib/utils"
+import { getAvailableThemes } from "@/lib/project-config"
 
-const colorThemes = [
-  { value: "default", label: "Default" },
-  { value: "red", label: "Red" },
-  { value: "rose", label: "Rose" },
-  { value: "orange", label: "Orange" },
-  { value: "green", label: "Green" },
-  { value: "blue", label: "Blue" },
-  { value: "yellow", label: "Yellow" },
-  { value: "violet", label: "Violet" },
-]
+// Define theme colors for the selector preview
+const themeColors: Record<string, string> = {
+  default: "hsl(0,0%,0%)",
+  red: "hsl(0,72%,51%)",
+  orange: "hsl(24,95%,53%)", 
+  green: "hsl(142,50%,40%)",
+  blue: "hsl(221,83%,53%)",
+  teal: "hsl(171,70%,40%)",
+  purple: "hsl(280,75%,45%)",
+  pink: "hsl(330,85%,60%)",
+}
+
+// Generate color themes from config
+const colorThemes = getAvailableThemes().map(theme => ({
+  value: theme,
+  label: theme.charAt(0).toUpperCase() + theme.slice(1),
+  color: themeColors[theme] || themeColors.default,
+}))
 
 export function ColorThemeSelector() {
   const { colorTheme, setColorTheme } = useSettings()
@@ -32,17 +41,8 @@ export function ColorThemeSelector() {
           title={theme.label}
         >
           <span
-            className={cn(
-              "absolute inset-1 rounded-sm",
-              theme.value === "default" ? "bg-[hsl(0,0%,0%)]" : "",
-              theme.value === "red" ? "bg-[hsl(0,72%,51%)]" : "",
-              theme.value === "rose" ? "bg-[hsl(336,80%,58%)]" : "",
-              theme.value === "orange" ? "bg-[hsl(24,95%,53%)]" : "",
-              theme.value === "green" ? "bg-[hsl(142,50%,40%)]" : "",
-              theme.value === "blue" ? "bg-[hsl(221,83%,53%)]" : "",
-              theme.value === "yellow" ? "bg-[hsl(48,96%,53%)]" : "",
-              theme.value === "violet" ? "bg-[hsl(271,81%,56%)]" : "",
-            )}
+            className="absolute inset-1 rounded-sm"
+            style={{ backgroundColor: theme.color }}
           />
           {colorTheme === theme.value && <Check className="absolute h-4 w-4 text-white" />}
           <span className="sr-only">{theme.label}</span>

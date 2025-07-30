@@ -1,11 +1,8 @@
+import baseConfig from '@boilerplate/config/next.config.base.js'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  ...baseConfig,
   async rewrites() {
     return [
       {

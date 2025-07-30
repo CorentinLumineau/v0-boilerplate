@@ -3,9 +3,12 @@
 import { useState } from "react"
 import { LogOut, Monitor, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useRouter } from "next/navigation"
 
 // Update imports to use the consolidated file
 import { useThemeSettings, useLanguageSettings } from "@/hooks/use-settings-store"
+import { useAuth } from "@/hooks/use-auth"
+import { signOut } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -25,6 +28,8 @@ export function UserDropdown() {
   const { theme, setTheme } = useTheme()
   const { radiusValue, setRadiusValue } = useThemeSettings()
   const { language, setLanguage, t } = useLanguageSettings()
+  const { user } = useAuth()
+  const router = useRouter()
 
   const [open, setOpen] = useState(false)
 
@@ -56,19 +61,36 @@ export function UserDropdown() {
     { value: "1.0", label: "1.0" },
   ]
 
-  // Using "username" as a placeholder for now
-  const username = t("username")
+  const handleLogout = async () => {
+    try {
+      await signOut()
+      router.push("/login")
+    } catch (error) {
+      console.error("Logout failed:", error)
+    }
+  }
+
+  // Use real user data or fallback to translated username
+  const displayName = user?.name || user?.email || t("username")
+  const userEmail = user?.email
 
   return (
     <div className="relative z-50">
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative">
-            {username}
+            {displayName}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64 z-50" align="end">
-          <DropdownMenuLabel>{username}</DropdownMenuLabel>
+          <DropdownMenuLabel>
+            <div>
+              <div className="font-medium">{displayName}</div>
+              {userEmail && displayName !== userEmail && (
+                <div className="text-sm text-muted-foreground font-normal">{userEmail}</div>
+              )}
+            </div>
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <div className="px-2 py-1.5">
@@ -134,7 +156,10 @@ export function UserDropdown() {
             </div>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive hover:bg-destructive/10 font-medium">
+          <DropdownMenuItem 
+            className="text-destructive hover:bg-destructive/10 font-medium cursor-pointer"
+            onClick={handleLogout}
+          >
             <LogOut className="mr-2 h-4 w-4" />
             <span>{t("logout")}</span>
           </DropdownMenuItem>
