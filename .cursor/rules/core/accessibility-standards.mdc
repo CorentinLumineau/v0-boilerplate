@@ -1,0 +1,132 @@
+---
+description: Accessibility standards and best practices for inclusive applications
+globs: ["**/*.html", "**/*.css", "**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.vue", "**/*.svelte"]
+alwaysApply: true
+priority: 1
+---
+
+# Accessibility Standards
+
+## Overview
+
+Accessibility standards and best practices to ensure applications are usable by people with various disabilities.
+
+## Core Principles
+
+### Perceivable
+
+- Information and user interface components must be presentable to users in ways they can perceive
+- Provide text alternatives for non-text content
+- Create content that can be presented in different ways without losing information
+- Make it easier for users to see and hear content
+- Example: Include proper alt text for images
+
+### Operable
+
+- User interface components and navigation must be operable
+- Make all functionality available from a keyboard
+- Give users enough time to read and use content
+- Do not use content that causes seizures
+- Provide ways to help users navigate and find content
+- Example: Ensure all interactive elements are keyboard accessible
+
+### Understandable
+
+- Information and operation of the user interface must be understandable
+- Make text readable and understandable
+- Make content appear and operate in predictable ways
+- Help users avoid and correct mistakes
+- Example: Use clear, simple language and consistent navigation
+
+### Robust
+
+- Content must be robust enough to be interpreted by a wide variety of user agents
+- Maximize compatibility with current and future user agents, including assistive technologies
+- Example: Use semantic HTML elements
+
+## Implementation Guidelines
+
+### Semantic HTML
+
+- Use proper HTML elements for their intended purpose
+- Use heading tags (`<h1>` to `<h6>`) to create a logical structure
+- Use lists (`<ul>`, `<ol>`, `<dl>`) for list content
+- Use tables (`<table>`) only for tabular data with proper headers
+- Example: Use `<button>` for clickable controls, not `<div>`
+
+### Keyboard Accessibility
+
+- Ensure all interactive elements are keyboard accessible
+- Provide visible focus indicators
+- Create logical tab order
+- Avoid keyboard traps
+- Example: Add keyboard shortcuts for common actions
+
+### Screen Reader Support
+
+- Provide descriptive text for screen readers
+- Use ARIA attributes when necessary
+- Test with screen readers
+- Avoid relying on visual cues alone
+- Example: Use `aria-label` for elements without visible text
+
+### Color and Contrast
+
+- Ensure sufficient contrast between text and background
+- Don't rely on color alone to convey information
+- Support high contrast modes
+- Example: Maintain a contrast ratio of at least 4.5:1 for normal text
+
+### Forms and Inputs
+
+- Label form controls properly
+- Group related form elements
+- Provide clear error messages
+- Support autocomplete
+- Example: Use `<label>` elements connected to inputs
+
+### Dynamic Content
+
+- Make AJAX updates accessible
+- Properly announce dynamic content changes
+- Provide controls for moving content
+- Example: Use `aria-live` regions for content that updates
+
+### Media
+
+- Provide captions for videos
+- Provide transcripts for audio content
+- Ensure media controls are accessible
+- Avoid auto-playing content
+- Example: Include closed captions for all video content
+
+### Touch and Pointer Interactions
+
+- Ensure touch targets are large enough
+- Provide alternatives for complex gestures
+- Support both touch and pointer inputs
+- Example: Make touch targets at least 44×44 pixels
+
+## Testing and Compliance
+
+### Automated Testing
+
+- Use accessibility testing tools in development
+- Integrate accessibility testing in CI/CD pipelines
+- Fix issues identified by automated tools
+- Example: Use tools like axe, WAVE, or Lighthouse
+
+### Manual Testing
+
+- Test with keyboard only
+- Test with screen readers
+- Test with different zoom levels
+- Test with different browsers and devices
+- Example: Navigate the entire application without using a mouse
+
+### Compliance Standards
+
+- Aim for WCAG 2.1 AA compliance at minimum
+- Consider specific requirements for your industry or region
+- Document known accessibility issues
+- Example: Ensure compliance with relevant accessibility laws (ADA, Section 508, EAA) 

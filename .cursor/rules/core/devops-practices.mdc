@@ -1,0 +1,185 @@
+---
+description: DevOps best practices for efficient development and operations
+globs: ["**/*.yml", "**/*.yaml", "**/*.json", "**/Dockerfile", "**/docker-compose.yml", "**/Jenkinsfile", "**/.github/workflows/**/*"]
+alwaysApply: true
+priority: 1
+---
+
+# DevOps Best Practices
+
+## Overview
+
+DevOps practices that integrate development and operations to improve collaboration, automation, and delivery efficiency.
+
+## Infrastructure as Code (IaC)
+
+### Version Control
+
+- Store infrastructure definitions in version control
+- Follow the same code review practices as application code
+- Use branches and pull requests for infrastructure changes
+- Example: Use Git for all infrastructure code
+
+### Declarative Definitions
+
+- Use declarative rather than imperative approaches
+- Define desired state rather than steps to reach it
+- Make configurations idempotent
+- Example: Use Terraform, CloudFormation, or Kubernetes manifests
+
+### Modularization
+
+- Create reusable modules for common infrastructure patterns
+- Define logical boundaries between infrastructure components
+- Follow DRY principles
+- Example: Create Terraform modules for standardized resources
+
+### Testing
+
+- Test infrastructure code before deployment
+- Validate syntax and structure
+- Run security scans on infrastructure definitions
+- Example: Use TFLint, cfn-lint, or similar tools
+
+## CI/CD Pipelines
+
+### Continuous Integration
+
+- Automate builds and tests for every code change
+- Fail fast on issues
+- Build artifacts once and promote them through environments
+- Example: Use GitHub Actions, Jenkins, or GitLab CI
+
+### Continuous Delivery
+
+- Automate deployment to testing environments
+- Make production deployment a push-button process
+- Ensure environments are consistent
+- Example: Implement automated deployments to staging with manual approval for production
+
+### Continuous Deployment
+
+- Automatically deploy to production after passing tests
+- Implement proper monitoring and rollback capabilities
+- Ensure zero-downtime deployments
+- Example: Use blue/green or canary deployment strategies
+
+### Pipeline as Code
+
+- Define pipelines in code, not through UI configurations
+- Store pipeline definitions with the application code
+- Version and review pipeline changes
+- Example: Use Jenkinsfile, GitHub Actions workflow files, or GitLab CI YAML
+
+## Containerization
+
+### Container Design
+
+- Create small, purpose-built containers
+- Use multi-stage builds
+- Minimize layer count and size
+- Example: Use distroless or alpine base images
+
+### Container Security
+
+- Scan containers for vulnerabilities
+- Avoid running as root
+- Remove unnecessary tools and libraries
+- Example: Implement vulnerability scanning in CI/CD pipelines
+
+### Image Management
+
+- Tag images with meaningful identifiers
+- Use immutable tags for production
+- Implement image promotion workflows
+- Example: Use semantic versioning for image tags
+
+### Orchestration
+
+- Use container orchestration for production workloads
+- Implement proper health checks
+- Define resource requests and limits
+- Example: Use Kubernetes for container orchestration
+
+## Monitoring and Observability
+
+### Metrics Collection
+
+- Collect system-level and application-level metrics
+- Implement custom metrics for business KPIs
+- Use standardized metric naming
+- Example: Use Prometheus for metrics collection
+
+### Logging
+
+- Implement structured logging
+- Centralize log collection
+- Include request IDs for tracing
+- Example: Use the ELK stack or similar solutions
+
+### Tracing
+
+- Implement distributed tracing
+- Correlate traces across services
+- Sample traces appropriately
+- Example: Use OpenTelemetry for tracing
+
+### Alerting
+
+- Create actionable alerts
+- Reduce alert fatigue by eliminating noise
+- Define clear escalation paths
+- Example: Use PagerDuty integrated with monitoring systems
+
+## Security Practices
+
+### Secret Management
+
+- Never store secrets in version control
+- Use dedicated secret management tools
+- Rotate secrets regularly
+- Example: Use HashiCorp Vault or cloud provider secret services
+
+### Least Privilege
+
+- Use service accounts with minimal permissions
+- Implement role-based access control
+- Regularly audit permissions
+- Example: Use IAM roles with specific permissions
+
+### Compliance as Code
+
+- Automate compliance checks
+- Implement policy as code
+- Regularly scan for compliance issues
+- Example: Use Open Policy Agent or cloud provider policy tools
+
+### Security Scanning
+
+- Scan code, containers, and infrastructure
+- Integrate scanning into CI/CD pipelines
+- Address high-risk findings immediately
+- Example: Use SonarQube, Trivy, and TFSec
+
+## Collaboration
+
+### Documentation
+
+- Maintain up-to-date runbooks and architecture diagrams
+- Document operational procedures
+- Create clear incident response guidelines
+- Example: Use Markdown documentation in repositories
+
+### Communication
+
+- Implement clear communication channels
+- Share postmortems and lessons learned
+- Make metrics and dashboards accessible
+- Example: Use dedicated chat channels for operational discussions
+
+### Knowledge Sharing
+
+- Cross-train team members
+- Rotate operational responsibilities
+- Document tribal knowledge
+- Example: Implement pair programming or shadowing for operations tasks 

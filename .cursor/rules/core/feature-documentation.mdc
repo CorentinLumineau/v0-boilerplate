@@ -1,0 +1,422 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Feature Documentation Standards
+
+## Directory Structure
+```
+docs/features/[feature-name]/
+├── README.md           # Feature overview and quick start
+├── overview.md         # Detailed feature description
+├── technical-specs.md  # Technical specifications
+├── api-docs.md         # API documentation
+├── ui-specs.md        # UI/UX specifications
+├── user-stories.md    # User stories and requirements
+├── security.md        # Security considerations
+├── logging.md         # Logging specifications
+└── todo.md            # Implementation checklist
+```
+
+## Feature Overview (README.md)
+- Quick feature summary
+- Key functionalities
+- Dependencies
+- Quick start guide
+```markdown
+# Feature Name
+
+## Overview
+Brief description of the feature and its purpose.
+
+## Key Functionalities
+- Functionality 1
+- Functionality 2
+- Functionality 3
+
+## Dependencies
+- Required packages
+- External services
+- Related features
+
+## Quick Start
+1. Basic setup
+2. Configuration
+3. Usage example
+```
+
+## Technical Documentation
+
+### Overview (overview.md)
+- Detailed feature description
+- Architecture overview
+- Data flow diagrams
+- Component interactions
+```markdown
+# Feature Overview
+
+## Description
+Detailed explanation of the feature.
+
+## Architecture
+```mermaid
+graph TD
+    A[Component A] --> B[Component B]
+    B --> C[Component C]
+```
+
+## Data Flow
+1. Step 1 description
+2. Step 2 description
+3. Step 3 description
+```
+
+### Technical Specifications (technical-specs.md)
+- Implementation details
+- Data models
+- State management
+- Performance considerations
+```markdown
+# Technical Specifications
+
+## Data Models
+```
+# Data model example
+Model Feature {
+  id: ID
+  name: String
+  config: FeatureConfig
+}
+
+Model FeatureConfig {
+  enabled: Boolean
+  options: JSON
+}
+```
+
+## State Management
+- State management approach
+- Data flow pattern
+- Local vs shared state strategy
+```
+
+### API Documentation (api-docs.md)
+- Endpoint specifications
+- Request/response formats
+- Authentication requirements
+- Error handling
+```markdown
+# API Documentation
+
+## Endpoints
+
+### `POST /api/feature`
+Create new feature instance
+
+#### Request
+```json
+{
+  "name": "string",
+  "config": {
+    "enabled": boolean
+  }
+}
+```
+
+#### Response
+```json
+{
+  "id": "string",
+  "status": "success"
+}
+```
+```
+
+## UI/UX Documentation
+
+### UI Specifications (ui-specs.md)
+- Component hierarchy
+- Design system usage
+- Interaction patterns
+- Accessibility requirements
+```markdown
+# UI Specifications
+
+## Component Structure
+```
+FeatureLayout
+├── FeatureHeader
+└── FeatureContent
+    ├── FeatureControls
+    └── FeatureDisplay
+```
+
+## Design System
+- Color scheme
+- Typography
+- Component variants
+- Responsive behavior
+```
+
+### User Stories (user-stories.md)
+- User requirements
+- Acceptance criteria
+- Edge cases
+- User flows
+```markdown
+# User Stories
+
+## Core Functionality
+As a user, I want to...
+- Story 1
+- Story 2
+- Story 3
+
+## Acceptance Criteria
+1. Criterion 1
+2. Criterion 2
+3. Criterion 3
+```
+
+## Security & Operations
+
+### Security Documentation (security.md)
+- Security requirements
+- Authentication flows
+- Authorization rules
+- Data protection
+```markdown
+# Security Documentation
+
+## Authentication
+- Authentication methods
+- Token management
+- Session handling
+
+## Authorization
+- Role requirements
+- Permission matrix
+- Access control
+```
+
+### Logging (logging.md)
+- Log levels
+- Event tracking
+- Monitoring requirements
+- Alerts
+```markdown
+# Logging Specifications
+
+## Log Events
+- User actions
+- System events
+- Error conditions
+
+## Monitoring
+- Key metrics
+- Alert thresholds
+- Dashboard requirements
+```
+
+## Implementation Tracking
+
+### Todo List (todo.md)
+- Implementation tasks
+- Progress tracking
+- Testing checklist
+- Deployment steps
+- Milestone-based organization
+
+#### Task Definition Requirements
+All tasks in todo.md must follow these guidelines:
+1. **Explicit**: Each task must clearly state what needs to be done with no ambiguity
+2. **Accurate**: Task descriptions must align with the technical specifications and design requirements
+3. **Detailed**: Include enough information to understand the scope and acceptance criteria
+4. **Measurable**: It should be clear when a task is completed
+5. **Self-contained**: Dependencies should be noted, but each task should be implementable on its own
+
+#### Task Format
+```markdown
+- [ ] [Component/Area] Task description that clearly states what needs to be done
+  - Acceptance Criteria: What defines completion
+  - Dependencies: Other tasks that must be completed first (if any)
+  - Technical Details: Specific implementation notes or requirements
+```
+
+#### Milestone-Based Organization
+Tasks should be organized into clearly defined milestones to enable incremental feature delivery:
+
+1. **Milestone Structure**: Group tasks by deployment-ready increments
+2. **Milestone Priorities**: Order milestones from core functionality to enhancements
+3. **Milestone Dependencies**: Clearly indicate dependencies between milestones
+4. **Milestone Criteria**: Define completion criteria for each milestone
+
+#### Milestone Validation Requirements
+
+Before a milestone can be considered complete, it must pass verification with the `make verify` command, which runs:
+- `pnpm test` - All tests must pass
+- `pnpm lint` - No linting errors or warnings
+- `pnpm build` - Successful build without errors
+
+This verification process ensures code quality and prevents integration issues before deployment.
+
+Example milestone organization:
+```markdown
+# Implementation Checklist
+
+## Milestone 1: Core Functionality (MVP)
+Estimated delivery: YYYY-MM-DD
+
+### Backend Tasks
+- [ ] [API] Create base data model
+- [ ] [API] Implement core endpoints
+
+### Frontend Tasks
+- [ ] [UI] Create basic component structure
+- [ ] [UI] Implement core user interactions
+
+## Milestone 2: Enhanced Features
+Estimated delivery: YYYY-MM-DD
+
+### Backend Tasks
+- [ ] [API] Add filtering and pagination
+- [ ] [API] Implement advanced data processing
+
+### Frontend Tasks
+- [ ] [UI] Add advanced filtering UI
+- [ ] [UI] Implement data visualization
+
+## Milestone 3: Optimization and Polish
+Estimated delivery: YYYY-MM-DD
+
+### Backend Tasks
+- [ ] [Performance] Optimize database queries
+- [ ] [Security] Add additional validation
+
+### Frontend Tasks
+- [ ] [UX] Add loading states and error handling
+- [ ] [Performance] Implement caching
+```
+
+#### Implementation Checklist Organization
+Within each milestone, implementation checklists should be organized into logical sections:
+1. **Backend Tasks**: API endpoints, database queries, server-side logic
+2. **Frontend Tasks**: UI components, state management, interaction logic
+3. **Testing Tasks**: Unit, integration, and E2E testing
+4. **Documentation Tasks**: User guides, API docs, inline code documentation
+
+#### Implementation Status Tracking
+The todo.md file should include a status tracking section:
+```markdown
+## Implementation Status
+
+| Task | Milestone | Status | Assigned To | Est. Completion | Blockers |
+|---|-----|-----|----|-----|----|
+| User authentication | 1 | In Progress | @developer1 | 2023-06-15 | None |
+| API endpoints | 1 | Not Started | @developer2 | 2023-06-20 | Depends on DB schema |
+| Advanced filtering | 2 | Not Started | @developer1 | 2023-06-25 | Depends on Milestone 1 |
+```
+
+#### Dynamic Task Additions
+The implementation plan should be treated as a living document that evolves with the project. Tasks can and should be added dynamically based on:
+
+1. **New Context**: As development progresses, new requirements or dependencies may be discovered that weren't apparent during initial planning.
+2. **Deeper Analysis**: Further analysis of the codebase or feature requirements may reveal additional necessary tasks.
+3. **Feedback & Learning**: Insights gained during implementation may highlight the need for additional tasks.
+4. **External Changes**: Changes in project dependencies, standards, or requirements may necessitate new tasks.
+
+When adding new tasks:
+- Clearly document the reason for the addition
+- Specify which milestone it belongs to (existing or new)
+- Follow the same task format and requirements as initial tasks
+- Update dependencies and blockers if the new task affects existing tasks
+- Consider impact on milestone timelines
+
+Example of a dynamically added task:
+```markdown
+- [ ] [API] Add rate limiting to authentication endpoints
+  - Reason Added: Security audit revealed potential vulnerability
+  - Acceptance Criteria: Implement rate limiting with configurable thresholds
+  - Dependencies: Authentication endpoints implementation
+  - Technical Details: Use Redis for rate limit tracking
+```
+
+## MASTERPLAN Integration
+
+All features must be integrated with the project's MASTERPLAN (located at `/docs/MASTERPLAN.md`), which serves as the central project management and roadmap tool. This ensures a coordinated development approach across all features.
+
+### MASTERPLAN Registration Requirements
+
+When a new feature is created, it must be registered in the MASTERPLAN following these guidelines:
+
+1. **Initial Registration**: 
+   - Identify which MASTERPLAN milestone and phase the feature belongs to
+   - Add the feature to the appropriate section in the MASTERPLAN
+   - Include estimated timeline and dependencies
+   - Link the feature documentation folder in the MASTERPLAN
+
+2. **Milestone Completion Updates**:
+   - When a feature milestone is completed, update the MASTERPLAN to reflect this
+   - Move completed items to a "Completed" section while maintaining the milestone structure
+   - Update any impacted dependencies or timelines for other features
+   - Document any lessons learned or implementation notes that may benefit other features
+
+3. **Progress Tracking**:
+   - Use the MASTERPLAN as the source of truth for feature development status
+   - Regularly sync individual feature todo.md status with the MASTERPLAN
+   - Address any discrepancies between feature documentation and MASTERPLAN
+
+### MASTERPLAN Update Process
+
+```markdown
+## MASTERPLAN Integration
+
+### Registration Information
+- MASTERPLAN Location: Milestone X, Phase Y
+- Dependencies: [List of features this feature depends on]
+- Dependents: [List of features that depend on this feature]
+- Estimated Timeline: [Start date] to [End date]
+
+### Milestone Updates
+- Milestone 1: [Status] - [Completion Date]
+  - Notes: [Any implementation details or lessons learned]
+- Milestone 2: [Status] - [Completion Date]
+  - Notes: [Any implementation details or lessons learned]
+```
+
+This information should be included in the `README.md` file of each feature and kept up-to-date as development progresses.
+
+```markdown
+# Implementation Checklist
+
+## Milestone 1: Core Functionality (MVP)
+Estimated delivery: YYYY-MM-DD
+
+### Backend Tasks
+- [ ] [API] Create GET /endpoint with basic functionality
+  - Acceptance Criteria: Endpoint returns user data
+  - Dependencies: User model definition
+  - Technical Details: Basic implementation without advanced features
+
+### Frontend Tasks
+- [ ] [UI] Create basic user list component
+  - Acceptance Criteria: Component displays user data
+  - Dependencies: API endpoint from backend task
+  - Technical Details: Use basic styling without advanced features
+
+## Milestone 2: Enhanced Features
+Estimated delivery: YYYY-MM-DD
+
+### Backend Tasks
+- [ ] [API] Add filtering and pagination to user endpoint
+  - Acceptance Criteria: Endpoint returns filtered and paginated results
+  - Dependencies: Basic endpoint from Milestone 1
+  - Technical Details: Use query params, return max 100 items per page, include total count
+
+### Frontend Tasks
+- [ ] [UI] Add search and filtering to user list
+  - Acceptance Criteria: Users can search and filter the list
+  - Dependencies: Enhanced API from Milestone 2 backend task
+  - Technical Details: Implement debounced search and filter controls
+```

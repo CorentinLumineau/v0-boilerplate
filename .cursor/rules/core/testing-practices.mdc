@@ -1,0 +1,252 @@
+---
+description: Testing best practices for any application (technology-agnostic)
+globs: ["**/*.test.*", "**/*.spec.*", "**/tests/**/*", "**/test/**/*"]
+alwaysApply: false
+---
+# Testing Best Practices
+
+## Unit Testing
+
+### Component Testing
+- Test components in isolation
+- Focus on component behavior and user interactions
+- Example:
+```
+# Test component behavior
+test "button calls handler when clicked":
+  # Setup
+  handler = mockFunction()
+  button = createButton(onClick=handler)
+  
+  # Simulate click
+  click(button)
+  
+  # Verify handler was called
+  assert handler.wasCalled()
+```
+
+### Function Testing
+- Test pure functions thoroughly
+- Verify input/output relationships
+- Example:
+```
+# Test pure function
+test "formatter handles various inputs":
+  assert formatData(123) == "123"
+  assert formatData(null) == "N/A"
+  assert formatData("") == "Empty"
+```
+
+### Utility Testing
+- Test utility functions thoroughly
+- Cover edge cases and error conditions
+- Example:
+```
+# Test utility function
+test "validation function":
+  # Valid cases
+  assert isValid(validInput) == true
+  
+  # Edge cases
+  assert isValid(emptyInput) == false
+  assert isValid(boundaryInput) == true
+  
+  # Error cases
+  assert isValid(malformedInput) == false
+```
+
+## Integration Testing
+
+### API Integration
+- Test API endpoints
+- Verify request/response handling
+- Example:
+```
+# API integration test
+test "fetch user data":
+  # Setup mock API
+  mockApi.respondTo('/users/123', userData)
+  
+  # Call API
+  response = api.getUser('123')
+  
+  # Verify response
+  assert response.name == "Test User"
+  assert response.id == "123"
+```
+
+### Component Integration
+- Test component interactions
+- Verify state management between components
+- Example:
+```
+# Component integration test
+test "form updates parent state on submit":
+  # Setup
+  parent = createParent()
+  form = parent.getForm()
+  
+  # Fill form
+  form.setField("name", "Test User")
+  form.submit()
+  
+  # Verify parent state updated
+  assert parent.getState().name == "Test User"
+```
+
+## End-to-End Testing
+
+### Critical Path Testing
+- Test main user flows
+- Verify business-critical operations
+- Example:
+```
+# End-to-end test
+test "user registration flow":
+  # Visit page
+  navigate("/register")
+  
+  # Fill form
+  fillField("email", "user@example.com")
+  fillField("password", "password123")
+  clickButton("Register")
+  
+  # Verify success
+  assertCurrentPath("/dashboard")
+  assertTextVisible("Welcome, user@example.com")
+```
+
+### Cross-browser Testing
+- Test in target browsers
+- Use browser-specific feature detection
+- Example:
+```
+# Browser compatibility test
+browsers = ["chrome", "firefox", "safari"]
+
+for each browser in browsers:
+  test "core functionality in ${browser}":
+    using browser:
+      # Test core functionality
+      navigate("/app")
+      assertElementVisible("main-content")
+```
+
+## Performance Testing
+
+### Load Testing
+- Test system under expected load
+- Measure response times and resource usage
+- Example:
+```
+# Performance test
+test "handles expected user load":
+  # Setup test environment
+  users = createVirtualUsers(100)
+  
+  # Run concurrent operations
+  results = users.performAction(standardAction)
+  
+  # Verify performance metrics
+  assert median(results.responseTime) < 200  # milliseconds
+  assert percentile(results.responseTime, 95) < 500
+```
+
+### Memory Leaks
+- Test for memory leaks in components
+- Verify cleanup on unmount
+- Example:
+```
+# Memory leak test
+test "cleans up resources":
+  # Setup memory measurement
+  beforeMemory = measureMemory()
+  
+  # Create and destroy many instances
+  for i = 1 to 100:
+    component = createComponent()
+    destroyComponent(component)
+  
+  # Verify no memory leak
+  afterMemory = measureMemory()
+  assert (afterMemory - beforeMemory) < acceptableThreshold
+```
+
+## Security Testing
+
+### Input Validation
+- Test input sanitization
+- Verify XSS prevention
+- Example:
+```
+# Security test
+test "sanitizes user input":
+  # Setup with malicious input
+  maliciousInput = "<script>alert('xss')</script>"
+  
+  # Process input
+  result = displayUserInput(maliciousInput)
+  
+  # Verify sanitization
+  assert !containsScriptTags(result)
+  assert !containsExecutableJavaScript(result)
+```
+
+### Authentication Testing
+- Test authentication flows
+- Verify protected routes
+- Example:
+```
+# Authentication test
+test "protects private routes":
+  # Try accessing protected route without auth
+  response = request("/private-data")
+  
+  # Verify authentication required
+  assert response.status == 401
+  
+  # Login and try again
+  login(validCredentials)
+  response = request("/private-data")
+  
+  # Verify access granted
+  assert response.status == 200
+```
+
+## Monitoring and Observability
+
+### Error Tracking
+- Implement error boundaries
+- Log errors with context
+- Example:
+```
+# Error handling test
+test "captures and logs errors":
+  # Setup error spy
+  errorSpy = spyOnErrors()
+  
+  # Trigger error
+  triggerErrorCondition()
+  
+  # Verify error was captured
+  assert errorSpy.wasCalled()
+  assert errorSpy.lastCall.hasContext()
+```
+
+### Performance Monitoring
+- Track key metrics
+- Set up alerting thresholds
+- Example:
+```
+# Performance monitoring test
+test "reports performance metrics":
+  # Setup metrics spy
+  metricsSpy = spyOnMetrics()
+  
+  # Perform operation
+  performOperation()
+  
+  # Verify metrics reported
+  assert metricsSpy.hasMetric("operationDuration")
+  assert metricsSpy.getMetric("operationDuration") < threshold
+``` 

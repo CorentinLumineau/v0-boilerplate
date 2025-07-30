@@ -1,0 +1,152 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Security testing methodologies including unit tests
+globs: ["**/*.test.*", "**/*.spec.*", "**/tests/**/*", "**/test/**/*"]
+alwaysApply: false
+priority: 2
+---
+# Security Testing Practices
+
+## Overview
+
+Guidelines for incorporating various security testing methodologies throughout the software development lifecycle (SDLC) to identify and mitigate vulnerabilities proactively.
+
+## Shift-Left Security
+
+### Principle
+- Integrate security testing as early and as often as possible in the development process.
+- Finding and fixing vulnerabilities earlier is significantly cheaper and more effective.
+## Security Testing Types
+
+### 1. Static Application Security Testing (SAST)
+
+- **What:** Analyzes source code, byte code, or binaries without executing the application.
+- **When:** Early in the SDLC, often integrated into IDEs and CI pipelines.
+- **Pros:** Finds vulnerabilities early, covers entire codebase, relatively fast.
+- **Cons:** Can have high false positive rates, doesn't understand runtime context or configuration, misses certain vulnerability classes (e.g., authentication bypass, business logic flaws).
+- **Tools:** SonarQube, Checkmarx, Veracode SAST, Semgrep, Bandit (Python), ESLint security plugins (JavaScript).
+
+### 2. Dynamic Application Security Testing (DAST)
+
+- **What:** Tests the running application by sending malicious or unexpected inputs and observing responses.
+- **When:** Later in the SDLC, typically in QA or staging environments.
+- **Pros:** Finds runtime vulnerabilities, lower false positive rate for identified issues, simulates real attacks.
+- **Cons:** Requires a running application, doesn't cover entire codebase, can be slow, struggles with complex authentication/workflows.
+- **Tools:** OWASP ZAP, Burp Suite Pro, Invicti (Netsparker), Acunetix.
+
+### 3. Interactive Application Security Testing (IAST)
+
+- **What:** Combines elements of SAST and DAST, typically using agents instrumented within the running application during functional testing.
+- **When:** During functional testing phases (manual or automated).
+- **Pros:** Provides runtime context (like DAST) with code-level insight (like SAST), good for API testing, lower false positives.
+- **Cons:** Can introduce performance overhead, relies on functional test coverage, newer technology.
+- **Tools:** Contrast Security, Checkmarx IAST, Veracode IAST.
+
+### 4. Software Composition Analysis (SCA)
+
+- **What:** Identifies open-source and third-party components in the codebase and checks for known vulnerabilities (CVEs) and license issues.
+- **When:** Integrated into CI/CD pipelines and development workflow.
+- **Pros:** Addresses risks from third-party code, automated.
+- **Cons:** Only finds *known* vulnerabilities in dependencies.
+- **Tools:** See `core/dependency-security` rule.
+
+### 5. Penetration Testing (Pen Testing)
+
+- **What:** Manual or semi-automated simulation of real-world attacks by security experts.
+- **When:** Periodically on production or production-like systems, often before major releases or for compliance.
+- **Pros:** Finds complex vulnerabilities, business logic flaws, and misconfigurations missed by automated tools.
+- **Cons:** Can be expensive, time-consuming, point-in-time assessment.
+
+### 6. Security Unit & Integration Tests
+
+- **What:** Automated tests written by developers alongside functional tests to specifically verify security controls and resistance to common attacks at the component or service interaction level.
+- **When:** Continuously during development and in CI pipelines.
+- **Pros:** Fast feedback, integrates security into developer workflow, ensures specific controls work as expected, can be automated easily, good regression testing for security fixes.
+- **Cons:** Requires developer knowledge of security, tests specific known controls/patterns rather than discovering novel vulnerabilities.
+
+## Security Unit & Integration Testing Examples
+
+**Goal:** Write tests that actively try to bypass security controls or inject malicious data.
+
+#### Testing Input Validation (e.g., against SQL Injection)
+```python
+# Assume a function `search_products(query)` that eventually uses the query in a DB lookup
+
+def test_search_products_sql_injection_attempt():
+    malicious_input = "' OR '1'='1"
+    # Expect the function to handle this gracefully,
+    # either by raising a validation error, returning empty results,
+    # or having parameterized queries prevent the injection.
+    # The exact assertion depends on the expected safe behavior.
+    with pytest.raises(InvalidInputError):
+         search_products(malicious_input)
+    # Or, if it should return empty results safely:
+    # results = search_products(malicious_input)
+    # assert results == []
+```
+
+#### Testing Input Validation (e.g., against XSS)
+```javascript
+// Assume a function `renderComment(commentText)` that outputs HTML
+
+it('should encode HTML tags to prevent XSS', () => {
+  const maliciousComment = '<script>alert("XSS")</script>';
+  const expectedOutput = '&lt;script&gt;alert("XSS")&lt;/script&gt;'; // Or however it should be encoded
+  const output = renderComment(maliciousComment);
+  expect(output).toContain(expectedOutput);
+  expect(output).not.toContain('<script>'); // Ensure the script tag itself isn't rendered
+});
+```
+
+#### Testing Authorization Logic
+```python
+# Assume `update_profile(user, profile_data)` requires ownership
+
+def test_update_profile_unauthorized_user():
+    user_making_request = create_user(id=1)
+    profile_to_update = create_profile(user_id=2) # Belongs to a different user
+    profile_data = {"email": "new@example.com"}
+
+    # Expect an authorization error (e.g., specific exception or HTTP 403)
+    with pytest.raises(AuthorizationError):
+        update_profile(user_making_request, profile_to_update.id, profile_data)
+```
+
+#### Testing Output Encoding
+```python
+# Similar to XSS test, verify data returned from API is correctly encoded
+
+def test_api_get_user_encodes_output():
+    malicious_name = '<img src=x onerror=alert(1)>'
+    user = create_user(name=malicious_name)
+
+    response = client.get(f'/api/users/{user.id}')
+    assert response.status_code == 200
+    user_data = response.get_json()
+
+    # Verify the malicious string is properly escaped in the JSON response
+    assert '&lt;img src=x onerror=alert(1)&gt;' in user_data['name']
+    assert malicious_name not in user_data['name']
+```
+
+#### Testing Session Management (Conceptual)
+- Test that logging in generates a new session ID.
+- Test that accessing protected resources without a valid session fails.
+- Test that session timeouts work as expected.
+
+#### Testing Insecure Deserialization (Conceptual)
+- If using serialization formats that are known to be vulnerable (e.g., Pickle in Python, Java Serialization), create test cases that feed malicious serialized payloads designed to trigger Remote Code Execution (RCE) or Denial of Service (DoS).
+- Assert that the deserialization process either rejects the malicious payload or handles it safely without executing code or crashing.
+
+## Integrating Security Testing
+
+- **CI/CD Pipeline:** Automate SAST, SCA, and security unit/integration tests in the pipeline.
+- **Developer Workflow:** Encourage use of IDE security plugins (SAST).
+- **QA Process:** Incorporate DAST and IAST during functional and integration testing.
+- **Release Cycle:** Schedule regular penetration tests.
+- **Code Reviews:** Include security checks as part of the standard code review process (see `core/code-review-standards`).
+

@@ -1,0 +1,102 @@
+---
+description: Security principles for modern applications
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Security Principles
+
+## Overview
+
+Security principles that should guide all development to ensure applications are secure by design.
+
+## Core Security Principles
+
+### Principle of Least Privilege
+
+- Limit access rights to the minimum necessary to perform required tasks
+- Minimize the attack surface by restricting unnecessary permissions
+- Apply to systems, users, processes, and services
+- Example: Use role-based access control with carefully scoped permissions
+
+### Defense in Depth
+
+- Implement multiple layers of security controls
+- Ensure that if one defense fails, others remain in place
+- Include network, application, and data security measures
+- Example: Use WAF, input validation, prepared statements, and encryption
+
+### Secure by Default
+
+- Applications should be secure out of the box without additional configuration
+- Disable dangerous features, functions, and permissions by default
+- Start with a secure foundation and only enable necessary functionality
+- Example: Disable unnecessary services, use secure defaults for cookies (HTTPOnly, Secure)
+
+### Fail Secure
+
+- When a system fails, it should do so in a way that maintains security
+- Errors should not expose sensitive information
+- Falling back to an insecure state is unacceptable
+- Example: Timeout sessions rather than keeping them open indefinitely
+
+### Complete Mediation
+
+- Verify access rights every time a resource is accessed
+- Don't cache access decisions without proper invalidation
+- Example: Check permissions on every API call rather than once per session
+
+## Implementation Practices
+
+### Input Validation
+
+- Validate all input at the server side
+- Use whitelisting (allow lists) instead of blacklisting
+- Validate content type, length, format, and range
+- Treat all user input as untrusted
+- Example: Use schema validation for API requests
+
+### Output Encoding
+
+- Encode output appropriate to the context (HTML, JavaScript, SQL, etc.)
+- Use framework-provided encoding functions
+- Never concatenate strings to build output
+- Example: Use template engines with automatic escaping
+
+### Authentication and Authorization
+
+- Implement strong authentication mechanisms
+- Separate authentication from authorization
+- Centralize authorization decisions
+- Implement proper session management
+- Example: Use standard authentication libraries rather than custom solutions
+
+### Secure Communication
+
+- Use TLS for all communication
+- Implement proper certificate validation
+- Use strong cipher suites
+- Enable HSTS
+- Example: Configure servers with modern TLS configurations
+
+### Data Protection
+
+- Encrypt sensitive data at rest and in transit
+- Use appropriate encryption algorithms and key lengths
+- Implement proper key management
+- Apply the principle of least exposure for sensitive data
+- Example: Use envelope encryption for stored data
+
+## Security Testing
+
+- Include security testing in the development process
+- Perform static and dynamic security testing
+- Conduct regular security reviews and penetration tests
+- Example: Integrate static analysis security testing into CI/CD pipelines
+
+## Security Response
+
+- Have a clear process for security vulnerability reporting
+- Implement a responsible disclosure policy
+- Prepare incident response procedures
+- Example: Document your vulnerability handling process and response times 

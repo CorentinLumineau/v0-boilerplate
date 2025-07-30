@@ -1,0 +1,89 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Dependency Security Management
+
+## Overview
+
+Practices for managing the security risks associated with using third-party libraries, frameworks, and components.
+
+## Vulnerability Scanning
+
+### Principle
+- Regularly scan dependencies for known vulnerabilities (CVEs).
+- Integrate scanning into the CI/CD pipeline to detect issues early.
+
+### Tools
+- **Language/Package Manager Tools:**
+  - `npm audit` (Node.js)
+  - `yarn audit` (Node.js)
+  - `pip-audit` or `safety` (Python)
+  - `bundler-audit` (Ruby)
+  - `cargo audit` (Rust)
+  - Maven Dependency Check Plugin / Gradle Dependency Check Plugin (Java)
+  - NuGet Package Manager Security Audits (.NET)
+- **Software Composition Analysis (SCA) Tools:** Commercial or open-source tools (e.g., OWASP Dependency-Check, Snyk, Dependabot, Trivy) that provide more comprehensive scanning and management features.
+
+### Process
+- Run scans regularly (e.g., daily or on every build).
+- Triage identified vulnerabilities based on severity (CVSS score), exploitability, and relevance to the application.
+- Establish a process for addressing vulnerabilities (patch, update, mitigate, accept risk).
+
+## Keeping Dependencies Updated
+
+### Principle
+- Regularly update dependencies to their latest secure versions.
+- Outdated components are a major source of vulnerabilities.
+
+### Practices
+- **Use Semantic Versioning (SemVer):** Understand versioning schemes to manage updates safely.
+- **Automated Updates:** Use tools like Dependabot (GitHub) or Renovate Bot to automate dependency updates via pull requests.
+- **Test Updates:** Ensure updates don't introduce breaking changes or regressions through thorough testing.
+- **Track End-of-Life (EOL):** Be aware of dependencies reaching their end-of-life and plan migrations.
+
+## Minimizing Dependency Footprint
+
+### Principle
+- Only include dependencies that are genuinely needed.
+- Remove unused dependencies.
+- Prefer smaller, focused libraries over large monolithic ones where practical.
+
+### Benefits
+- Reduces the attack surface.
+- Simplifies dependency management and updates.
+- Potentially improves build times and application performance.
+
+## Verifying Dependency Integrity
+
+### Principle
+- Ensure the dependencies downloaded are the intended ones and haven't been tampered with.
+
+### Techniques
+- **Lock Files:** Use package manager lock files (`package-lock.json`, `yarn.lock`, `Pipfile.lock`, `Gemfile.lock`, `Cargo.lock`) to pin exact dependency versions and ensure reproducible builds.
+- **Checksum Verification:** Some package managers automatically verify checksums upon download.
+- **Signed Packages:** Use package managers and repositories that support package signing where available.
+
+## License Compliance
+
+### Principle
+- Understand and comply with the licenses of third-party dependencies.
+- Non-compliance can have legal and business implications.
+
+### Practices
+- **Identify Licenses:** Use tools to scan dependencies and identify their licenses.
+- **Review License Terms:** Ensure licenses are compatible with the project's usage and distribution model.
+- **Maintain License Inventory:** Keep a record of dependencies and their licenses.
+
+## Evaluating New Dependencies
+
+### Principle
+- Assess the security posture and maintenance status of a dependency *before* adding it to the project.
+
+### Checklist
+- **Popularity/Community:** Is the library widely used and actively maintained?
+- **Maintenance Status:** When was the last update? Are issues and pull requests being addressed?
+- **Security History:** Does the library have a history of vulnerabilities? How quickly were they addressed?
+- **Source Code:** Is the source code available for review?
+- **Minimal Scope:** Does it do only what's needed, or does it bring in excessive transitive dependencies?
