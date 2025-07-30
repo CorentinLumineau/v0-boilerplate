@@ -1,0 +1,486 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Design Patterns and Use Cases
+
+## Creational Patterns
+
+### Factory Method
+- **Purpose**: Creates objects without specifying the exact class to create
+- **Use When**:
+  - A class can't anticipate the type of objects it must create
+  - You want to delegate creation to subclasses
+  - You need to provide hooks for extension
+```
+// Factory method pattern example
+interface Product {
+  operation(): string;
+}
+
+class ConcreteProduct implements Product {
+  operation(): string {
+    return "Result of ConcreteProduct";
+  }
+}
+
+abstract class Creator {
+  abstract factoryMethod(): Product;
+  
+  someOperation(): string {
+    const product = this.factoryMethod();
+    return `Creator: ${product.operation()}`;
+  }
+}
+
+class ConcreteCreator extends Creator {
+  factoryMethod(): Product {
+    return new ConcreteProduct();
+  }
+}
+```
+
+### Singleton
+- **Purpose**: Ensures a class has only one instance
+- **Use When**:
+  - Exactly one instance of a class is needed
+  - Instance must be accessible globally
+  - You need lazy initialization
+  - You need thread-safety
+```
+// Singleton pattern example
+class Singleton {
+  private static instance: Singleton;
+  
+  private constructor() {}
+  
+  public static getInstance(): Singleton {
+    if (!Singleton.instance) {
+      Singleton.instance = new Singleton();
+    }
+    return Singleton.instance;
+  }
+}
+```
+
+### Builder
+- **Purpose**: Separates object construction from its representation
+- **Use When**:
+  - Creation process must allow different representations
+  - Construction process is complex
+  - You want to encapsulate a complex creation process
+```
+// Builder pattern example
+class Product {
+  parts: string[] = [];
+  
+  addPart(part: string): void {
+    this.parts.push(part);
+  }
+  
+  listParts(): string {
+    return `Product parts: ${this.parts.join(', ')}`;
+  }
+}
+
+class Builder {
+  private product: Product;
+  
+  constructor() {
+    this.reset();
+  }
+  
+  reset(): void {
+    this.product = new Product();
+  }
+  
+  buildPartA(): void {
+    this.product.addPart('PartA');
+  }
+  
+  buildPartB(): void {
+    this.product.addPart('PartB');
+  }
+  
+  getProduct(): Product {
+    const result = this.product;
+    this.reset();
+    return result;
+  }
+}
+```
+
+## Structural Patterns
+
+### Adapter
+- **Purpose**: Allows incompatible interfaces to work together
+- **Use When**:
+  - You need to use an existing class with an incompatible interface
+  - You want to create a reusable class that cooperates with classes that don't have compatible interfaces
+```
+// Adapter pattern example
+interface Target {
+  request(): string;
+}
+
+class Adaptee {
+  specificRequest(): string {
+    return "Specific request";
+  }
+}
+
+class Adapter implements Target {
+  private adaptee: Adaptee;
+  
+  constructor(adaptee: Adaptee) {
+    this.adaptee = adaptee;
+  }
+  
+  request(): string {
+    return `Adapter: ${this.adaptee.specificRequest()}`;
+  }
+}
+```
+
+### Decorator
+- **Purpose**: Adds behavior to objects without affecting other objects of the same class
+- **Use When**:
+  - You need to add responsibilities to objects dynamically
+  - You want to avoid subclassing for extension
+  - You need a flexible alternative to subclassing
+```
+// Decorator pattern example
+interface Component {
+  operation(): string;
+}
+
+class ConcreteComponent implements Component {
+  operation(): string {
+    return "ConcreteComponent";
+  }
+}
+
+abstract class Decorator implements Component {
+  protected component: Component;
+  
+  constructor(component: Component) {
+    this.component = component;
+  }
+  
+  operation(): string {
+    return this.component.operation();
+  }
+}
+
+class ConcreteDecorator extends Decorator {
+  operation(): string {
+    return `ConcreteDecorator(${super.operation()})`;
+  }
+}
+```
+
+## Behavioral Patterns
+
+### Observer
+- **Purpose**: Defines a one-to-many dependency between objects
+- **Use When**:
+  - A change to one object requires changing others, and you don't know how many objects need to change
+  - An object should be able to notify others without making assumptions about who they are
+```
+// Observer pattern example
+interface Observer {
+  update(subject: Subject): void;
+}
+
+class Subject {
+  private observers: Observer[] = [];
+  private state: number = 0;
+  
+  attach(observer: Observer): void {
+    this.observers.push(observer);
+  }
+  
+  setState(state: number): void {
+    this.state = state;
+    this.notifyObservers();
+  }
+  
+  getState(): number {
+    return this.state;
+  }
+  
+  private notifyObservers(): void {
+    for (const observer of this.observers) {
+      observer.update(this);
+    }
+  }
+}
+
+class ConcreteObserver implements Observer {
+  update(subject: Subject): void {
+    console.log(`Observer updated with state: ${subject.getState()}`);
+  }
+}
+```
+
+### Strategy
+- **Purpose**: Defines a family of algorithms, encapsulates each one, and makes them interchangeable
+- **Use When**:
+  - You need different variants of an algorithm
+  - You want to avoid exposing complex algorithm-specific data structures
+  - You have a class with many behaviors that appear as multiple conditional statements
+```
+// Strategy pattern example
+interface Strategy {
+  execute(a: number, b: number): number;
+}
+
+class AddStrategy implements Strategy {
+  execute(a: number, b: number): number {
+    return a + b;
+  }
+}
+
+class SubtractStrategy implements Strategy {
+  execute(a: number, b: number): number {
+    return a - b;
+  }
+}
+
+class Context {
+  private strategy: Strategy;
+  
+  setStrategy(strategy: Strategy): void {
+    this.strategy = strategy;
+  }
+  
+  executeStrategy(a: number, b: number): number {
+    return this.strategy.execute(a, b);
+  }
+}
+```
+
+## Architectural Patterns
+
+### MVC (Model-View-Controller)
+- **Purpose**: Separates application into three interconnected components
+- **Use When**:
+  - Building user interfaces
+  - You want to separate data, presentation, and control logic
+  - You need multiple ways to view and interact with data
+```
+// MVC pattern simplified example
+class Model {
+  private data: string = "";
+  
+  setData(data: string): void {
+    this.data = data;
+  }
+  
+  getData(): string {
+    return this.data;
+  }
+}
+
+class View {
+  display(data: string): void {
+    console.log(`View: ${data}`);
+  }
+}
+
+class Controller {
+  private model: Model;
+  private view: View;
+  
+  constructor(model: Model, view: View) {
+    this.model = model;
+    this.view = view;
+  }
+  
+  updateView(): void {
+    this.view.display(this.model.getData());
+  }
+  
+  setData(data: string): void {
+    this.model.setData(data);
+  }
+}
+```
+
+### Repository Pattern
+- **Purpose**: Separates domain objects from data access logic
+- **Use When**:
+  - You want to centralize data access logic
+  - You need to decouple business logic from data access
+  - You need testable components
+```
+// Repository pattern example
+interface Entity {
+  id: number;
+}
+
+interface Repository<T extends Entity> {
+  findById(id: number): T | undefined;
+  save(entity: T): void;
+  delete(id: number): void;
+}
+
+class UserRepository implements Repository<User> {
+  private users: Map<number, User> = new Map();
+  
+  findById(id: number): User | undefined {
+    return this.users.get(id);
+  }
+  
+  save(user: User): void {
+    this.users.set(user.id, user);
+  }
+  
+  delete(id: number): void {
+    this.users.delete(id);
+  }
+}
+```
+
+## Reactive Patterns
+
+### Observable/Reactive Streams
+- **Purpose**: Handle asynchronous data streams with operations
+- **Use When**:
+  - Processing event-based systems
+  - Handling asynchronous operations with dependencies
+  - Building reactive user interfaces
+```
+// Simplified Observable pattern example
+interface Observer<T> {
+  next(value: T): void;
+  complete(): void;
+  error(err: any): void;
+}
+
+class Observable<T> {
+  private subscribe: (observer: Observer<T>) => () => void;
+  
+  constructor(subscribe: (observer: Observer<T>) => () => void) {
+    this.subscribe = subscribe;
+  }
+  
+  pipe<R>(operator: (source: Observable<T>) => Observable<R>): Observable<R> {
+    return operator(this);
+  }
+  
+  map<R>(fn: (value: T) => R): Observable<R> {
+    return new Observable<R>(observer => {
+      return this.subscribe({
+        next: value => observer.next(fn(value)),
+        complete: () => observer.complete(),
+        error: err => observer.error(err)
+      });
+    });
+  }
+}
+```
+
+## Microservices Patterns
+
+### API Gateway
+- **Purpose**: Single entry point for client applications to access services
+- **Use When**:
+  - You have multiple microservices that clients need to interact with
+  - You need protocol translation, request routing, or composition
+  - You want to shield clients from service implementation details
+```
+// API Gateway conceptual structure
+class ApiGateway {
+  private serviceRegistry: Map<string, string> = new Map();
+  
+  registerService(name: string, url: string): void {
+    this.serviceRegistry.set(name, url);
+  }
+  
+  async routeRequest(serviceName: string, endpoint: string, method: string, data?: any): Promise<any> {
+    const serviceUrl = this.serviceRegistry.get(serviceName);
+    if (!serviceUrl) {
+      throw new Error(`Service ${serviceName} not found`);
+    }
+    
+    // Handle routing logic, authentication, transformation, etc.
+    return await this.sendRequest(`${serviceUrl}/${endpoint}`, method, data);
+  }
+  
+  private async sendRequest(url: string, method: string, data?: any): Promise<any> {
+    // Implementation of HTTP request
+    return { status: "success" }; // Placeholder
+  }
+}
+```
+
+### Circuit Breaker
+- **Purpose**: Prevents cascading failures in distributed systems
+- **Use When**:
+  - Making remote service calls that might fail
+  - You need to gracefully handle service degradation
+  - You want to automatically recover when services come back online
+```
+// Circuit Breaker pattern example
+enum State {
+  CLOSED,
+  OPEN,
+  HALF_OPEN
+}
+
+class CircuitBreaker {
+  private state: State = State.CLOSED;
+  private failureCount: number = 0;
+  private failureThreshold: number;
+  private resetTimeout: number;
+  private lastFailureTime: number = 0;
+  
+  constructor(failureThreshold: number = 5, resetTimeout: number = 60000) {
+    this.failureThreshold = failureThreshold;
+    this.resetTimeout = resetTimeout;
+  }
+  
+  async execute<T>(fn: () => Promise<T>, fallback?: () => Promise<T>): Promise<T> {
+    if (this.state === State.OPEN) {
+      if (Date.now() - this.lastFailureTime > this.resetTimeout) {
+        this.state = State.HALF_OPEN;
+      } else if (fallback) {
+        return await fallback();
+      } else {
+        throw new Error("Circuit is open");
+      }
+    }
+    
+    try {
+      const result = await fn();
+      if (this.state === State.HALF_OPEN) {
+        this.reset();
+      }
+      return result;
+    } catch (error) {
+      this.recordFailure();
+      if (fallback) {
+        return await fallback();
+      }
+      throw error;
+    }
+  }
+  
+  private recordFailure(): void {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+    
+    if (this.failureCount >= this.failureThreshold || 
+        this.state === State.HALF_OPEN) {
+      this.state = State.OPEN;
+    }
+  }
+  
+  private reset(): void {
+    this.failureCount = 0;
+    this.state = State.CLOSED;
+  }
+}
+``` 

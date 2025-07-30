@@ -1,0 +1,189 @@
+---
+description: Code quality standards for maintainable and reliable software
+globs: ["**/*"]
+alwaysApply: true
+priority: 1
+---
+
+# Code Quality Standards
+
+## Overview
+
+Standards and practices to ensure high-quality, maintainable, and reliable code.
+
+## Code Organization
+
+### Clean Code Principles
+
+- Write code that is easy to read and understand
+- Functions should do one thing and do it well
+- Keep functions and classes small and focused
+- Example: Create functions with clear names that perform a single logical operation
+
+### Naming Conventions
+
+- Use clear, descriptive names
+- Follow consistent naming patterns
+- Use domain-specific terminology
+- Example: Use `calculateTotalPrice` instead of `calc` or `doMath`
+
+### File Organization
+
+- Group related code together
+- Use a consistent file structure
+- Keep files at a reasonable size
+- Example: Split large files into logical modules
+
+### Code Formatting
+
+- Follow consistent formatting rules
+- Use automated formatting tools
+- Maintain consistent indentation and line wrapping
+- Example: Use tools like Prettier, Black, or gofmt
+
+## Error Handling
+
+### Comprehensive Error Handling
+
+- Handle all possible error cases
+- Avoid swallowing exceptions
+- Provide meaningful error messages
+- Example: Include contextual information in error messages
+
+### Error Propagation
+
+- Define clear error propagation strategies
+- Use appropriate error types
+- Consider when to retry, recover, or fail
+- Example: Use domain-specific error types for different error categories
+
+### Failure Recovery
+
+- Design systems to recover from failures
+- Implement graceful degradation
+- Use circuit breakers for unreliable dependencies
+- Example: Provide fallback mechanisms when external services are unavailable
+
+## Code Duplication
+
+### DRY Principle
+
+- Don't Repeat Yourself
+- Extract common code into reusable functions
+- Create abstractions for repeated patterns
+- Example: Create helper functions for operations performed in multiple places
+
+### Abstraction Levels
+
+- Use appropriate levels of abstraction
+- Don't over-abstract simple concepts
+- Refactor when duplication becomes problematic
+- Example: Extract code into a utility function when it's used in 3+ places
+
+## Complexity Management
+
+### Cyclomatic Complexity
+
+- Keep cyclomatic complexity low
+- Limit nesting of control structures
+- Break complex functions into smaller ones
+- Example: Refactor functions with more than 5 branches
+
+### Cognitive Complexity
+
+- Minimize cognitive load required to understand code
+- Use clear control flow
+- Avoid clever or obscure code
+- Example: Prefer readability over brevity or performance when the trade-off is small
+
+### Cohesion and Coupling
+
+- Maximize cohesion within modules
+- Minimize coupling between modules
+- Define clear boundaries and interfaces
+- Example: Group related functions in a module with a clear public API
+
+## Documentation
+
+### Code Comments
+
+- Document why, not what the code does
+- Keep comments up-to-date with code changes
+- Document non-obvious behavior
+- Example: Explain complex algorithms or business rules
+
+### API Documentation
+
+- Document public APIs thoroughly
+- Include parameter descriptions and return values
+- Provide usage examples
+- Example: Use JSDoc, Swagger, or similar tools
+
+### Architecture Documentation
+
+- Document high-level system architecture
+- Explain key design decisions
+- Keep documentation up-to-date
+- Example: Use architecture decision records (ADRs)
+
+## Testing
+
+### Test Coverage
+
+- Aim for high test coverage of business logic
+- Focus on critical paths
+- Test edge cases and error conditions
+- Example: Ensure all business rules have corresponding tests
+
+### Test Quality
+
+- Write meaningful, focused tests
+- Avoid brittle tests
+- Make tests readable and maintainable
+- Example: Test behavior, not implementation details
+
+### Test Types
+
+- Use a balanced approach with different test types
+- Implement unit, integration, and end-to-end tests
+- Focus on the appropriate testing pyramid
+- Example: Have more unit tests than integration tests, and more integration tests than E2E tests
+
+## Code Review
+
+### Review Process
+
+- Perform regular code reviews
+- Define clear acceptance criteria
+- Provide constructive feedback
+- Example: Use pull/merge request templates with checklists
+
+### Review Focus
+
+- Check for functionality and correctness
+- Review for code quality and maintainability
+- Verify adherence to standards and best practices
+- Example: Look for error handling, edge cases, and performance issues
+
+## Continuous Improvement
+
+### Refactoring
+
+- Regularly refactor code
+- Address technical debt
+- Improve as you go
+- Example: Add tests before refactoring to ensure behavior remains the same
+
+### Knowledge Sharing
+
+- Share code quality best practices
+- Conduct training sessions
+- Use pair programming for knowledge transfer
+- Example: Host regular "clean code" discussions
+
+### Metrics
+
+- Track code quality metrics
+- Set improvement goals
+- Act on concerning trends
+- Example: Monitor code complexity, duplication, and test coverage 

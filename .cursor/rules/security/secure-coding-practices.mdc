@@ -1,0 +1,140 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Secure Coding Practices
+
+## Overview
+
+Guidelines for writing code that is resistant to common security vulnerabilities. This complements general code quality standards by focusing specifically on security aspects during development.
+
+## Input Validation
+
+### Principle
+- Treat all external input as untrusted (user input, API calls, file uploads, environment variables, database results).
+- Validate input rigorously on the server-side. Client-side validation is for UX, not security.
+
+### Techniques
+- **Whitelisting (Allow Listing):** Define exactly what is allowed (e.g., specific characters, formats, lengths, ranges). Prefer this over blacklisting.
+- **Type Checking:** Ensure data is of the expected type (integer, string, boolean).
+- **Format Validation:** Use regular expressions or dedicated libraries to validate specific formats (email, URL, date).
+- **Length/Range Checking:** Enforce minimum/maximum lengths or numerical ranges.
+- **Canonicalization:** Normalize input before validation (e.g., decode URL encoding, resolve paths) to prevent bypasses, but be cautious about introducing new vulnerabilities.
+
+### Example (Conceptual)
+```python
+# Bad: Assuming input is safe
+user_id = request.args.get('id')
+query = f"SELECT * FROM users WHERE id = {user_id}" # Vulnerable to SQL Injection
+
+# Good: Validating input type and potentially format/range
+user_id_str = request.args.get('id')
+try:
+    user_id = int(user_id_str)
+    if user_id <= 0:
+        raise ValueError("Invalid ID")
+    # Proceed with validated user_id
+    # Use parameterized queries (see Database Security)
+except (ValueError, TypeError):
+    # Handle invalid input error
+    log_error("Invalid user ID format received")
+    return "Invalid input", 400
+```
+
+## Output Encoding
+
+### Principle
+- Encode data appropriately for the context where it will be rendered or used to prevent injection attacks (XSS, HTML Injection).
+
+### Contexts
+- **HTML Body:** HTML-encode special characters (`<`, `>`, `&`, `"`, `'`).
+- **HTML Attributes:** Encode characters relevant within HTML attributes. Frameworks often handle this.
+- **JavaScript:** Encode data inserted into JavaScript code (e.g., within `<script>` tags or event handlers). Be extremely careful here; avoid inserting untrusted data directly into JS execution contexts if possible. JSON serialization is often safer.
+- **CSS:** Encode data used within style properties.
+- **URL Components:** URL-encode data used in URLs.
+
+### Example (Conceptual - using a template engine)
+```html
+<!-- Assume 'user_comment' is untrusted input -->
+
+<!-- Bad: Direct rendering -->
+<div>{{ user_comment }}</div> <!-- Vulnerable if template engine doesn't auto-escape -->
+
+<!-- Good: Explicit encoding (if needed) or relying on framework auto-escaping -->
+<div>{{ escape_html(user_comment) }}</div>
+```
+```javascript
+// Bad: Inserting data directly into JS
+const userName = "{{ user_name }}"; // Potential XSS if user_name contains JS code
+
+// Better: Using data attributes or JSON encoding
+const userData = JSON.parse('{{ user_data_json | safe }}'); // Ensure user_data_json is properly sanitized JSON
+const userName = document.getElementById('userElement').dataset.userName;
+```
+
+## Parameterized Queries / Prepared Statements
+
+### Principle
+- Never construct SQL queries by concatenating strings with untrusted input.
+- Use database driver features for parameterized queries or prepared statements. This separates the query structure from the data, preventing SQL Injection.
+
+### Example (Conceptual - Python DB-API)
+```python
+# Bad: String concatenation
+user_input = request.args.get('username')
+cursor.execute(f"SELECT * FROM users WHERE username = '{user_input}'") # SQL Injection vulnerability
+
+# Good: Parameterized query
+user_input = request.args.get('username')
+query = "SELECT * FROM users WHERE username = %s" # Placeholder depends on driver (%s, ?, :name)
+cursor.execute(query, (user_input,))
+```
+
+## Secure Error Handling
+
+### Principle
+- Avoid revealing sensitive information in error messages (stack traces, database details, internal paths, keys).
+- Log detailed errors internally for debugging.
+- Show generic, user-friendly error messages to the end-user.
+
+### Example (Conceptual - Web Framework)
+```python
+try:
+    # Risky operation
+    result = perform_sensitive_operation(user_input)
+except DatabaseConnectionError as e:
+    log.error(f"Database connection failed for user {user_id}: {e}", exc_info=True)
+    # Show generic error to user
+    return render_template("error.html", message="An internal error occurred. Please try again later."), 500
+except Exception as e:
+    log.exception(f"Unhandled exception during operation for user {user_id}") # Log full trace internally
+    # Show generic error to user
+    return render_template("error.html", message="An unexpected error occurred."), 500
+
+return render_template("success.html", data=result)
+```
+
+## Session Management
+
+### Principle
+- Use strong, unpredictable session identifiers.
+- Regenerate session IDs upon login and privilege changes (prevents session fixation).
+- Implement session timeouts (both inactivity and absolute).
+- Use secure session storage mechanisms.
+- Transmit session identifiers securely (e.g., via secure, HttpOnly cookies).
+
+## Least Privilege
+
+### Principle
+- Processes, services, and users should run with the minimum level of privilege necessary to perform their function.
+- Avoid running services as root or administrator.
+- Limit database user permissions.
+
+## Cryptography
+
+### Principle
+- Use standard, well-vetted cryptographic libraries and algorithms. Do not invent your own.
+- Use strong algorithms and appropriate key lengths (e.g., AES-256, RSA-2048/3072, SHA-256+).
+- Protect cryptographic keys securely (see Secrets Management).
+- Understand the difference between encoding, hashing, and encryption. Use hashing for passwords (with salt and key stretching like Argon2, bcrypt, scrypt).

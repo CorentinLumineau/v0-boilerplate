@@ -1,0 +1,153 @@
+---
+description: Performance best practices for modern applications
+globs: ["**/*"]
+alwaysApply: true
+priority: 1
+---
+
+# Performance Best Practices
+
+## Overview
+
+Performance best practices that should be applied across applications to ensure optimal speed, efficiency, and scalability.
+
+## Design for Performance
+
+### Minimize Network Requests
+
+- Combine multiple API calls when possible
+- Batch database operations
+- Use GraphQL or similar technologies to fetch exactly what's needed
+- Example: Use bulk endpoints instead of multiple individual requests
+
+### Caching Strategies
+
+- Cache expensive operations at appropriate levels
+- Use a multi-level caching strategy (memory, distributed cache, CDN)
+- Implement proper cache invalidation
+- Example: Use Redis for session data and computed results
+
+### Asynchronous Processing
+
+- Move CPU-intensive tasks to background jobs
+- Use message queues for communication between services
+- Implement webhooks for event notifications
+- Example: Process image uploads in the background while returning success to the user
+
+### Data Access Optimization
+
+- Design schemas with query patterns in mind
+- Use appropriate indexes for common queries
+- Partition large tables based on access patterns
+- Example: Add indexes for fields used in WHERE, JOIN, and ORDER BY clauses
+
+## Front-End Optimization
+
+### Resource Loading
+
+- Minimize and bundle JavaScript and CSS
+- Use lazy loading for components and routes
+- Implement code splitting
+- Example: Only load code needed for the current view
+
+### Rendering Performance
+
+- Optimize rendering cycles
+- Use virtual DOM efficiently
+- Implement windowing for long lists
+- Example: Only render visible items in a large scrollable list
+
+### Asset Optimization
+
+- Compress and optimize images
+- Use appropriate image formats (WebP, AVIF)
+- Implement responsive images
+- Example: Serve different image sizes based on viewport dimensions
+
+### Client-Side Caching
+
+- Implement service workers for offline capabilities
+- Use localStorage/IndexedDB appropriately
+- Set proper Cache-Control headers
+- Example: Cache API responses in IndexedDB for faster subsequent loads
+
+## Back-End Optimization
+
+### Database Optimization
+
+- Write efficient queries
+- Avoid N+1 query problems
+- Use query compilation/prepared statements
+- Example: Eager load related data instead of lazy loading in loops
+
+### Memory Management
+
+- Monitor and control memory usage
+- Implement proper garbage collection strategies
+- Use streaming for large data sets
+- Example: Process large files in chunks rather than loading entirely into memory
+
+### Connection Pooling
+
+- Implement connection pooling for databases
+- Reuse HTTP connections when appropriate
+- Example: Configure proper pool sizes based on expected load
+
+### Concurrency and Parallelism
+
+- Design for concurrency where appropriate
+- Use worker pools for CPU-bound tasks
+- Implement proper locking and synchronization
+- Example: Use thread pools for handling incoming requests
+
+## Monitoring and Optimization
+
+### Performance Metrics
+
+- Define key performance indicators (KPIs)
+- Implement real user monitoring (RUM)
+- Use synthetic testing for critical paths
+- Example: Track and alert on page load times exceeding thresholds
+
+### Profiling
+
+- Regularly profile application performance
+- Use APM tools to identify bottlenecks
+- Implement distributed tracing
+- Example: Use flame graphs to identify CPU-intensive operations
+
+### Load Testing
+
+- Perform regular load testing
+- Test beyond expected peak capacity
+- Simulate realistic user behavior
+- Example: Create test scenarios that mirror expected traffic patterns
+
+## Scaling Strategies
+
+### Horizontal Scaling
+
+- Design stateless applications
+- Implement proper load balancing
+- Consider containerization and orchestration
+- Example: Deploy multiple instances behind a load balancer
+
+### Vertical Scaling
+
+- Optimize resource utilization
+- Monitor resource consumption
+- Example: Increase resources for memory-intensive operations
+
+### Database Scaling
+
+- Implement read replicas
+- Consider sharding for write-heavy workloads
+- Use database proxies for connection management
+- Example: Direct read queries to replicas and write queries to the primary
+
+### Microservices Considerations
+
+- Right-size services based on functionality
+- Implement proper inter-service communication
+- Consider the overhead of service boundaries
+- Example: Balance between service isolation and communication overhead 

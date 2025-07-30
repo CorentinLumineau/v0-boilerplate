@@ -1,0 +1,159 @@
+{
+  "rules": {
+    "common-practices": {
+      "description": "Universal best practices for software development",
+      "globs": ["**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "development-principles": {
+      "description": "SOLID and other development principles for modern applications",
+      "globs": ["**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "testing-practices": {
+      "description": "Testing best practices for any application",
+      "globs": ["**/*.test.*", "**/*.spec.*", "**/tests/**/*", "**/test/**/*"],
+      "alwaysApply": false,
+      "priority": 2
+    },
+    "architecture-practices": {
+      "description": "12-Factor app and API design principles",
+      "globs": ["**/api/**/*", "**/server/**/*", "**/config/**/*", "**/lib/**/*", "**/cmd/**/*", "**/pkg/**/*", "**/internal/**/*"],
+      "alwaysApply": false,
+      "priority": 2
+    },
+    "code-review-standards": {
+      "description": "Standards and practices for code review process",
+      "globs": ["**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "documentation-standards": {
+      "description": "Standards for code and project documentation",
+      "globs": ["**/*.md", "**/*.mdx", "**/docs/**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "feature-documentation": {
+      "description": "Standards for feature-specific documentation",
+      "globs": ["**/docs/features/**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "performance-practices": {
+      "description": "Performance best practices for modern applications",
+      "globs": ["**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "accessibility-standards": {
+      "description": "Accessibility standards and best practices for inclusive applications",
+      "globs": ["**/*.html", "**/*.css", "**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.vue", "**/*.svelte"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "devops-practices": {
+      "description": "DevOps best practices for efficient development and operations",
+      "globs": ["**/*.yml", "**/*.yaml", "**/*.json", "**/Dockerfile", "**/docker-compose.yml", "**/Jenkinsfile", "**/.github/workflows/**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "code-quality-standards": {
+      "description": "Code quality standards for maintainable and reliable software",
+      "globs": ["**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "security/security-principles": {
+      "description": "Core security principles for modern applications",
+      "globs": ["**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "security/secure-coding-practices": {
+      "description": "Secure coding techniques to prevent common vulnerabilities",
+      "globs": ["**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "security/api-security": {
+      "description": "Best practices for securing APIs",
+      "globs": ["**/api/**/*", "**/routes/**/*", "**/controllers/**/*", "**/handlers/**/*"],
+      "alwaysApply": false,
+      "priority": 2
+    },
+    "security/dependency-security": {
+      "description": "Managing security risks in third-party dependencies",
+      "globs": ["**/package.json", "**/package-lock.json", "**/yarn.lock", "**/requirements*.txt", "**/Pipfile", "**/Pipfile.lock", "**/pom.xml", "**/build.gradle", "**/Cargo.toml", "**/Cargo.lock", "**/go.mod", "**/go.sum"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "security/security-testing": {
+      "description": "Security testing methodologies including unit tests",
+      "globs": ["**/*.test.*", "**/*.spec.*", "**/tests/**/*", "**/test/**/*"],
+      "alwaysApply": false,
+      "priority": 2
+    },
+    "security/secrets-management": {
+      "description": "Best practices for handling secrets securely",
+      "globs": ["**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    "purplescan-project-documentation": {
+      "description": "Comprehensive documentation specific to the PurpleScan project",
+      "globs": ["**/*"],
+      "alwaysApply": true,
+      "priority": 1
+    }
+  },
+  "defaultRules": [
+    "common-practices", 
+    "code-review-standards", 
+    "documentation-standards", 
+    "development-principles", 
+    "security/security-principles",
+    "code-quality-standards", 
+    "security/secure-coding-practices",
+    "security/dependency-security",
+    "security/secrets-management",
+    "project-documentation"
+  ],
+  "contextualRules": {
+    "pullRequest": ["code-review-standards"],
+    "documentation": ["documentation-standards", "project-documentation"],
+    "newFile": ["common-practices", "documentation-standards"],
+    "codeReview": ["code-review-standards", "common-practices"],
+    "feature": ["feature-documentation", "documentation-standards"],
+    "api": ["architecture-practices", "security/api-security"],
+    "test": ["testing-practices", "security/security-testing"],
+    "security": [
+      "security/security-principles", 
+      "security/secure-coding-practices", 
+      "security/api-security", 
+      "security/dependency-security", 
+      "security/security-testing", 
+      "security/secrets-management"
+    ],
+    "performance": ["performance-practices"],
+    "accessibility": ["accessibility-standards"],
+    "devops": ["devops-practices"],
+    "quality": ["code-quality-standards"]
+  },
+  "featureRules": {
+    "paths": ["**/docs/features/**/"],
+    "requiredFiles": [
+      "README.md",
+      "overview.md",
+      "technical-specs.md",
+      "api-docs.md",
+      "ui-specs.md",
+      "user-stories.md",
+      "security.md",
+      "logging.md",
+      "todo.md"
+    ]
+  }
+} 

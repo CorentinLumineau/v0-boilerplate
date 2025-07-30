@@ -1,0 +1,176 @@
+---
+description: Standards and practices for code review process (technology-agnostic)
+globs: ["**/*"]
+alwaysApply: true
+---
+# Code Review Standards
+
+## Pull Request Guidelines
+
+### PR Description
+- Clear description of changes
+- Link to related issues/tickets
+- List of major changes
+- Screenshots/videos for UI changes
+```markdown
+# PR Template
+## Description
+[Description of the changes]
+
+## Related Issues
+- Fixes #123
+- Relates to #456
+
+## Changes
+- [ ] Feature A implementation
+- [ ] Database schema update
+- [ ] API endpoint modification
+
+## Screenshots
+[If applicable]
+```
+
+### PR Size
+- Keep PRs small and focused
+- Split large changes into multiple PRs
+- Aim for < 400 lines of code per PR
+```
+# Good PR Structure
+feature/
+├── PR1: Database schema changes
+├── PR2: API endpoint implementation
+└── PR3: UI implementation
+```
+
+## Review Process
+
+### Code Quality Checklist
+- Code follows project style guide
+- No commented-out code
+- Proper error handling
+- Documentation updated
+```
+# Before
+# old implementation
+# function oldFunction() {
+#   ...
+# }
+
+# After
+/**
+ * @param userId - The user's ID
+ * @returns The user object
+ */
+function getUser(userId) {
+  // Implementation
+}
+```
+
+### Security Review
+- Check for security vulnerabilities
+- Validate input sanitization
+- Review authentication/authorization
+```
+# Review for security issues
+
+# Bad: No input validation
+query = "SELECT * FROM users WHERE id = " + input
+
+# Good: Parameterized query
+query = "SELECT * FROM users WHERE id = ?"
+executeQuery(query, [input])
+```
+
+### Performance Review
+- Check for performance implications
+- Review database queries
+- Look for potential memory leaks
+```
+# Review for performance
+
+# Bad: N+1 query problem
+for user in users:
+  orders = queryDatabase("SELECT * FROM orders WHERE user_id = ?", [user.id])
+
+# Good: Single query with JOIN
+usersWithOrders = queryDatabase("
+  SELECT users.*, orders.*
+  FROM users
+  LEFT JOIN orders ON users.id = orders.user_id
+")
+```
+
+## Feedback Guidelines
+
+### Constructive Feedback
+- Be specific and actionable
+- Explain the why, not just the what
+- Provide examples when possible
+```
+# Good Feedback Examples
+✅ "Consider using a more descriptive variable name here. Instead of 'data',
+   maybe 'userProfile' would better represent the content."
+
+✅ "This function might be more reusable if we extract the business logic
+   into a separate utility function."
+
+# Bad Feedback Examples
+❌ "This code needs improvement"
+❌ "I don't like this implementation"
+```
+
+### Code Suggestions
+- Provide alternative solutions
+- Explain trade-offs
+- Reference documentation/patterns
+```
+# Suggestion Example
+
+# Current implementation
+function handleError(error) {
+  print("Error:", error)
+}
+
+# Suggested improvement
+/**
+ * Consider using structured error handling:
+ * - Provides better error tracking
+ * - Includes context for debugging
+ * - Follows logging standards
+ */
+function handleError(error, context) {
+  logError("Operation failed", {
+    error: error.message,
+    ...context
+  })
+}
+```
+
+## Review Completion
+
+### Merge Criteria
+- All discussions resolved
+- CI/CD checks passing
+- Required approvals received
+- Documentation updated
+```
+# Example merge checklist
+merge_requirements:
+  - minimum_approvals: 2
+  - passing_ci_checks: true
+  - no_unresolved_comments: true
+  - updated_documentation: true
+```
+
+### Post-Merge Actions
+- Delete feature branch
+- Update ticket status
+- Monitor deployment
+- Verify changes in staging
+```
+# Post-merge cleanup
+checkout main
+pull main
+delete feature-branch
+cleanup remote references
+``` 

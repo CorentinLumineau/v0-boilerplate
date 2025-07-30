@@ -1,0 +1,207 @@
+---
+description: 12-Factor app and API design principles (technology-agnostic)
+globs: ["**/*"]
+alwaysApply: true
+---
+# Architecture Best Practices
+
+## 12-Factor App Methodology
+
+### 1. Codebase
+- One codebase tracked in version control
+- Multiple deploys from the same codebase
+- Example structure:
+```
+project/
+├── src/               # Source code
+├── tests/             # Test files
+├── docs/              # Documentation
+├── scripts/           # Build/deployment scripts
+├── config/            # Configuration files
+└── README.md         # Project documentation
+```
+
+### 2. Dependencies
+- Explicitly declare dependencies
+- Use package manager for dependency isolation
+- Example:
+```
+# Package dependencies file
+# Explicitly lists all dependencies with versions
+# Format depends on language/platform but principle is universal
+```
+
+### 3. Config
+- Store config in environment variables
+- Separate config from code
+- Example:
+```
+# Configuration module
+# Reads from environment variables
+# Provides application-wide access to configuration
+```
+
+### 4. Backing Services
+- Treat backing services as attached resources
+- Use environment variables for service connections
+- Example:
+```
+# Database connection
+# Uses environment variables for connection details
+# Can be swapped without code changes
+```
+
+### 5. Build, Release, Run
+- Strictly separate build and run stages
+- Use CI/CD pipeline for builds
+- Example:
+```
+# CI Pipeline stages
+# 1. Build: Compile, bundle, package
+# 2. Release: Combine build with config
+# 3. Run: Execute the release in the target environment
+```
+
+### 6. Processes
+- Execute app as stateless processes
+- Store state in backing services
+- Example:
+```
+# Stateless component
+# Doesn't store local state between requests
+# Uses database/cache for persistent data
+```
+
+### 7. Port Binding
+- Export services via port binding
+- Use environment variables for port configuration
+- Example:
+```
+# Server setup
+# Binds to specified port from environment
+# Self-contained web server
+```
+
+### 8. Concurrency
+- Scale out via the process model
+- Handle multiple instances gracefully
+- Example:
+```
+# Stateless application
+# Can run multiple instances behind load balancer
+# Uses shared backing services for state
+```
+
+### 9. Disposability
+- Maximize robustness with fast startup/shutdown
+- Handle graceful shutdown
+- Example:
+```
+# Graceful shutdown handler
+# Clean up resources before terminating
+# Handle in-progress requests
+```
+
+### 10. Dev/Prod Parity
+- Keep development and production as similar as possible
+- Use environment-specific configuration
+- Example:
+```
+# Environment-specific config
+# Same codebase for all environments
+# Only configuration changes between environments
+```
+
+### 11. Logs
+- Treat logs as event streams
+- Use structured logging
+- Example:
+```
+# Structured logging
+# JSON format with standard fields
+# Timestamp, level, message, and metadata
+```
+
+### 12. Admin Processes
+- Run admin/management tasks as one-off processes
+- Use scripts for database migrations
+- Example:
+```
+# Admin scripts
+# Run from same codebase
+# Uses same environment and configuration
+```
+
+## API Design
+
+### RESTful Principles
+- Use proper HTTP methods
+- Follow resource-based URLs
+- Example:
+```
+# RESTful API endpoints
+GET /resources           # List resources
+GET /resources/{id}      # Get specific resource
+POST /resources          # Create resource
+PUT /resources/{id}      # Update resource
+DELETE /resources/{id}   # Delete resource
+```
+
+### Response Format
+- Consistent response structure
+- Proper error handling
+- Example:
+```
+# Success response
+{
+  "data": {},
+  "meta": {}
+}
+
+# Error response
+{
+  "error": {
+    "code": "error_code",
+    "message": "Error message"
+  }
+}
+```
+
+### API Documentation
+- Use OpenAPI/Swagger for documentation
+- Document all endpoints and types
+- Example:
+```
+# API Documentation
+# Describes endpoints, parameters, responses
+# Can be machine-readable and human-readable
+```
+
+### Security
+- Implement proper authentication
+- Use rate limiting
+- Example:
+```
+# Authentication middleware
+# Verifies tokens/credentials
+# Rejects unauthorized requests
+```
+
+### Performance
+- Implement caching strategies
+- Use pagination and filtering
+- Example:
+```
+# Pagination example
+GET /resources?page=2&limit=10
+
+# Response with pagination metadata
+{
+  "data": [...],
+  "meta": {
+    "page": 2,
+    "limit": 10,
+    "total": 45
+  }
+}
+``` 

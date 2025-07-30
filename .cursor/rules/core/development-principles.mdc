@@ -1,0 +1,166 @@
+---
+description: SOLID and other development principles for any application
+globs: ["**/*"]
+alwaysApply: true
+---
+# Development Principles
+
+## SOLID Principles
+
+### Single Responsibility Principle (SRP)
+- Each component, function, or class should have one reason to change
+- Break down complex components into smaller, focused ones
+- Example:
+```
+// Bad: Component doing too much
+function Dashboard() {
+  // Handles authentication
+  // Manages data
+  // Renders complex UI
+  // Handles API calls
+}
+
+// Good: Split into focused components
+function Dashboard() {
+  // Uses smaller, focused components instead
+  // Each component has a single responsibility
+}
+```
+
+### Open/Closed Principle (OCP)
+- Software entities should be open for extension but closed for modification
+- Use composition and interfaces to allow behavior extension
+- Example:
+```
+// Good: Component accepts extensions via parameters
+function Button(params) {
+  // Base styling extended through parameters
+  // Implementation without specific technology
+}
+```
+
+### Liskov Substitution Principle (LSP)
+- Derived components should be substitutable for their base components
+- Maintain consistent behavior when extending components
+- Example:
+```
+// Base component contract
+// Input component with basic props
+
+// Specialized input maintains base contract
+// Email input extends base input but maintains same interface
+```
+
+### Interface Segregation Principle (ISP)
+- Keep interfaces small and focused
+- Don't force components to implement unnecessary methods
+- Example:
+```
+// Bad: One large interface
+interface UserActions {
+  viewProfile();
+  editProfile();
+  deleteAccount();
+  manageSubscription();
+}
+
+// Good: Segregated interfaces
+interface ProfileViewer {
+  viewProfile();
+}
+
+interface ProfileEditor {
+  editProfile();
+}
+```
+
+### Dependency Inversion Principle (DIP)
+- Depend on abstractions, not concrete implementations
+- Use dependency injection for flexible component composition
+- Example:
+```
+// Good: Component accepts data fetching abstraction
+function UserList(dataProvider) {
+  // Use injected provider instead of direct API calls
+}
+```
+
+## Additional Principles
+
+### DRY (Don't Repeat Yourself)
+- Extract common logic into reusable functions, utilities, or components
+- Create shared components for repeated UI patterns
+- Example:
+```
+// Good: Reusable validation function
+function validateInput(input, rules) {
+  // Shared validation logic
+}
+
+// Good: Shared UI component
+function Card(title, content) {
+  // Reusable card component
+}
+```
+
+### KISS (Keep It Simple, Stupid)
+- Write clear, straightforward code
+- Avoid premature abstraction
+- Example:
+```
+// Bad: Over-engineered
+function processData(data) {
+  return new ProcessingFactory()
+    .withValidation()
+    .withTransformation()
+    .process(data);
+}
+
+// Good: Simple and direct
+function processData(data) {
+  if (!isValid(data)) return null;
+  return transform(data);
+}
+```
+
+### YAGNI (You Aren't Gonna Need It)
+- Implement features only when required
+- Focus on current requirements
+- Example:
+```
+// Bad: Implementing unused features
+function createUser(userData) {
+  // Current feature
+  const user = {...userData};
+  
+  // Future feature not needed yet
+  user.advancedSettings = {}; 
+  user.analyticsData = {};
+  
+  return user;
+}
+
+// Good: Implement what's needed now
+function createUser(userData) {
+  return {...userData};
+}
+```
+
+### Separation of Concerns
+- Separate business logic from UI components
+- Use appropriate design patterns
+- Example:
+```
+// Good: Separate data fetching from presentation
+function UserListContainer() {
+  // Fetch data
+  const users = fetchUsers();
+  
+  // Pass data to presentation component
+  return renderUserList(users);
+}
+
+function renderUserList(users) {
+  // Pure presentation logic
+}
+``` 

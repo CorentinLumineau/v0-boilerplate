@@ -1,0 +1,217 @@
+---
+description: Standards for code and project documentation (technology-agnostic)
+globs: ["**/*.md", "**/*.mdx", "**/docs/**/*"]
+alwaysApply: true
+---
+# Documentation Standards
+
+## Project Documentation
+
+### README Structure
+- Project overview
+- Setup instructions
+- Usage examples
+- Contributing guidelines
+```markdown
+# Project Name
+
+## Overview
+Brief description of the project and its purpose.
+
+## Getting Started
+1. Prerequisites
+2. Installation
+3. Configuration
+
+## Usage
+Code examples and use cases.
+
+## Contributing
+How to contribute to the project.
+```
+
+### Architecture Documentation
+- System overview
+- Component relationships
+- Data flow diagrams
+- Technology stack
+```markdown
+# Architecture Overview
+
+## System Components
+```mermaid
+graph TD
+    A[Client] --> B[API Gateway]
+    B --> C[Auth Service]
+    B --> D[User Service]
+    B --> E[Data Service]
+```
+
+## Technology Stack
+- Frontend: [Technology]
+- Backend: [Technology]
+- Database: [Technology]
+- Cache: [Technology]
+```
+
+## Code Documentation
+
+### Function Documentation
+- Purpose and behavior
+- Parameters and return types
+- Examples and edge cases
+```
+/**
+ * Processes a user's payment for an order
+ * 
+ * @param userId - The ID of the user making the payment
+ * @param order - The order being paid for
+ * @param paymentDetails - Payment method information
+ * @returns Result of the payment processing
+ * @throws If payment processing fails
+ * 
+ * @example
+ * processPayment('user123', orderData, paymentDetails);
+ */
+```
+
+### Component Documentation
+- Component purpose
+- Props/parameters
+- Usage examples
+- State management
+```
+/**
+ * UserProfile displays user information and allows editing
+ * 
+ * @component
+ * @example
+ * <UserProfile
+ *   userId="123"
+ *   editable={true}
+ *   onUpdate={handleUpdate}
+ * />
+ */
+```
+
+### API Documentation
+- Endpoint descriptions
+- Request/response formats
+- Authentication requirements
+```
+/**
+ * @api {post} /api/users Create User
+ * @apiName CreateUser
+ * @apiGroup Users
+ * 
+ * @apiParam {String} email User's email
+ * @apiParam {String} name User's full name
+ * 
+ * @apiSuccess {String} id User's unique ID
+ * @apiSuccess {String} email User's email
+ * 
+ * @apiError {Object} error Error details
+ */
+```
+
+## Documentation Maintenance
+
+### Version Control
+- Keep docs in sync with code
+- Document breaking changes
+- Maintain changelog
+```markdown
+# Changelog
+
+## [2.0.0] - 2024-04-02
+### Breaking Changes
+- Changed authentication flow
+- Updated API response format
+
+### Added
+- New user management features
+- Enhanced logging system
+
+### Fixed
+- Performance issues in data processing
+```
+
+### Style Guide
+- Consistent formatting
+- Clear writing guidelines
+- Common terminology
+```markdown
+# Documentation Style Guide
+
+## Writing Guidelines
+- Use active voice
+- Keep sentences concise
+- Use consistent terminology
+- Include code examples
+
+## Formatting
+- Use proper heading hierarchy
+- Include table of contents
+- Format code blocks properly
+```
+
+### Documentation Testing
+- Verify code examples
+- Check broken links
+- Validate API docs
+```
+# Documentation testing examples
+- Run code samples to verify they work
+- Use link checker to find broken references
+- Validate API examples against actual endpoints
+```
+
+## Automated Documentation
+
+### API Documentation
+- API documentation system integration
+- Automated generation
+- Interactive documentation
+```
+# API Documentation setup
+- Annotations in code for docs generation
+- Auto-generated documentation from code
+- Interactive documentation UI
+```
+
+### Type Documentation
+- Generate from type definitions
+- Keep types and docs in sync
+- Include examples
+```
+/**
+ * User profile information
+ * @typedef {Object} UserProfile
+ * @property {string} id - Unique identifier
+ * @property {string} name - User's full name
+ * @property {string} email - User's email address
+ */
+```
+
+### Code Example Documentation
+- Provide clear examples
+- Explain key concepts
+- Show complete usage patterns
+```
+# Examples of different usage patterns
+
+## Basic Usage
+```example
+// Basic example code
+```
+
+## Advanced Usage
+```example
+// Advanced example code
+```
+
+## Error Handling
+```example
+// Error handling example
+```
+``` 

@@ -1,0 +1,284 @@
+---
+description: Universal best practices for software development (technology-agnostic)
+globs: ["**/*"]
+alwaysApply: true
+---
+# Common Development Practices
+
+## Code Organization
+
+### Project Structure
+- Keep a consistent and logical directory structure
+- Group related files together
+- Example structure:
+```
+project/
+├── src/               # Source code
+├── tests/             # Test files
+├── docs/              # Documentation
+├── scripts/           # Build/deployment scripts
+├── config/            # Configuration files
+└── README.md         # Project documentation
+```
+
+### File Naming
+- Use consistent naming conventions
+- Make names descriptive and meaningful
+```
+# Good
+user-authentication
+data-transformer
+error-handler
+
+# Bad
+stuff
+misc
+temp
+```
+
+## Code Style
+
+### Naming Conventions
+- Use clear, descriptive names
+- Follow language-specific conventions
+```
+# Variables: descriptive
+userCount = 0
+isActive = true
+firstName = "John"
+
+# Constants: descriptive, often uppercase
+MAX_RETRY_COUNT = 3
+API_BASE_URL = "https://api.example.com"
+
+# Functions: verb + noun
+validateInput()
+fetchUserData()
+transformResponse()
+
+# Classes/Types: noun
+UserRepository
+DataProvider
+```
+
+### Comments and Documentation
+- Document why, not what
+- Keep comments up to date
+- Use consistent documentation format
+```
+/**
+ * Processes user data according to business rules
+ * @param data - Raw user data
+ * @returns Processed user data
+ * @throws If data is invalid
+ */
+```
+
+## Error Handling
+
+### Best Practices
+- Never swallow errors silently
+- Use appropriate error types
+- Include relevant context
+```
+# Good: Proper error handling
+try:
+  process_data()
+except Exception as error:
+  log_error('Data processing failed', error=error)
+  raise ProcessingError('Failed to process data')
+
+# Bad: Swallowing errors
+try:
+  process_data()
+except Exception:
+  print('Error')
+```
+
+### Error Types
+- Use specific error types
+- Include helpful error messages
+```
+# Validation error
+class ValidationError(Error):
+  # Provides specific details about validation failure
+  
+# Not found error
+class NotFoundError(Error):
+  # Indicates resource could not be found
+```
+
+## Security
+
+### Input Validation
+- Validate all inputs
+- Sanitize data before use
+- Use parameterized queries
+```
+# Good: Input validation
+function processUserInput(input):
+  if (!isValid(input)):
+    throw ValidationError('Invalid input')
+  return sanitizeInput(input)
+
+# Good: Parameterized queries
+query = "SELECT * FROM users WHERE id = ?"
+execute_query(query, [userId])
+```
+
+### Authentication & Authorization
+- Use secure authentication methods
+- Implement proper access control
+- Follow principle of least privilege
+```
+# Permission check
+function checkPermission(user, resource, action):
+  if (!user.hasPermission(resource, action)):
+    throw UnauthorizedError(
+      `User ${user.id} not authorized for ${action} on ${resource}`
+    )
+```
+
+## Performance
+
+### Optimization Guidelines
+- Optimize only when necessary
+- Measure before optimizing
+- Document performance requirements
+```
+# Good: Measure performance
+startTime = getCurrentTime()
+operation()
+duration = getCurrentTime() - startTime
+logInfo('Operation completed', duration=duration)
+
+# Good: Caching expensive operations
+cache = {}
+function expensiveOperation(key):
+  if (key in cache):
+    return cache[key]
+  result = compute(key)
+  cache[key] = result
+  return result
+```
+
+### Resource Management
+- Clean up resources properly
+- Use connection pooling
+- Implement proper timeouts
+```
+# Resource cleanup pattern
+function withResource(operation):
+  resource = acquire()
+  try:
+    return operation(resource)
+  finally:
+    release(resource)
+```
+
+## Version Control
+
+### Commit Guidelines
+- Write clear commit messages
+- Keep commits focused and atomic
+- Follow conventional commits
+```
+# Good commit messages
+feat: add user authentication
+fix: resolve memory leak in data processing
+docs: update API documentation
+test: add integration tests for payment system
+
+# Bad commit messages
+update stuff
+fix bug
+wip
+```
+
+### Branch Management
+- Use consistent branch naming
+- Keep branches short-lived
+- Regular integration with main branch
+```
+# Branch naming convention
+feature/user-authentication
+bugfix/memory-leak
+hotfix/security-patch
+release/v1.2.0
+```
+
+## Testing
+
+### Test Structure
+- Arrange-Act-Assert pattern
+- Clear test descriptions
+- One assertion per test
+```
+# Test function example
+test "creates new user with valid data":
+  # Arrange
+  userData = {...}
+  
+  # Act
+  user = userService.create(userData)
+  
+  # Assert
+  assert user is not null
+```
+
+### Test Coverage
+- Focus on critical paths
+- Test edge cases
+- Include error scenarios
+```
+# Testing scenarios
+test "success with valid data"
+test "handles invalid input"
+test "retries on network failure"
+```
+
+## Logging
+
+### Logging Best Practices
+- Use appropriate log levels
+- Include relevant context
+- Structured logging format
+```
+# Structured logging example
+log.error({
+  message: 'Operation failed',
+  timestamp: timestamp(),
+  context: {
+    operation: 'dataSync',
+    userId: user.id
+  },
+  error: error.message
+})
+```
+
+## Configuration Management
+
+### Configuration Guidelines
+- Use environment variables
+- Separate config from code
+- Version control safe
+```
+# Configuration example
+config = {
+  database: {
+    host: getEnv('DB_HOST'),
+    port: getEnv('DB_PORT'),
+    name: getEnv('DB_NAME')
+  },
+  api: {
+    timeout: getEnv('API_TIMEOUT'),
+    retries: getEnv('API_RETRIES')
+  }
+}
+
+# Never commit sensitive data
+# .gitignore
+.env
+*.key
+credentials.json
+``` 

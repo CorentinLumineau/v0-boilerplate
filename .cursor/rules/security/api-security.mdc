@@ -1,0 +1,110 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# API Security Best Practices
+
+## Overview
+
+Guidelines for designing and implementing secure APIs, focusing on aspects beyond general secure coding practices.
+
+## Authentication
+
+### Principle
+- Every API endpoint (unless explicitly public) must enforce authentication.
+- Use standard, robust authentication mechanisms.
+
+### Mechanisms
+- **OAuth 2.0 / OpenID Connect:** Standard for delegated authorization and authentication, especially for third-party access or microservices.
+- **API Keys:** Simple mechanism, suitable for server-to-server communication. Ensure keys are sufficiently long, random, and transmitted securely (e.g., in HTTP headers, not URLs). Implement key rotation.
+- **JWT (JSON Web Tokens):** Commonly used for stateless authentication. Ensure tokens are signed (not encrypted unless necessary), use strong signing algorithms (e.g., RS256, ES256, avoid `none`), validate signature and claims (expiration `exp`, issuer `iss`, audience `aud`), and transmit securely.
+- **Session-Based Authentication:** Traditional method using server-side sessions linked to a session ID cookie. Ensure secure cookie attributes (HttpOnly, Secure, SameSite).
+
+## Authorization
+
+### Principle
+- Once authenticated, verify that the caller has the necessary permissions to perform the requested action on the specific resource.
+- Enforce authorization checks on every request at the server-side.
+- Apply the Principle of Least Privilege.
+
+### Techniques
+- **Role-Based Access Control (RBAC):** Assign users roles, and grant permissions to roles.
+- **Attribute-Based Access Control (ABAC):** Base decisions on attributes of the user, resource, action, and environment.
+- **Resource-Based Checks:** Verify ownership or access rights to specific data instances (e.g., can user X edit document Y?).
+- **Scope Validation (OAuth):** Validate that the token presented has the required scope for the requested operation.
+
+### Example (Conceptual)
+```python
+@app.route('/documents/<doc_id>', methods=['PUT'])
+@require_auth # Decorator handles authentication
+def update_document(doc_id):
+    user = get_current_user() # Authenticated user
+    document = fetch_document(doc_id)
+
+    # Authorization Check
+    if not user_can_edit(user, document):
+        return jsonify({"error": "Forbidden"}), 403
+
+    # Proceed with update...
+    data = request.get_json()
+    # ... validate data ...
+    updated_doc = update_document_in_db(doc_id, data)
+    return jsonify(updated_doc), 200
+```
+
+## Input Validation (API Specific)
+
+### Principle
+- Rigorously validate all incoming data: request body, query parameters, path parameters, and headers.
+- Use schemas (e.g., OpenAPI/Swagger, JSON Schema) to define and enforce API contracts.
+
+### Checks
+- **Data Types & Formats:** Ensure data conforms to expected types and formats.
+- **Required Fields:** Validate the presence of mandatory fields.
+- **Length/Range/Value Constraints:** Enforce limits on data values.
+- **Unexpected Payload:** Reject requests with unexpected or excessive data.
+
+## Rate Limiting & Throttling
+
+### Principle
+- Protect APIs from denial-of-service (DoS) attacks and abuse.
+- Limit the number of requests a client can make within a specific time window.
+
+### Implementation
+- Implement limits based on API key, user ID, IP address, or a combination.
+- Provide informative error responses (e.g., HTTP 429 Too Many Requests) with `Retry-After` headers if applicable.
+- Apply different limits for different endpoints based on cost or sensitivity.
+
+## Secure Headers
+
+### Principle
+- Use HTTP response headers to instruct browsers on how to handle content securely.
+
+### Key Headers
+- **`Strict-Transport-Security` (HSTS):** Enforces HTTPS usage.
+- **`Content-Security-Policy` (CSP):** Controls resources the browser is allowed to load, mitigating XSS.
+- **`X-Content-Type-Options: nosniff`:** Prevents MIME-type sniffing.
+- **`X-Frame-Options: DENY` / `SAMEORIGIN`:** Prevents clickjacking.
+- **`Referrer-Policy`:** Controls how much referrer information is sent.
+- **`Permissions-Policy` (formerly Feature-Policy):** Controls browser feature access.
+
+## CORS (Cross-Origin Resource Sharing)
+
+### Principle
+- If the API needs to be accessed by browsers from different origins, configure CORS correctly.
+- Be as restrictive as possible. Avoid wildcard origins (`*`) in production unless the API is truly public.
+- Specify allowed origins, methods, and headers.
+
+## Information Disclosure
+
+### Principle
+- Avoid leaking sensitive information in API responses (e.g., internal IDs, file paths, overly verbose errors).
+- Carefully design API responses to expose only necessary data.
+
+## Endpoint Security
+
+### Principle
+- Avoid exposing sensitive functionality or administrative endpoints without proper authentication and authorization.
+- Be mindful of Mass Assignment vulnerabilities (ensure only permitted fields can be updated via API requests).
+- Protect against Server-Side Request Forgery (SSRF) if APIs interact with other internal or external resources based on user input.
