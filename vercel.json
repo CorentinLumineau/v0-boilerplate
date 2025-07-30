@@ -3,6 +3,5 @@
   "buildCommand": "pnpm build --filter=@boilerplate/frontend",
   "outputDirectory": "apps/frontend/.next",
   "installCommand": "pnpm install",
-  "framework": "nextjs",
-  "monorepo": true
+  "framework": "nextjs"
 }
