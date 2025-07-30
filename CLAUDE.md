@@ -149,8 +149,8 @@ The frontend features a sophisticated theming system:
 1. Install dependencies: `pnpm install`
 2. Start development: `pnpm dev` (starts both Next.js apps)
 3. Build all: `pnpm build`
-4. Frontend: http://localhost:3000
-5. Backend API: http://localhost:3001
+4. Frontend: http://localhost:3100
+5. Backend API: http://localhost:3101
 
 ### Why This Simplified Structure?
 - **Faster development** - No build step for UI components

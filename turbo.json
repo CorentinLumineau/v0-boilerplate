@@ -4,14 +4,17 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": ["NODE_ENV", "FRONTEND_URL", "BACKEND_URL"]
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["NODE_ENV", "FRONTEND_URL", "BACKEND_URL"]
     },
     "start": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "env": ["NODE_ENV", "FRONTEND_URL", "BACKEND_URL"]
     },
     "lint": {
       "outputs": []
