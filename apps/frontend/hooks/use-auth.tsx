@@ -8,6 +8,17 @@ export function useAuth() {
   const session = useSession();
   const router = useRouter();
 
+  // Debug logging for session hook behavior
+  useEffect(() => {
+    console.log("useAuth hook state:", {
+      isPending: session.isPending,
+      hasData: !!session.data,
+      hasError: !!session.error,
+      userId: session.data?.user?.id || 'none',
+      timestamp: new Date().toISOString()
+    });
+  }, [session.isPending, session.data, session.error]);
+
   return {
     session: session.data,
     user: session.data?.user,
