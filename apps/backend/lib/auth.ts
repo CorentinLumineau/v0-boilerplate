@@ -7,26 +7,30 @@ const isProduction = process.env.NODE_ENV === 'production' ||
                     process.env.VERCEL_ENV === 'production' ||
                     (process.env.BETTER_AUTH_BASE_URL && process.env.BETTER_AUTH_BASE_URL.includes('https://'));
 
-// Get the frontend URL for cookie configuration
+// Get the frontend URL for trusted origins
 const frontendUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3100";
 const backendUrl = process.env.BETTER_AUTH_BASE_URL || "http://localhost:3101";
-const frontendDomain = new URL(frontendUrl).hostname;
 
-// Extract the root domain for cookie sharing (e.g., lumineau.app from boilerplate.lumineau.app)
-const getRootDomain = (hostname: string) => {
-  // For localhost, don't set domain
-  if (hostname === 'localhost' || hostname.includes('127.0.0.1')) {
+// Extract the root domain for cross-subdomain cookies (e.g., lumineau.app from boilerplate.lumineau.app)
+const getRootDomain = (url: string) => {
+  try {
+    const hostname = new URL(url).hostname;
+    // For localhost, return undefined
+    if (hostname === 'localhost' || hostname.includes('127.0.0.1')) {
+      return undefined;
+    }
+    
+    // For production domains, extract the root domain
+    const parts = hostname.split('.');
+    if (parts.length >= 2) {
+      // Return the root domain without the leading dot (better-auth handles this)
+      return parts.slice(-2).join('.');
+    }
+    
+    return undefined;
+  } catch {
     return undefined;
   }
-  
-  // For production domains, extract the root domain
-  const parts = hostname.split('.');
-  if (parts.length >= 2) {
-    // Return the last two parts (e.g., lumineau.app)
-    return `.${parts.slice(-2).join('.')}`;
-  }
-  
-  return undefined;
 };
 
 // Log configuration in development
@@ -35,8 +39,7 @@ if (process.env.NODE_ENV !== 'production') {
     isProduction,
     frontendUrl,
     backendUrl,
-    frontendDomain,
-    cookieDomain: getRootDomain(frontendDomain),
+    rootDomain: getRootDomain(frontendUrl),
   });
 }
 
@@ -45,8 +48,12 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
   secret: process.env.BETTER_AUTH_SECRET!,
-  baseURL: process.env.BETTER_AUTH_BASE_URL,
-  trustedOrigins: [frontendUrl],
+  baseURL: backendUrl,
+  trustedOrigins: [
+    frontendUrl,
+    // Support wildcard for subdomains in production
+    ...(isProduction && getRootDomain(frontendUrl) ? [`*.${getRootDomain(frontendUrl)}`] : [])
+  ],
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false, // Set to true in production
@@ -61,17 +68,6 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     } : undefined,
   },
-  // Global cookie options that apply to ALL cookies
-  cookies: {
-    sameSite: isProduction ? "none" : "lax",
-    secure: isProduction,
-    httpOnly: true,
-    path: "/",
-    // Set domain for cookie sharing across subdomains in production
-    ...(isProduction && getRootDomain(frontendDomain) ? {
-      domain: getRootDomain(frontendDomain)
-    } : {})
-  },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days in seconds
     updateAge: 60 * 60 * 24, // 1 day in seconds
@@ -79,6 +75,15 @@ export const auth = betterAuth({
       enabled: true,
       maxAge: 60 * 5, // 5 minutes
     },
+  },
+  advanced: {
+    // Use better-auth's built-in cross-subdomain cookie support
+    ...(isProduction && getRootDomain(frontendUrl) ? {
+      crossSubDomainCookies: {
+        enabled: true,
+        domain: getRootDomain(frontendUrl), // e.g., "lumineau.app"
+      }
+    } : {})
   },
 });
 
