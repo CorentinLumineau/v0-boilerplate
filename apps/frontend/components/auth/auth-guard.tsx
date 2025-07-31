@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
-const publicRoutes = ["/login", "/signup", "/debug"];
+const publicRoutes = ["/login", "/signup", "/debug", "/debug-auth"];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { session, isLoading } = useAuth();
@@ -15,14 +15,25 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const isPublicRoute = publicRoutes.includes(pathname);
 
   useEffect(() => {
-    console.log("AuthGuard state:", { session, isLoading, pathname, isPublicRoute });
+    // Debug session state for cross-domain troubleshooting
+    console.log("AuthGuard state:", { 
+      session: session ? { userId: session.user?.id, email: session.user?.email } : null,
+      isLoading, 
+      pathname, 
+      isPublicRoute,
+      cookies: document.cookie.includes('better-auth') ? 'present' : 'missing'
+    });
     
     if (!isLoading) {
       if (!session && !isPublicRoute) {
-        console.log("No session, redirecting to login");
-        router.push("/login");
-      } else if (session && isPublicRoute) {
-        console.log("Has session on public route, redirecting to home");
+        console.log("No session found, redirecting to login");
+        // Add a small delay to prevent immediate redirect loops
+        const timer = setTimeout(() => {
+          router.push("/login");
+        }, 100);
+        return () => clearTimeout(timer);
+      } else if (session && isPublicRoute && pathname !== "/debug") {
+        console.log("Session found on public route, redirecting to home");
         router.push("/");
       }
     }

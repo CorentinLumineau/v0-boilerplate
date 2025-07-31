@@ -33,10 +33,18 @@ export function LoginForm() {
       if (error) {
         setError(error.message || "Invalid email or password");
       } else if (data) {
-        // Add a small delay to ensure cookies are set
-        await new Promise(resolve => setTimeout(resolve, 100));
-        router.push("/");
-        router.refresh();
+        // For cross-domain setups, we need to reload the page to ensure
+        // the useSession hook detects the new session cookies
+        console.log("Sign in successful, reloading page to refresh session");
+        
+        // Option 1: Force page reload (most reliable for cross-domain)
+        window.location.href = "/";
+        
+        // Alternative option 2: Navigate with refresh (less reliable)
+        // await new Promise(resolve => setTimeout(resolve, 200));
+        // router.push("/");
+        // router.refresh();
+        // window.location.reload();
       }
     } catch (err) {
       console.error("Sign in error:", err);
