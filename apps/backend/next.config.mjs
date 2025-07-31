@@ -1,8 +1,15 @@
-import baseConfig from '@boilerplate/config/next.config.base.js'
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  ...baseConfig,
+  // Base config inlined to avoid dependency issues on Vercel
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  images: {
+    unoptimized: true,
+  },
   async rewrites() {
     return [
       {
