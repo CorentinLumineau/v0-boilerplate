@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
-const publicRoutes = ["/login", "/signup", "/debug", "/debug-auth"];
+const publicRoutes = ["/login", "/signup", "/debug", "/debug-auth", "/session-test"];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { session, isLoading } = useAuth();
@@ -32,7 +32,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           router.push("/login");
         }, 100);
         return () => clearTimeout(timer);
-      } else if (session && isPublicRoute && pathname !== "/debug") {
+      } else if (session && isPublicRoute && !pathname.startsWith("/debug")) {
         console.log("Session found on public route, redirecting to home");
         router.push("/");
       }

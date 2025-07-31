@@ -29,6 +29,8 @@ export function LoginForm() {
       });
 
       console.log("Sign in response:", { data, error });
+      console.log("Current cookies before redirect:", document.cookie);
+      console.log("Current origin:", window.location.origin);
 
       if (error) {
         setError(error.message || "Invalid email or password");
