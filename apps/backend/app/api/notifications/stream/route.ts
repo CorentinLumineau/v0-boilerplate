@@ -8,31 +8,6 @@ declare global {
   var notificationStreams: Map<string, { controller: ReadableStreamDefaultController; isClosed: () => boolean }> | undefined
 }
 
-/**
- * @swagger
- * /api/notifications/stream:
- *   get:
- *     summary: Server-Sent Events stream for notifications
- *     description: Real-time notification stream using Server-Sent Events (SSE)
- *     tags:
- *       - Notifications
- *     responses:
- *       200:
- *         description: SSE stream established
- *         content:
- *           text/event-stream:
- *             schema:
- *               type: string
- *             examples:
- *               heartbeat:
- *                 description: Heartbeat event to keep connection alive
- *                 value: "event: heartbeat\ndata: {\"timestamp\":\"2024-01-01T00:00:00.000Z\"}\n\n"
- *               notification:
- *                 description: New notification event
- *                 value: "event: notification\ndata: {\"id\":\"123\",\"title\":\"New message\",\"type\":\"INFO\"}\n\n"
- *       401:
- *         description: Unauthorized
- */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: await headers() })

@@ -3,58 +3,6 @@ import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 
-/**
- * @swagger
- * /api/notifications/{id}:
- *   patch:
- *     summary: Update notification status
- *     description: Mark a notification as read or archived
- *     tags:
- *       - Notifications
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Notification ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               status:
- *                 type: string
- *                 enum: [READ, ARCHIVED]
- *     responses:
- *       200:
- *         description: Notification updated successfully
- *       404:
- *         description: Notification not found
- *       401:
- *         description: Unauthorized
- *   delete:
- *     summary: Delete notification
- *     description: Delete a notification
- *     tags:
- *       - Notifications
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Notification ID
- *     responses:
- *       204:
- *         description: Notification deleted successfully
- *       404:
- *         description: Notification not found
- *       401:
- *         description: Unauthorized
- */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

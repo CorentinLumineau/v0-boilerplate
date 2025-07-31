@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { GalleryVerticalEnd, Home, Settings, BookOpen } from "lucide-react"
+import { GalleryVerticalEnd, Home, Settings } from "lucide-react"
 
 // Update import to use the consolidated file
 import { useLanguageSettings } from "@/hooks/use-settings-store"
@@ -28,7 +28,6 @@ export function Sidebar({ version }: SidebarProps) {
 
   const mainNavigation = [
     { name: t("home"), href: "/", icon: Home, current: pathname === "/" },
-    { name: "API Docs", href: "/docs", icon: BookOpen, current: pathname === "/docs" },
   ]
 
   const bottomNavigation = [

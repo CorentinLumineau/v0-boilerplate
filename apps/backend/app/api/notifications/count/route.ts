@@ -3,28 +3,6 @@ import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 
-/**
- * @swagger
- * /api/notifications/count:
- *   get:
- *     summary: Get unread notification count
- *     description: Get the count of unread notifications for the authenticated user
- *     tags:
- *       - Notifications
- *     responses:
- *       200:
- *         description: Unread notification count
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 unreadCount:
- *                   type: integer
- *                   description: Number of unread notifications
- *       401:
- *         description: Unauthorized
- */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: await headers() })

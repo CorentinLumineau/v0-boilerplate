@@ -24,7 +24,6 @@
     "cors": "^2.8.5",
     "helmet": "^8.1.0",
     "next": "^15.4.5",
-    "next-swagger-doc": "^0.4.0",
     "prisma": "^6.13.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
