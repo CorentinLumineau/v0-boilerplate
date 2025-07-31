@@ -41,12 +41,6 @@ A production-ready **Next.js 15** monorepo boilerplate with comprehensive authen
 - App manifest with customizable icons and metadata
 - Offline-first approach for improved user experience
 
-### 📚 **API Documentation**
-- **Auto-generated Swagger documentation** with `next-swagger-doc`
-- Live OpenAPI spec updates during development
-- Interactive API explorer with Swagger UI
-- JSDoc-based API documentation standards
-
 ### 🏗️ **Monorepo Architecture**
 - **Turborepo** for optimized build orchestration
 - **pnpm workspaces** with workspace protocol
@@ -119,7 +113,6 @@ A production-ready **Next.js 15** monorepo boilerplate with comprehensive authen
 4. **Access the applications**
    - **Frontend**: http://localhost:3100
    - **Backend API**: http://localhost:3101
-   - **API Documentation**: http://localhost:3100/docs
 
 ## 🏢 Architecture Overview
 
@@ -151,7 +144,6 @@ v0-boilerplate/
 - **Better-auth** for authentication
 - **Prisma ORM** with PostgreSQL
 - **Server-Sent Events** for real-time features
-- **Auto-generated OpenAPI** documentation
 
 #### **Shared Packages**
 - **`@boilerplate/config`** - ESLint, Tailwind, TypeScript, and project configs
@@ -279,11 +271,9 @@ npx tsx scripts/setup-project.ts
 1. Add new routes in `apps/backend/app/api/`
 2. Update Prisma schema for database changes
 3. Generate types in `@boilerplate/types`
-4. Add JSDoc comments for automatic Swagger documentation
 
 ## 📖 Documentation
 
-- **API Documentation**: Available at `/docs` when running the frontend
 - **Component Documentation**: Built with Storybook (coming soon)
 - **Type Documentation**: Auto-generated from TypeScript interfaces
 
