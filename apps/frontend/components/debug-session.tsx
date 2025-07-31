@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, RefreshCw, AlertCircle, CheckCircle } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { getBackendUrl } from "@boilerplate/config/project.config";
 
 export function DebugSession() {
   const [debugInfo, setDebugInfo] = useState<any>(null);
@@ -19,7 +20,7 @@ export function DebugSession() {
     
     try {
       // Check backend session endpoint
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3101";
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || getBackendUrl();
       const response = await fetch(`${backendUrl}/api/auth/session-debug`, {
         credentials: 'include',
         headers: {

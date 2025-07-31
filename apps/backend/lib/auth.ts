@@ -1,15 +1,16 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
+import { getFrontendUrl, getBackendUrl } from "@boilerplate/config/project.config";
 
 // Determine if we're in production (more robust detection)
 const isProduction = process.env.NODE_ENV === 'production' || 
                     process.env.VERCEL_ENV === 'production' ||
                     (process.env.BETTER_AUTH_BASE_URL && process.env.BETTER_AUTH_BASE_URL.includes('https://'));
 
-// Get the frontend URL for trusted origins
-const frontendUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3100";
-const backendUrl = process.env.BETTER_AUTH_BASE_URL || "http://localhost:3101";
+// Get URLs from project config with environment variable overrides
+const frontendUrl = process.env.NEXT_PUBLIC_APP_URL || getFrontendUrl();
+const backendUrl = process.env.BETTER_AUTH_BASE_URL || getBackendUrl();
 
 // Extract the root domain for cross-subdomain cookies (e.g., lumineau.app from boilerplate.lumineau.app)
 const getRootDomain = (url: string) => {

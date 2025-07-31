@@ -122,6 +122,13 @@ export const getBackendUrl = () => {
   const isProduction = process.env.NODE_ENV === 'production';
   return isProduction ? PROJECT_CONFIG.production.backend.url : PROJECT_CONFIG.development.backend.url;
 };
+
+export const getProductionFrontendUrl = () => PROJECT_CONFIG.production.frontend.url;
+export const getProductionBackendUrl = () => PROJECT_CONFIG.production.backend.url;
+export const getDevelopmentFrontendUrl = () => PROJECT_CONFIG.development.frontend.url;
+export const getDevelopmentBackendUrl = () => PROJECT_CONFIG.development.backend.url;
+export const getFrontendPort = () => PROJECT_CONFIG.development.frontend.port;
+export const getBackendPort = () => PROJECT_CONFIG.development.backend.port;
 export const getNamespace = () => PROJECT_CONFIG.packages.namespace;
 export const getAvailableThemes = () => PROJECT_CONFIG.themes.available;
 export const getDefaultTheme = () => PROJECT_CONFIG.themes.default;

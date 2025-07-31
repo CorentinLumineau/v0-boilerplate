@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getFrontendUrl } from './lib/project-config'
+import { getFrontendUrl, getDevelopmentFrontendUrl, getProductionFrontendUrl } from '@boilerplate/config/project.config'
 
 export function middleware(request: NextRequest) {
   // Handle CORS for API routes
@@ -8,19 +8,18 @@ export function middleware(request: NextRequest) {
     
     // Add CORS headers
     const allowedOrigins = [
-      getFrontendUrl(),
-      'http://localhost:3100', // fallback for development
-      'http://localhost:3000', // another common dev port
+      getFrontendUrl(), // Current environment URL
+      getDevelopmentFrontendUrl(), // Development fallback
+      getProductionFrontendUrl(), // Production URL
       process.env.FRONTEND_URL,
       process.env.NEXT_PUBLIC_APP_URL,
-      // Add production URLs
-      'https://boilerplate.lumineau.app',
-      'https://www.boilerplate.lumineau.app'
+      // Add www subdomain for production
+      getProductionFrontendUrl().replace('https://', 'https://www.')
     ].filter(Boolean)
     
     const origin = request.headers.get('origin')
     const isAllowedOrigin = origin && allowedOrigins.some(allowed => 
-      allowed === origin || origin.startsWith(allowed)
+      allowed === origin || origin.startsWith(allowed!)
     )
     
     if (isAllowedOrigin) {

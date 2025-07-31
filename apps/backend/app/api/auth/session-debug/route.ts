@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { getFrontendUrl, getBackendUrl } from "@boilerplate/config/project.config";
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,8 +15,8 @@ export async function GET(request: NextRequest) {
     
     // Get environment info
     const isProduction = process.env.NODE_ENV === 'production';
-    const frontendUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3100";
-    const backendUrl = process.env.BETTER_AUTH_BASE_URL || "http://localhost:3101";
+    const frontendUrl = process.env.NEXT_PUBLIC_APP_URL || getFrontendUrl();
+    const backendUrl = process.env.BETTER_AUTH_BASE_URL || getBackendUrl();
     const frontendDomain = new URL(frontendUrl).hostname;
     
     // Extract root domain logic (same as in auth.ts)
