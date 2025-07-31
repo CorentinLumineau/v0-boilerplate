@@ -105,6 +105,15 @@ importers:
       '@radix-ui/react-toggle-group':
         specifier: ^1.1.10
         version: 1.1.10(@types/react-dom@19.1.7)(@types/react@19.1.9)(react-dom@19.1.1)(react@19.1.1)
+      '@types/node':
+        specifier: ^22.17.0
+        version: 22.17.0
+      '@types/react':
+        specifier: ^19.1.9
+        version: 19.1.9
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.1.7(@types/react@19.1.9)
       better-auth:
         specifier: ^1.3.4
         version: 1.3.4(react-dom@19.1.1)(react@19.1.1)
@@ -135,16 +144,10 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
     devDependencies:
-      '@types/node':
-        specifier: ^22.17.0
-        version: 22.17.0
-      '@types/react':
-        specifier: ^19.1.9
-        version: 19.1.9
-      '@types/react-dom':
-        specifier: ^19.1.7
-        version: 19.1.7(@types/react@19.1.9)
       '@typescript-eslint/parser':
         specifier: ^8.38.0
         version: 8.38.0(eslint@8.57.1)(typescript@5.8.3)
@@ -163,9 +166,6 @@ importers:
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
-      typescript:
-        specifier: ^5.8.3
-        version: 5.8.3
 
   packages/config:
     devDependencies:
