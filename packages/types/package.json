@@ -21,7 +21,7 @@
     "type-check": "tsc --noEmit",
     "prepublishOnly": "pnpm build"
   },
-  "devDependencies": {
+  "dependencies": {
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   }
