@@ -30,18 +30,19 @@ export function DebugSession() {
       
       const data = await response.json();
       
-      // Get browser cookies
-      const browserCookies = document.cookie.split(';').map(c => {
-        const [name, value] = c.trim().split('=');
-        return { name, value: value ? value.substring(0, 20) + '...' : '' };
-      });
+      // Get browser cookies (client-side only)
+      const browserCookies = typeof document !== 'undefined' ? 
+        document.cookie.split(';').map(c => {
+          const [name, value] = c.trim().split('=');
+          return { name, value: value ? value.substring(0, 20) + '...' : '' };
+        }) : [{ name: 'server-side', value: 'cookies not available during SSR' }];
       
       setDebugInfo({
         ...data,
         browserCookies,
         frontendSession: session.data,
         environment: {
-          frontend: window.location.origin,
+          frontend: typeof window !== 'undefined' ? window.location.origin : 'server-side',
           backend: backendUrl,
           isProduction: process.env.NODE_ENV === 'production',
         }

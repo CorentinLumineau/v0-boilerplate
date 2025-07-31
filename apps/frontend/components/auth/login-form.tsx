@@ -29,8 +29,12 @@ export function LoginForm() {
       });
 
       console.log("Sign in response:", { data, error });
-      console.log("Current cookies before redirect:", document.cookie);
-      console.log("Current origin:", window.location.origin);
+      if (typeof document !== 'undefined') {
+        console.log("Current cookies before redirect:", document.cookie);
+      }
+      if (typeof window !== 'undefined') {
+        console.log("Current origin:", window.location.origin);
+      }
 
       if (error) {
         setError(error.message || "Invalid email or password");
@@ -40,7 +44,9 @@ export function LoginForm() {
         console.log("Sign in successful, reloading page to refresh session");
         
         // Option 1: Force page reload (most reliable for cross-domain)
-        window.location.href = "/";
+        if (typeof window !== 'undefined') {
+          window.location.href = "/";
+        }
         
         // Alternative option 2: Navigate with refresh (less reliable)
         // await new Promise(resolve => setTimeout(resolve, 200));

@@ -10,10 +10,15 @@ export default function DebugAuthPage() {
   const [refreshCount, setRefreshCount] = useState(0);
 
   const forceRefresh = () => {
-    window.location.reload();
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
   };
 
   const checkCookies = () => {
+    if (typeof document === 'undefined') {
+      return { 'server-side': 'cookies not available during SSR' };
+    }
     const cookies = document.cookie.split(';').reduce((acc, cookie) => {
       const [name, value] = cookie.trim().split('=');
       if (name.includes('better-auth')) {
