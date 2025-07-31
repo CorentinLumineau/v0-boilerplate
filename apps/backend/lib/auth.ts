@@ -2,15 +2,20 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 
+// Determine if we're in production
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Get the frontend URL for cookie configuration
+const frontendUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3100";
+const frontendDomain = new URL(frontendUrl).hostname;
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_BASE_URL,
-  trustedOrigins: [
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3100",
-  ],
+  trustedOrigins: [frontendUrl],
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false, // Set to true in production
@@ -26,12 +31,24 @@ export const auth = betterAuth({
     } : undefined,
   },
   session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // 1 day
+    expiresIn: 60 * 60 * 24 * 7, // 7 days in seconds
+    updateAge: 60 * 60 * 24, // 1 day in seconds
     cookieCache: {
       enabled: true,
       maxAge: 60 * 5, // 5 minutes
     },
+    // Cookie configuration for cross-domain
+    cookieName: "better-auth.session_token",
+    cookieOptions: {
+      httpOnly: true,
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction,
+      path: "/",
+      // Set domain only in production for cookie sharing
+      ...(isProduction && frontendDomain !== 'localhost' ? {
+        domain: `.${frontendDomain.split('.').slice(-2).join('.')}`  // e.g., .lumineau.app
+      } : {})
+    }
   },
 });
 

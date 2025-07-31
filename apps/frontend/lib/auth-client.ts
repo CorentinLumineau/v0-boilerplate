@@ -5,6 +5,10 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL || getBackendUrl();
 
 export const authClient = createAuthClient({
   baseURL: apiUrl,
+  // Enable credentials for cross-origin requests
+  fetchOptions: {
+    credentials: 'include',
+  },
 });
 
 export const {

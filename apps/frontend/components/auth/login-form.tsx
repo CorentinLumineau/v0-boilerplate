@@ -28,12 +28,18 @@ export function LoginForm() {
         callbackURL: "/",
       });
 
+      console.log("Sign in response:", { data, error });
+
       if (error) {
         setError(error.message || "Invalid email or password");
       } else if (data) {
+        // Add a small delay to ensure cookies are set
+        await new Promise(resolve => setTimeout(resolve, 100));
         router.push("/");
+        router.refresh();
       }
     } catch (err) {
+      console.error("Sign in error:", err);
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);

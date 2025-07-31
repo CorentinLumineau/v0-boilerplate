@@ -15,10 +15,14 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const isPublicRoute = publicRoutes.includes(pathname);
 
   useEffect(() => {
+    console.log("AuthGuard state:", { session, isLoading, pathname, isPublicRoute });
+    
     if (!isLoading) {
       if (!session && !isPublicRoute) {
+        console.log("No session, redirecting to login");
         router.push("/login");
       } else if (session && isPublicRoute) {
+        console.log("Has session on public route, redirecting to home");
         router.push("/");
       }
     }
