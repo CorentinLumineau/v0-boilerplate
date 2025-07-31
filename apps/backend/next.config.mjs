@@ -2,8 +2,6 @@ import path from 'path'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable standalone output for Vercel deployment
-  output: 'standalone',
   
   // Configure file tracing for monorepo
   outputFileTracingRoot: path.join(process.cwd(), '../../'),
@@ -18,7 +16,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  
+
   async rewrites() {
     return [
       {
