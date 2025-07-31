@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3100",
-    "build": "next build",
+    "build": "pnpm --filter @boilerplate/types build && pnpm --filter @boilerplate/config build && next build",
     "start": "next start --port 3100",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "type-check": "tsc --noEmit"
