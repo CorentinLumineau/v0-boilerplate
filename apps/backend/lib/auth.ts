@@ -7,7 +7,36 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 // Get the frontend URL for cookie configuration
 const frontendUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3100";
+const backendUrl = process.env.BETTER_AUTH_BASE_URL || "http://localhost:3101";
 const frontendDomain = new URL(frontendUrl).hostname;
+
+// Extract the root domain for cookie sharing (e.g., lumineau.app from boilerplate.lumineau.app)
+const getRootDomain = (hostname: string) => {
+  // For localhost, don't set domain
+  if (hostname === 'localhost' || hostname.includes('127.0.0.1')) {
+    return undefined;
+  }
+  
+  // For production domains, extract the root domain
+  const parts = hostname.split('.');
+  if (parts.length >= 2) {
+    // Return the last two parts (e.g., lumineau.app)
+    return `.${parts.slice(-2).join('.')}`;
+  }
+  
+  return undefined;
+};
+
+// Log configuration in development
+if (process.env.NODE_ENV !== 'production') {
+  console.log('Auth Configuration:', {
+    isProduction,
+    frontendUrl,
+    backendUrl,
+    frontendDomain,
+    cookieDomain: getRootDomain(frontendDomain),
+  });
+}
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -44,9 +73,9 @@ export const auth = betterAuth({
       sameSite: isProduction ? "none" : "lax",
       secure: isProduction,
       path: "/",
-      // Set domain only in production for cookie sharing
-      ...(isProduction && frontendDomain !== 'localhost' ? {
-        domain: `.${frontendDomain.split('.').slice(-2).join('.')}`  // e.g., .lumineau.app
+      // Set domain for cookie sharing across subdomains
+      ...(getRootDomain(frontendDomain) ? {
+        domain: getRootDomain(frontendDomain)
       } : {})
     }
   },
