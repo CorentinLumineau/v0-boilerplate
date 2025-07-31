@@ -4,7 +4,13 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "outputs": [
+        ".next/**", 
+        "!.next/cache/**", 
+        ".next/standalone/**",
+        ".next/static/**",
+        "dist/**"
+      ],
       "env": ["NODE_ENV", "FRONTEND_URL", "BACKEND_URL"]
     },
     "dev": {

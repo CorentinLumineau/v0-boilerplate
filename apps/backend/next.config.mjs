@@ -1,5 +1,13 @@
+import path from 'path'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable standalone output for Vercel deployment
+  output: 'standalone',
+  
+  // Configure file tracing for monorepo
+  outputFileTracingRoot: path.join(process.cwd(), '../../'),
+  
   // Base config inlined to avoid dependency issues on Vercel
   eslint: {
     ignoreDuringBuilds: true,
@@ -9,6 +17,19 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+  },
+  
+  // File tracing configuration for monorepo
+  outputFileTracingIncludes: {
+    '/**': ['../../packages/**/*']
+  },
+  outputFileTracingExcludes: {
+    '/**': [
+      'node_modules/@swc/**/*',
+      'node_modules/@esbuild/**/*',
+      '../../node_modules/@swc/**/*',
+      '../../node_modules/@esbuild/**/*'
+    ],
   },
   async rewrites() {
     return [

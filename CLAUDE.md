@@ -22,6 +22,11 @@ This is a **Turborepo monorepo** with the following **simplified** structure:
 
 - Never hardcode values that can change on another project. Use `@packages/config/project.config.ts` and use it throughout the whole project
 - Always generate/update the type in @packages/types/ and use them in project. We should not have interfaces created within the frontend/backend
+- Never commit changes
+
+## Troubleshooting Notes
+
+- On troubleshooting issue, dont forget to get the latest documentation of technical stack by calling context7 mcp
 
 ## Common Commands
 
@@ -162,3 +167,4 @@ The frontend features a sophisticated theming system:
 - **Easier debugging** - Direct component access
 - **Simpler onboarding** - Less complexity for new developers
 - **Future flexibility** - Easy to extract packages when you need multiple frontends
+```
