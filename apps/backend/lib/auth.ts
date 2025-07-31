@@ -83,7 +83,14 @@ export const auth = betterAuth({
         enabled: true,
         domain: getRootDomain(frontendUrl), // e.g., "lumineau.app"
       }
-    } : {})
+    } : {}),
+    // Default cookie attributes
+    defaultCookieAttributes: {
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction ? true : false,
+      httpOnly: true,
+      path: "/",
+    }
   },
 });
 
