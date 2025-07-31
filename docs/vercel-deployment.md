@@ -141,7 +141,11 @@ Add backend-specific environment variables:
 2. **Backend**: Regular environment variables work as expected
 
 ### Database Migration Issues
-1. **Migration fails during build**:
+1. **"prisma: command not found" error**:
+   - Ensure `prisma` is in `dependencies` (not `devDependencies`)
+   - Vercel only installs production dependencies
+
+2. **Migration fails during build**:
    - Check `DATABASE_URL` is correct and accessible
    - Verify database exists and user has proper permissions
    - Check Vercel build logs for specific error messages
