@@ -2,8 +2,10 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 
-// Determine if we're in production
-const isProduction = process.env.NODE_ENV === 'production';
+// Determine if we're in production (more robust detection)
+const isProduction = process.env.NODE_ENV === 'production' || 
+                    process.env.VERCEL_ENV === 'production' ||
+                    (process.env.BETTER_AUTH_BASE_URL && process.env.BETTER_AUTH_BASE_URL.includes('https://'));
 
 // Get the frontend URL for cookie configuration
 const frontendUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3100";
@@ -59,6 +61,17 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     } : undefined,
   },
+  // Global cookie options that apply to ALL cookies
+  cookies: {
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction,
+    httpOnly: true,
+    path: "/",
+    // Set domain for cookie sharing across subdomains in production
+    ...(isProduction && getRootDomain(frontendDomain) ? {
+      domain: getRootDomain(frontendDomain)
+    } : {})
+  },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days in seconds
     updateAge: 60 * 60 * 24, // 1 day in seconds
@@ -66,18 +79,6 @@ export const auth = betterAuth({
       enabled: true,
       maxAge: 60 * 5, // 5 minutes
     },
-    // Cookie configuration for cross-domain
-    cookieName: "better-auth.session_token",
-    cookieOptions: {
-      httpOnly: true,
-      sameSite: isProduction ? "none" : "lax",
-      secure: isProduction,
-      path: "/",
-      // Set domain for cookie sharing across subdomains
-      ...(getRootDomain(frontendDomain) && isProduction ? {
-        domain: getRootDomain(frontendDomain)
-      } : {})
-    }
   },
 });
 

@@ -31,6 +31,10 @@ interface ProjectAnswers {
   frontendPort: string;
   backendPort: string;
   
+  // Production configuration
+  productionFrontendUrl: string;
+  productionBackendUrl: string;
+  
   // Security
   authSecret: string;
 }
@@ -82,6 +86,11 @@ async function collectProjectInfo(): Promise<ProjectAnswers> {
   const frontendPort = await question('Frontend port [3100]: ') || '3100';
   const backendPort = await question('Backend port [3101]: ') || '3101';
   
+  // Production Configuration
+  console.log('\n🌐 PRODUCTION CONFIGURATION');
+  const productionFrontendUrl = await question('Production frontend URL (e.g., https://myapp.com): ');
+  const productionBackendUrl = await question('Production backend URL (e.g., https://api.myapp.com): ');
+  
   // Security
   console.log('\n🔐 SECURITY CONFIGURATION');
   console.log('Generating secure authentication secret...');
@@ -104,12 +113,14 @@ async function collectProjectInfo(): Promise<ProjectAnswers> {
     dbPassword,
     frontendPort,
     backendPort,
+    productionFrontendUrl,
+    productionBackendUrl,
     authSecret,
   };
 }
 
 function updateProjectConfig(answers: ProjectAnswers) {
-  const configPath = join(process.cwd(), 'project.config.ts');
+  const configPath = join(process.cwd(), 'packages/config/project.config.ts');
   let config = readFileSync(configPath, 'utf-8');
 
   // Update basic info
@@ -125,6 +136,10 @@ function updateProjectConfig(answers: ProjectAnswers) {
   // Update URLs
   config = config.replace(/repository: ".*?"/, `repository: "${answers.repositoryUrl}"`);
   config = config.replace(/homepage: ".*?"/, `homepage: "${answers.homepageUrl}"`);
+
+  // Update production URLs
+  config = config.replace(/url: "https:\/\/boilerplate\.lumineau\.app"/, `url: "${answers.productionFrontendUrl}"`);
+  config = config.replace(/url: "https:\/\/api\.boilerplate\.lumineau\.app"/, `url: "${answers.productionBackendUrl}"`);
 
   // Update namespace
   config = config.replace(/namespace: "@boilerplate"/, `namespace: "${answers.namespace}"`);
@@ -144,7 +159,7 @@ function updateProjectConfig(answers: ProjectAnswers) {
   config = config.replace(/containerName: "v0-boilerplate-postgres"/, `containerName: "${answers.name}-postgres"`);
 
   writeFileSync(configPath, config);
-  console.log('✅ Updated project.config.ts');
+  console.log('✅ Updated packages/config/project.config.ts');
 }
 
 function updatePackageJson(answers: ProjectAnswers) {
@@ -350,6 +365,10 @@ function displaySummary(answers: ProjectAnswers) {
   console.log(`  Frontend: http://localhost:${answers.frontendPort}`);
   console.log(`  Backend: http://localhost:${answers.backendPort}`);
   console.log(`  API Health: http://localhost:${answers.backendPort}/api/health`);
+  console.log('');
+  console.log('🌍 PRODUCTION URLS:');
+  console.log(`  Frontend: ${answers.productionFrontendUrl}`);
+  console.log(`  Backend: ${answers.productionBackendUrl}`);
   console.log('');
   console.log('🔐 SECURITY:');
   console.log(`  Auth Secret: ${answers.authSecret.substring(0, 16)}... (64 chars)`);
