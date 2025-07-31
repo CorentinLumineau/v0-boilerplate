@@ -1,31 +1,50 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { betterFetch } from "@better-fetch/fetch";
 
 // Public routes that don't require authentication
 const publicRoutes = ["/login", "/signup", "/debug"];
 
-export function middleware(request: NextRequest) {
+// Get backend URL from environment or fallback
+const getBackendUrl = () => {
+  return process.env.NEXT_PUBLIC_API_URL || process.env.BETTER_AUTH_BASE_URL || "http://localhost:3101";
+};
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Check if the route is public
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
   
-  // Get the session token from cookies
-  const sessionToken = request.cookies.get("better-auth.session_token");
+  // For public routes, allow access
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
   
-  // If no session and trying to access protected route, redirect to login
-  if (!sessionToken && !isPublicRoute) {
+  // For protected routes, validate session using secure method
+  try {
+    const { data: session } = await betterFetch("/api/auth/get-session", {
+      baseURL: getBackendUrl(),
+      headers: {
+        cookie: request.headers.get("cookie") || "",
+      },
+    });
+
+    // If no valid session, redirect to login
+    if (!session) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("from", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Valid session, allow access
+    return NextResponse.next();
+  } catch (error) {
+    // On error (network, etc.), redirect to login
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
-  
-  // If has session and trying to access login/signup, redirect to home
-  if (sessionToken && isPublicRoute) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-  
-  return NextResponse.next();
 }
 
 export const config = {

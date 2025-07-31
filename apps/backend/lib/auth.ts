@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { nextCookies } from "better-auth/next-js";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { getFrontendUrl, getBackendUrl } from "@boilerplate/config/project.config";
@@ -93,6 +94,8 @@ export const auth = betterAuth({
       path: "/",
     }
   },
+  // Add the nextCookies plugin - MUST be last in the plugins array
+  plugins: [nextCookies()],
 });
 
 export type Auth = typeof auth;

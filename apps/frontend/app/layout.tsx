@@ -4,7 +4,6 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 
 import { ThemeProvider } from "@/components/theme-provider"
-import { AuthGuard } from "@/components/auth/auth-guard"
 import { AppLayout } from "@/components/app-layout"
 // Import the correct provider
 import { SettingsStoreProvider } from "@/hooks/use-settings-store"
@@ -31,9 +30,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {/* Use the correct provider */}
           <SettingsStoreProvider>
-            <AuthGuard>
-              <AppLayout version={version}>{children}</AppLayout>
-            </AuthGuard>
+            <AppLayout version={version}>{children}</AppLayout>
           </SettingsStoreProvider>
         </ThemeProvider>
       </body>

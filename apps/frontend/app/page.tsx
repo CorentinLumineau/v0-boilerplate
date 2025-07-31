@@ -1,14 +1,29 @@
-"use client"
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { getBackendUrl } from "@/lib/project-config";
+import { betterFetch } from "@better-fetch/fetch";
 
-// Update import to use the consolidated file
-import { useLanguageSettings } from "@/hooks/use-settings-store"
+// Server component with authentication
+export default async function Page() {
+  // Get session using better-auth server-side API
+  try {
+    const { data: session } = await betterFetch("/api/auth/get-session", {
+      baseURL: getBackendUrl(),
+      headers: await headers(),
+    });
 
-export default function Page() {
-  const { t } = useLanguageSettings()
+    if (!session) {
+      redirect("/login");
+    }
 
-  return (
-    <div>
-      <h1>{t("wip")}</h1>
-    </div>
-  )
+    return (
+      <div>
+        <h1>Welcome {session.user.name || session.user.email}</h1>
+        <p>You are successfully authenticated!</p>
+      </div>
+    );
+  } catch (error) {
+    // If there's an error getting the session, redirect to login
+    redirect("/login");
+  }
 }

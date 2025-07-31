@@ -7,8 +7,7 @@ import { useRouter } from "next/navigation"
 
 // Update imports to use the consolidated file
 import { useThemeSettings, useLanguageSettings } from "@/hooks/use-settings-store"
-import { useAuth } from "@/hooks/use-auth"
-import { signOut } from "@/lib/auth-client"
+import { signOut, useSession } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -28,7 +27,7 @@ export function UserDropdown() {
   const { theme, setTheme } = useTheme()
   const { radiusValue, setRadiusValue } = useThemeSettings()
   const { language, setLanguage, t } = useLanguageSettings()
-  const { user } = useAuth()
+  const session = useSession()
   const router = useRouter()
 
   const [open, setOpen] = useState(false)
@@ -71,6 +70,7 @@ export function UserDropdown() {
   }
 
   // Use real user data or fallback to translated username
+  const user = session.data?.user
   const displayName = user?.name || user?.email || t("username")
   const userEmail = user?.email
 
