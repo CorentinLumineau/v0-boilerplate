@@ -14,20 +14,26 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   
   const isPublicRoute = publicRoutes.includes(pathname);
 
+  // TEMPORARY DEBUG: Log everything
+  console.log("=== AuthGuard DEBUG ===");
+  console.log("pathname:", pathname);
+  console.log("isPublicRoute:", isPublicRoute);
+  console.log("isLoading:", isLoading);
+  console.log("session:", session);
+  console.log("document.cookie:", document.cookie);
+  console.log("better-auth cookies present:", document.cookie.includes('better-auth'));
+  console.log("=======================");
+
+  // TEMPORARY: Allow access to debug routes without authentication
+  if (pathname.startsWith("/debug") || pathname === "/session-test") {
+    console.log("DEBUG ROUTE - bypassing auth");
+    return <>{children}</>;
+  }
+
   useEffect(() => {
-    // Debug session state for cross-domain troubleshooting
-    console.log("AuthGuard state:", { 
-      session: session ? { userId: session.user?.id, email: session.user?.email } : null,
-      isLoading, 
-      pathname, 
-      isPublicRoute,
-      cookies: document.cookie.includes('better-auth') ? 'present' : 'missing'
-    });
-    
     if (!isLoading) {
       if (!session && !isPublicRoute) {
         console.log("No session found, redirecting to login");
-        // Add a small delay to prevent immediate redirect loops
         const timer = setTimeout(() => {
           router.push("/login");
         }, 100);
