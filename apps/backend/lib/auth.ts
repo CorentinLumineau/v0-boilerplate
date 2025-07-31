@@ -74,7 +74,7 @@ export const auth = betterAuth({
       secure: isProduction,
       path: "/",
       // Set domain for cookie sharing across subdomains
-      ...(getRootDomain(frontendDomain) ? {
+      ...(getRootDomain(frontendDomain) && isProduction ? {
         domain: getRootDomain(frontendDomain)
       } : {})
     }

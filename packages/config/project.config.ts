@@ -18,6 +18,16 @@ export const PROJECT_CONFIG = {
     homepage: "https://your-domain.com",
     documentation: "https://docs.your-domain.com",
   },
+
+  // Production URLs
+  production: {
+    frontend: {
+      url: "https://boilerplate.lumineau.app",
+    },
+    backend: {
+      url: "https://api.boilerplate.lumineau.app",
+    },
+  },
   
   // Author Information
   author: {
@@ -103,8 +113,15 @@ export const getVersion = () => PROJECT_CONFIG.version;
 export const getAuthor = () => PROJECT_CONFIG.author;
 export const getRepositoryUrl = () => PROJECT_CONFIG.urls.repository;
 export const getHomepageUrl = () => PROJECT_CONFIG.urls.homepage;
-export const getFrontendUrl = () => PROJECT_CONFIG.development.frontend.url;
-export const getBackendUrl = () => PROJECT_CONFIG.development.backend.url;
+export const getFrontendUrl = () => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return isProduction ? PROJECT_CONFIG.production.frontend.url : PROJECT_CONFIG.development.frontend.url;
+};
+
+export const getBackendUrl = () => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return isProduction ? PROJECT_CONFIG.production.backend.url : PROJECT_CONFIG.development.backend.url;
+};
 export const getNamespace = () => PROJECT_CONFIG.packages.namespace;
 export const getAvailableThemes = () => PROJECT_CONFIG.themes.available;
 export const getDefaultTheme = () => PROJECT_CONFIG.themes.default;
