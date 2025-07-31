@@ -18,21 +18,13 @@ export function SettingsPanel() {
 
   const handleThemeChange = (value: string) => {
     if (value) {
-      try {
-        setTheme(value)
-      } catch (error) {
-        console.error("Error setting theme:", error)
-      }
+      setTheme(value)
     }
   }
 
   const handleLanguageChange = (value: string) => {
     if (value && (value === "en" || value === "fr")) {
-      try {
-        setLanguage(value as "en" | "fr")
-      } catch (error) {
-        console.error("Error setting language:", error)
-      }
+      setLanguage(value as "en" | "fr")
     }
   }
 

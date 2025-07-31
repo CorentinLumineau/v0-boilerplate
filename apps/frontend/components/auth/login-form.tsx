@@ -28,20 +28,12 @@ export function LoginForm() {
         callbackURL: "/",
       });
 
-      console.log("Sign in response:", { data, error });
-      if (typeof document !== 'undefined') {
-        console.log("Current cookies before redirect:", document.cookie);
-      }
-      if (typeof window !== 'undefined') {
-        console.log("Current origin:", window.location.origin);
-      }
 
       if (error) {
         setError(error.message || "Invalid email or password");
       } else if (data) {
         // For cross-domain setups, we need to reload the page to ensure
         // the useSession hook detects the new session cookies
-        console.log("Sign in successful, reloading page to refresh session");
         
         // Option 1: Force page reload (most reliable for cross-domain)
         if (typeof window !== 'undefined') {
@@ -55,7 +47,6 @@ export function LoginForm() {
         // window.location.reload();
       }
     } catch (err) {
-      console.error("Sign in error:", err);
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);

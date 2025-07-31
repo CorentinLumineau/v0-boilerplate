@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { betterFetch } from "@better-fetch/fetch";
 
 // Public routes that don't require authentication
-const publicRoutes = ["/login", "/signup", "/debug"];
+const publicRoutes = ["/login", "/signup"];
 
 // Get backend URL from environment or fallback
 const getBackendUrl = () => {

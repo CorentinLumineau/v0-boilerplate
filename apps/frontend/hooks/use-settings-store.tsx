@@ -58,7 +58,7 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
         setLanguage(storedLanguage)
       }
     } catch (error) {
-      console.error("Error loading settings from localStorage:", error)
+      // Silently handle localStorage errors
     }
   }, [])
 
@@ -76,7 +76,7 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
       localStorage.setItem("colorTheme", colorTheme)
       localStorage.setItem("radiusValue", radiusValue)
     } catch (error) {
-      console.error("Error applying theme:", error)
+      // Silently handle theme application errors
     }
   }, [colorTheme, radiusValue, theme])
 
@@ -85,7 +85,7 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
     try {
       localStorage.setItem("language", language)
     } catch (error) {
-      console.error("Error setting language in localStorage:", error)
+      // Silently handle language storage errors
     }
   }, [language])
 

@@ -30,23 +30,12 @@ export function BottomSheet({
   
   // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
-    console.log('🎯 BottomSheet: Backdrop click detected', {
-      target: e.target,
-      currentTarget: e.currentTarget,
-      isBackdrop: e.target === e.currentTarget,
-      targetTagName: (e.target as Element)?.tagName,
-      targetClassName: (e.target as Element)?.className,
-      isTransitioning: isTransitioning.current
-    });
-    
     // Don't close if we're in the middle of a transition (tab switching)
     if (isTransitioning.current) {
-      console.log('🚫 BottomSheet: Backdrop click ignored - transition in progress');
       return;
     }
     
     if (e.target === e.currentTarget) {
-      console.log('❌ BottomSheet: Closing via backdrop click');
       onClose();
     }
   };
@@ -54,40 +43,21 @@ export function BottomSheet({
   // Handle outside clicks
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      console.log('👆 BottomSheet: Click outside detected', {
-        target: event.target,
-        targetTagName: (event.target as Element)?.tagName,
-        targetClassName: (event.target as Element)?.className,
-        targetId: (event.target as Element)?.id,
-        sheetRefExists: !!sheetRef.current,
-        isOpen,
-        targetInDocument: document.contains(event.target as Node),
-        targetInSheet: sheetRef.current?.contains(event.target as Node)
-      });
-
       // Prevent closing if a popover is open (global flag)
       if (typeof window !== 'undefined' && (window as unknown as { __popoverOpen?: boolean }).__popoverOpen) {
-        console.log('🚫 BottomSheet: Popover is open, ignoring click outside');
         return;
       }
       
       if (sheetRef.current && !sheetRef.current.contains(event.target as Node) && isOpen) {
-        console.log('❌ BottomSheet: Closing via click outside - target not in sheet');
         onClose();
-      } else {
-        console.log('✅ BottomSheet: Click inside sheet, not closing');
       }
     };
 
     if (isOpen) {
-      console.log('🎯 BottomSheet: Adding click outside listener');
       document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      console.log('🎯 BottomSheet: Removing click outside listener (not open)');
     }
 
     return () => {
-      console.log('🧹 BottomSheet: Cleanup - removing click outside listener');
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen, onClose]);
@@ -96,15 +66,12 @@ export function BottomSheet({
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        console.log('❌ BottomSheet: Closing via Escape key');
         onClose();
       }
     };
 
-    console.log('⌨️ BottomSheet: Adding escape key listener');
     window.addEventListener('keydown', handleEscape);
     return () => {
-      console.log('🧹 BottomSheet: Cleanup - removing escape key listener');
       window.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen, onClose]);
@@ -113,11 +80,9 @@ export function BottomSheet({
   useEffect(() => {
     if (isOpen) {
       isTransitioning.current = true;
-      console.log('🔄 BottomSheet: Content changed, marking as transitioning');
       
       const timeoutId = setTimeout(() => {
         isTransitioning.current = false;
-        console.log('✅ BottomSheet: Transition period ended');
       }, 300); // Allow 300ms for transitions to complete
       
       return () => {
@@ -164,11 +129,9 @@ export function BottomSheet({
     // Calculate if we should close the sheet
     const deltaY = currentY.current - startY.current;
     
-    console.log('👋 BottomSheet: Touch end', { deltaY, shouldClose: deltaY > 100 });
     
     if (deltaY > 100) {
       // Close the sheet if dragged down sufficiently
-      console.log('❌ BottomSheet: Closing via swipe down gesture');
       onClose();
     } else if (sheetRef.current) {
       // Reset position with animation
@@ -228,7 +191,6 @@ export function BottomSheet({
             variant="ghost"
             size="icon"
             onClick={() => {
-              console.log('❌ BottomSheet: Closing via close button click');
               onClose();
             }}
             className="h-8 w-8 rounded-full flex-shrink-0"

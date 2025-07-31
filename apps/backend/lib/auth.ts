@@ -35,15 +35,6 @@ const getRootDomain = (url: string) => {
   }
 };
 
-// Log configuration in development
-if (process.env.NODE_ENV !== 'production') {
-  console.log('Auth Configuration:', {
-    isProduction,
-    frontendUrl,
-    backendUrl,
-    rootDomain: getRootDomain(frontendUrl),
-  });
-}
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {

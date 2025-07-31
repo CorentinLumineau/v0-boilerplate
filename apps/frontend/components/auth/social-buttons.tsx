@@ -16,7 +16,7 @@ export function SocialButtons() {
         callbackURL: "/",
       });
     } catch (error) {
-      console.error(`${provider} login failed:`, error);
+      // Silently handle social login errors
       setLoadingProvider(null);
     }
   };
