@@ -2,36 +2,53 @@
 
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
-const publicRoutes = ["/login", "/signup", "/debug", "/debug-auth", "/session-test"];
+const publicRoutes = ["/login", "/signup", "/debug", "/debug-auth", "/session-test", "/debug-simple"];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { session, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [isClient, setIsClient] = useState(false);
   
+  // Ensure we're on the client side before doing anything
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const isPublicRoute = publicRoutes.includes(pathname);
 
-  // TEMPORARY DEBUG: Log everything
-  console.log("=== AuthGuard DEBUG ===");
-  console.log("pathname:", pathname);
-  console.log("isPublicRoute:", isPublicRoute);
-  console.log("isLoading:", isLoading);
-  console.log("session:", session);
-  console.log("document.cookie:", document.cookie);
-  console.log("better-auth cookies present:", document.cookie.includes('better-auth'));
-  console.log("=======================");
+  // Client-side only debug logging
+  useEffect(() => {
+    if (isClient) {
+      console.log("=== AuthGuard DEBUG ===");
+      console.log("pathname:", pathname);
+      console.log("isPublicRoute:", isPublicRoute);
+      console.log("isLoading:", isLoading);
+      console.log("session:", session);
+      console.log("cookies present:", typeof document !== 'undefined' && document.cookie.includes('better-auth'));
+      console.log("=======================");
+    }
+  }, [isClient, pathname, isPublicRoute, isLoading, session]);
 
   // TEMPORARY: Allow access to debug routes without authentication
   if (pathname.startsWith("/debug") || pathname === "/session-test") {
-    console.log("DEBUG ROUTE - bypassing auth");
     return <>{children}</>;
   }
 
+  // Don't render anything until we're on the client
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   useEffect(() => {
-    if (!isLoading) {
+    if (isClient && !isLoading) {
       if (!session && !isPublicRoute) {
         console.log("No session found, redirecting to login");
         const timer = setTimeout(() => {
@@ -43,7 +60,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         router.push("/");
       }
     }
-  }, [session, isLoading, isPublicRoute, router, pathname]);
+  }, [isClient, session, isLoading, isPublicRoute, router, pathname]);
 
   // Show loading state
   if (isLoading) {
