@@ -14,6 +14,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const [isClient, setIsClient] = useState(false);
   const [sessionCheckTimeout, setSessionCheckTimeout] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [hasRedirected, setHasRedirected] = useState(false);
   
   const isPublicRoute = publicRoutes.includes(pathname);
   const isDebugRoute = pathname.startsWith("/debug") || pathname === "/session-test";
@@ -24,19 +25,30 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     setIsClient(true);
   }, []);
 
-  // Add timeout for session loading - wait 3 seconds before giving up
+  // Add MINIMUM wait time for session loading - don't rush the redirect
   useEffect(() => {
-    if (isClient && isLoading) {
-      const timeout = setTimeout(() => {
-        console.log("Session loading timeout - proceeding with current state");
+    if (isClient) {
+      // Always wait at least 500ms before allowing any redirects
+      const minWaitTimeout = setTimeout(() => {
+        console.log("Minimum wait time completed, checking session state");
         setSessionCheckTimeout(true);
-      }, 3000); // Wait 3 seconds for session to load
+      }, 500); // Wait 500ms minimum
+
+      return () => clearTimeout(minWaitTimeout);
+    }
+  }, [isClient]);
+
+  // Additional timeout if still loading after minimum wait
+  useEffect(() => {
+    if (isClient && isLoading && sessionCheckTimeout) {
+      const timeout = setTimeout(() => {
+        console.log("Extended session loading timeout - proceeding with current state");
+        // sessionCheckTimeout is already true, so this just logs
+      }, 2000); // Additional 2 seconds if still loading
 
       return () => clearTimeout(timeout);
-    } else if (!isLoading) {
-      setSessionCheckTimeout(false);
     }
-  }, [isClient, isLoading]);
+  }, [isClient, isLoading, sessionCheckTimeout]);
 
   // Retry mechanism for failed session loads
   useEffect(() => {
@@ -74,24 +86,37 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [isClient, pathname, isPublicRoute, isDebugRoute, isLoading, sessionCheckTimeout, retryCount, session]);
 
-  // Redirect logic - now waits for session to load OR timeout
+  // Redirect logic - waits for minimum time AND session loading to complete
   useEffect(() => {
-    const sessionFinishedLoading = !isLoading || sessionCheckTimeout;
+    // Only proceed if we've waited the minimum time AND session is not loading
+    const canProceed = sessionCheckTimeout && !isLoading;
     
-    if (isClient && sessionFinishedLoading) {
+    if (isClient && canProceed && !hasRedirected) {
       if (!session && !isPublicRoute) {
-        console.log("No session found after loading/timeout, redirecting to login");
-        console.log("isLoading:", isLoading, "sessionCheckTimeout:", sessionCheckTimeout);
-        const timer = setTimeout(() => {
-          router.push("/login");
-        }, 500); // Increased delay to 500ms
-        return () => clearTimeout(timer);
-      } else if (session && isPublicRoute && !pathname.startsWith("/debug")) {
-        console.log("Session found on public route, redirecting to home");
-        router.push("/");
+        console.log("REDIRECT DECISION: No session found after proper wait, redirecting to login");
+        console.log("Final state - isLoading:", isLoading, "sessionCheckTimeout:", sessionCheckTimeout, "session:", !!session);
+        setHasRedirected(true);
+        router.push("/login");
+      } else if (session && pathname === "/login") {
+        // Only redirect from login page if we have a valid session
+        console.log("REDIRECT DECISION: Session found on login page, redirecting to home");
+        setHasRedirected(true);
+        // Use window.location.href for cross-domain redirect to ensure cookies are properly handled
+        if (typeof window !== 'undefined') {
+          window.location.href = "/";
+        } else {
+          router.replace("/");
+        }
+      } else if (session && !isPublicRoute) {
+        console.log("SUCCESS: Session found on protected route, allowing access");
       }
     }
-  }, [isClient, session, isLoading, sessionCheckTimeout, isPublicRoute, router, pathname]);
+  }, [isClient, session, isLoading, sessionCheckTimeout, isPublicRoute, router, pathname, hasRedirected]);
+
+  // Reset redirect flag when pathname changes
+  useEffect(() => {
+    setHasRedirected(false);
+  }, [pathname]);
 
   // NOW WE CAN SAFELY RETURN CONDITIONALLY
   
