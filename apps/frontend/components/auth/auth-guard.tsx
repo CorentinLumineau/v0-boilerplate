@@ -13,12 +13,14 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isClient, setIsClient] = useState(false);
   
+  const isPublicRoute = publicRoutes.includes(pathname);
+  const isDebugRoute = pathname.startsWith("/debug") || pathname === "/session-test";
+
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   // Ensure we're on the client side before doing anything
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  const isPublicRoute = publicRoutes.includes(pathname);
 
   // Client-side only debug logging
   useEffect(() => {
@@ -33,20 +35,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [isClient, pathname, isPublicRoute, isLoading, session]);
 
-  // TEMPORARY: Allow access to debug routes without authentication
-  if (pathname.startsWith("/debug") || pathname === "/session-test") {
-    return <>{children}</>;
-  }
-
-  // Don't render anything until we're on the client
-  if (!isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
+  // Redirect logic
   useEffect(() => {
     if (isClient && !isLoading) {
       if (!session && !isPublicRoute) {
@@ -61,6 +50,22 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       }
     }
   }, [isClient, session, isLoading, isPublicRoute, router, pathname]);
+
+  // NOW WE CAN SAFELY RETURN CONDITIONALLY
+  
+  // TEMPORARY: Allow access to debug routes without authentication
+  if (isDebugRoute) {
+    return <>{children}</>;
+  }
+
+  // Don't render anything until we're on the client
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   // Show loading state
   if (isLoading) {
