@@ -52,14 +52,31 @@ Add any environment variables your frontend needs:
 
 ### 2.3 Environment Variables
 Add backend-specific environment variables:
-- `DATABASE_URL`: Your database connection string
-- `JWT_SECRET`: Your JWT secret key
-- `CORS_ORIGIN`: Your frontend URL (e.g., `https://your-app-frontend.vercel.app`)
+- `DATABASE_URL`: Your database connection string (⚠️ **REQUIRED** - see database setup below)
+- `BETTER_AUTH_SECRET`: Your Better Auth secret key (32+ characters)
+- `BETTER_AUTH_BASE_URL`: Your backend URL with protocol (e.g., `https://your-app-backend.vercel.app`)
+- `NEXT_PUBLIC_APP_URL`: Your frontend URL (e.g., `https://your-app-frontend.vercel.app`)
+
+### 2.3.1 Database Setup (Critical)
+**⚠️ Important:** You must set up a production database BEFORE deploying the backend.
+
+**Recommended Database Providers:**
+- **Neon** (recommended): Free tier, auto-scaling PostgreSQL
+- **Supabase**: Free tier with additional features
+- **Railway**: Simple PostgreSQL hosting
+- **AWS RDS**: Enterprise-grade option
+
+**Steps:**
+1. Create a PostgreSQL database with your chosen provider
+2. Get the connection string (format: `postgresql://user:password@host:port/database`)
+3. Add `DATABASE_URL` to your backend environment variables in Vercel
+4. The build process will automatically run migrations on first deployment
 
 ### 2.4 Deploy Backend
 1. Click **"Deploy"**
-2. Wait for the build to complete
+2. Wait for the build to complete *(migrations run automatically during build)*
 3. Note the deployment URL (e.g., `https://your-app-backend.vercel.app`)
+4. Verify migration success by checking the build logs for "Database migrations completed"
 
 ## Step 3: Update Frontend Environment Variables
 
@@ -123,8 +140,22 @@ Add backend-specific environment variables:
 1. **Frontend**: Use `NEXT_PUBLIC_` prefix for client-side variables
 2. **Backend**: Regular environment variables work as expected
 
+### Database Migration Issues
+1. **Migration fails during build**:
+   - Check `DATABASE_URL` is correct and accessible
+   - Verify database exists and user has proper permissions
+   - Check Vercel build logs for specific error messages
+
+2. **"No pending migrations" error**:
+   - This is normal for subsequent deployments
+   - Migrations only run when there are schema changes
+
+3. **Schema out of sync**:
+   - Use `prisma db push` for quick fixes (development only)
+   - Create proper migrations for production: `prisma migrate dev`
+
 ### CORS Issues
-1. Update `CORS_ORIGIN` in backend environment variables
+1. Update backend environment variables to include frontend URL
 2. Ensure it matches your frontend domain exactly
 
 ### API Communication
@@ -145,6 +176,30 @@ Your Repository
 └── vercel.json            → Frontend deployment config (optional)
 ```
 
+## Database Migration Workflow
+
+### **How Migrations Work**
+1. **Development**: Create migrations locally with `make db-migrate`
+2. **Commit**: Migration files are version controlled
+3. **Deploy**: Vercel runs `prisma migrate deploy` during build
+4. **Production**: Database schema is automatically updated
+
+### **Making Schema Changes**
+```bash
+# 1. Update your schema in apps/backend/prisma/schema.prisma
+# 2. Create migration
+make db-migrate
+# 3. Test locally, then commit and push
+git add . && git commit -m "Add user profile fields"
+git push origin main
+# 4. Vercel automatically deploys with migrations
+```
+
+### **Migration Commands**
+- `make db-migrate` - Create and apply new migration (development)
+- `make db-migrate-deploy` - Deploy migrations to production database
+- `make db-migrate-reset` - Reset database (⚠️ deletes all data)
+
 ## Benefits of This Setup
 
 ✅ **Independent Scaling**: Each app scales based on its own traffic  
@@ -153,6 +208,7 @@ Your Repository
 ✅ **Easy Rollbacks**: Rollback one app independently  
 ✅ **Cost Optimization**: Pay only for what each app uses  
 ✅ **Simultaneous Deployments**: Both deploy when you push code  
+✅ **Automatic Migrations**: Database schema stays in sync
 
 ## Next Steps
 
@@ -194,8 +250,9 @@ If you want to deploy from the root directory, you would need:
 
 ### Backend Environment Variables
 - `DATABASE_URL`: Database connection string
-- `JWT_SECRET`: JWT signing secret
-- `CORS_ORIGIN`: Allowed CORS origins
+- `BETTER_AUTH_SECRET`: Better Auth signing secret (32+ characters)
+- `BETTER_AUTH_BASE_URL`: Backend URL with protocol (e.g., `https://api.yourdomain.com`)
+- `NEXT_PUBLIC_APP_URL`: Frontend URL for CORS and redirects
 - `NODE_ENV`: Environment (production/development)
 
 ## Deployment Checklist

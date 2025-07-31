@@ -1,7 +1,7 @@
 # V0 Boilerplate Makefile
 # Commands for managing the development environment
 
-.PHONY: help db-up db-down db-restart db-logs db-clean dev dev-backend dev-frontend build install clean version-patch version-minor version-major version-sync release-patch release-minor release-major
+.PHONY: help db-up db-down db-restart db-logs db-clean db-migrate db-migrate-deploy db-migrate-reset dev dev-backend dev-frontend build install clean version-patch version-minor version-major version-sync release-patch release-minor release-major
 
 # Default target
 help:
@@ -11,6 +11,9 @@ help:
 	@echo "  make db-restart   - Restart PostgreSQL database"
 	@echo "  make db-logs      - Show database logs"
 	@echo "  make db-clean     - Remove database container and volumes"
+	@echo "  make db-migrate   - Run database migrations (development)"
+	@echo "  make db-migrate-deploy - Deploy migrations (production)"
+	@echo "  make db-migrate-reset  - Reset database with fresh migrations"
 	@echo "  make dev          - Start all development servers"
 	@echo "  make dev-backend  - Start only backend development server"
 	@echo "  make dev-frontend - Start only frontend development server"
@@ -53,6 +56,22 @@ db-clean:
 	@echo "Cleaning database (this will delete all data)..."
 	docker compose down -v
 	@echo "Database cleaned!"
+
+db-migrate:
+	@echo "Running database migrations (development)..."
+	pnpm --filter @boilerplate/backend db:migrate
+	@echo "Migrations completed!"
+
+db-migrate-deploy:
+	@echo "Deploying database migrations (production)..."
+	pnpm --filter @boilerplate/backend db:migrate:deploy
+	@echo "Migrations deployed!"
+
+db-migrate-reset:
+	@echo "⚠️  Resetting database with fresh migrations (this will delete all data)..."
+	@read -p "Are you sure? Type 'yes' to continue: " confirm && [ "$$confirm" = "yes" ]
+	pnpm --filter @boilerplate/backend db:migrate:reset
+	@echo "Database reset completed!"
 
 # Development commands
 dev:
