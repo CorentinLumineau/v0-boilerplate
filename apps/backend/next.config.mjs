@@ -19,18 +19,6 @@ const nextConfig = {
     unoptimized: true,
   },
   
-  // File tracing configuration for monorepo
-  outputFileTracingIncludes: {
-    '/**': ['../../packages/**/*']
-  },
-  outputFileTracingExcludes: {
-    '/**': [
-      'node_modules/@swc/**/*',
-      'node_modules/@esbuild/**/*',
-      '../../node_modules/@swc/**/*',
-      '../../node_modules/@esbuild/**/*'
-    ],
-  },
   async rewrites() {
     return [
       {
