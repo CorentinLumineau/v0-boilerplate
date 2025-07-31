@@ -1,50 +1,23 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { betterFetch } from "@better-fetch/fetch";
-
-// Public routes that don't require authentication
-const publicRoutes = ["/login", "/signup"];
-
-// Get backend URL from environment or fallback
-const getBackendUrl = () => {
-  return process.env.NEXT_PUBLIC_API_URL || process.env.BETTER_AUTH_BASE_URL || "http://localhost:3101";
-};
+import { getSessionCookie } from "better-auth/cookies";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Check if the route is public
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
-  
-  // For public routes, allow access
-  if (isPublicRoute) {
-    return NextResponse.next();
-  }
-  
-  // For protected routes, validate session using secure method
-  try {
-    const { data: session } = await betterFetch("/api/auth/get-session", {
-      baseURL: getBackendUrl(),
-      headers: {
-        cookie: request.headers.get("cookie") || "",
-      },
-    });
-
-    // If no valid session, redirect to login
-    if (!session) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("from", pathname);
-      return NextResponse.redirect(loginUrl);
+  // Only check if authenticated users are trying to access auth pages
+  if (pathname.startsWith("/login") || pathname.startsWith("/signup")) {
+    // Use optimistic cookie check (fast, no API call)
+    const sessionCookie = getSessionCookie(request);
+    
+    if (sessionCookie) {
+      // User appears to be authenticated, redirect to home
+      return NextResponse.redirect(new URL("/", request.url));
     }
-
-    // Valid session, allow access
-    return NextResponse.next();
-  } catch (error) {
-    // On error (network, etc.), redirect to login
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("from", pathname);
-    return NextResponse.redirect(loginUrl);
   }
+  
+  // For all other routes, let the route handlers/layouts handle authentication
+  return NextResponse.next();
 }
 
 export const config = {
