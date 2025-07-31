@@ -7,8 +7,7 @@
     "eslint-config.js",
     "tailwind.config.js",
     "tsconfig.json",
-    "project.config.ts",
-    "next.config.base.js"
+    "project.config.ts"
   ],
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.38.0",
