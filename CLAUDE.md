@@ -18,6 +18,11 @@ This is a **Turborepo monorepo** with the following **simplified** structure:
 └── turbo.json            # Turborepo configuration
 ```
 
+## Development Principles
+
+- Never hardcode values that can change on another project. Use `@packages/config/project.config.ts` and use it throughout the whole project
+- Always generate/update the type in @packages/types/ and use them in project. We should not have interfaces created within the frontend/backend
+
 ## Common Commands
 
 ### Root Level Commands (Turborepo)

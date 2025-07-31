@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { Menu } from "lucide-react"
 
 import { UserDropdown } from "@/components/user-dropdown"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -71,7 +72,8 @@ export function Header() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <div className="relative z-50">
+      <div className="relative z-50 flex items-center gap-2">
+        <NotificationBell />
         <UserDropdown />
       </div>
     </header>

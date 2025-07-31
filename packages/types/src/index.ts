@@ -51,3 +51,48 @@ export interface AuthState {
   isLoading: boolean
   error: string | null
 }
+
+// Notification types
+export interface Notification {
+  id: string
+  title: string
+  message?: string
+  type: NotificationType
+  status: NotificationStatus
+  userId: string
+  data?: any
+  createdAt: string
+  updatedAt: string
+  readAt?: string
+}
+
+export enum NotificationType {
+  INFO = 'INFO',
+  SUCCESS = 'SUCCESS',
+  WARNING = 'WARNING',
+  ERROR = 'ERROR',
+  SYSTEM = 'SYSTEM'
+}
+
+export enum NotificationStatus {
+  UNREAD = 'UNREAD',
+  READ = 'READ',
+  ARCHIVED = 'ARCHIVED'
+}
+
+// Auth request/response types
+export interface LoginCredentials {
+  email: string
+  password: string
+}
+
+export interface SignupCredentials {
+  email: string
+  password: string  
+  name?: string
+}
+
+export interface AuthSession {
+  user: User
+  session: Session
+}

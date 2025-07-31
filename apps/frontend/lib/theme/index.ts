@@ -7,7 +7,7 @@ import { blueTheme } from "./blue"
 import { tealTheme } from "./teal"
 import { purpleTheme } from "./purple"
 import { pinkTheme } from "./pink"
-import { getAvailableThemes, getDefaultTheme, type ThemeName } from "../project-config"
+import { getAvailableThemes, getDefaultTheme, type ThemeName } from "@boilerplate/config/project.config"
 
 export type ColorTheme = ThemeName
 export type ThemeMode = "light" | "dark"

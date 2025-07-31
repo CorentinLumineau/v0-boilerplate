@@ -317,6 +317,27 @@ function updateMakefile(answers: ProjectAnswers) {
   console.log('✅ Updated Makefile');
 }
 
+function updateManifestJson(answers: ProjectAnswers) {
+  const manifestPath = join(process.cwd(), 'apps/frontend/public/manifest.json');
+  
+  if (existsSync(manifestPath)) {
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+    
+    // Update app metadata
+    manifest.name = answers.displayName;
+    manifest.short_name = answers.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    manifest.description = answers.description;
+    
+    // Update start URL based on frontend URL
+    if (answers.productionFrontendUrl) {
+      manifest.start_url = new URL('/', answers.productionFrontendUrl).pathname;
+    }
+    
+    writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+    console.log('✅ Updated PWA manifest.json');
+  }
+}
+
 function updateSetupGuide(answers: ProjectAnswers) {
   const setupPath = join(process.cwd(), 'SETUP.md');
   let setup = readFileSync(setupPath, 'utf-8');
@@ -385,6 +406,7 @@ async function main() {
     updateDockerCompose(answers);
     createEnvironmentFiles(answers);
     updateMakefile(answers);
+    updateManifestJson(answers);
     updateSetupGuide(answers);
     
     displaySummary(answers);

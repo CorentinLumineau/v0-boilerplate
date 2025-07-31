@@ -4,7 +4,7 @@ import { Check } from "lucide-react"
 
 import { useSettings } from "@/hooks"
 import { cn } from "@/lib/utils"
-import { getAvailableThemes } from "@/lib/project-config"
+import { getAvailableThemes } from "@boilerplate/config/project.config"
 
 // Define theme colors for the selector preview
 const themeColors: Record<string, string> = {

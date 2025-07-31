@@ -14,15 +14,16 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  id            String         @id @default(cuid())
+  email         String         @unique
+  emailVerified Boolean        @default(false)
   name          String?
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   sessions      Session[]
   accounts      Account[]
+  notifications Notification[]
 }
 
 model Session {
@@ -66,4 +67,36 @@ model Verification {
 
   @@unique([identifier, value])
   @@index([identifier])
+}
+
+model Notification {
+  id        String              @id @default(cuid())
+  title     String
+  message   String?             @db.Text
+  type      NotificationType    @default(INFO)
+  status    NotificationStatus  @default(UNREAD)
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data      Json?               // Additional structured data
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  readAt    DateTime?
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  SYSTEM
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
 }

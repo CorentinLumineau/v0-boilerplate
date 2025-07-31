@@ -1,14 +1,13 @@
-import { headers } from "next/headers";
-import { getBackendUrl } from "@/lib/project-config";
-import { betterFetch } from "@better-fetch/fetch";
+'use client'
 
-// No authentication needed here - handled by layout
-export default async function HomePage() {
-  // Get session data for display (already authenticated by layout)
-  const { data: session } = await betterFetch("/api/auth/get-session", {
-    baseURL: getBackendUrl(),
-    headers: await headers(),
-  });
+import { useSession } from '@/lib/queries/auth'
+
+export default function HomePage() {
+  const { data: session, isLoading } = useSession()
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
 
   return (
     <div>

@@ -1,5 +1,5 @@
 import { createAuthClient } from "better-auth/react";
-import { getBackendUrl } from "./project-config";
+import { getBackendUrl } from "@boilerplate/config/project.config";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || getBackendUrl();
 
