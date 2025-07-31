@@ -2,10 +2,6 @@ import path from 'path'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  
-  // Configure file tracing for monorepo
-  outputFileTracingRoot: path.join(process.cwd(), '../../'),
-  
   // Base config inlined to avoid dependency issues on Vercel
   eslint: {
     ignoreDuringBuilds: true,
