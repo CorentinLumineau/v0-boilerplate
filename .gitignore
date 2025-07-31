@@ -51,12 +51,7 @@ web_modules/
 
 # TypeScript cache
 *.tsbuildinfo
-<<<<<<< HEAD
 next-env.d.ts
-
-.turbo
-**/dist
-=======
 
 # Optional npm cache directory
 .npm
@@ -130,6 +125,7 @@ public
 
 # Turborepo
 .turbo
+**/dist
 
 # OS generated files
 .DS_Store
@@ -168,4 +164,6 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
->>>>>>> staging
+
+# Vercel
+.vercel

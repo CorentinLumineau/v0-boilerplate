@@ -1,6 +1,12 @@
 {
   "$schema": "https://turborepo.org/schema.json",
   "globalDependencies": ["**/.env.*local"],
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_BASE_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -11,7 +17,16 @@
         ".next/static/**",
         "dist/**"
       ],
-      "env": ["NODE_ENV", "FRONTEND_URL", "BACKEND_URL"]
+      "env": [
+        "NODE_ENV", 
+        "FRONTEND_URL", 
+        "BACKEND_URL",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_APP_URL",
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_BASE_URL"
+      ]
     },
     "dev": {
       "cache": false,
