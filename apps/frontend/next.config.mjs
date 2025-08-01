@@ -20,6 +20,10 @@ const pwaConfig = withPWA({
   disable: process.env.NODE_ENV === 'development',
   register: true,
   skipWaiting: true,
+  swSrc: false, // Use auto-generated service worker
+  fallbacks: {
+    document: '/offline', // Fallback page for offline navigation
+  },
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
