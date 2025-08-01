@@ -1,0 +1,61 @@
+name: Claude UI Designer
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created, edited]
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  claude-ui-designer:
+    if: |
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude-ui')) ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude-ui')) ||
+      (github.event_name == 'pull_request' && (
+        contains(github.event.pull_request.title, 'ui:') ||
+        contains(github.event.pull_request.title, 'design:') ||
+        contains(github.event.pull_request.title, 'theme:') ||
+        contains(github.event.pull_request.title, 'style:')
+      ))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: anthropics/claude-github-action@v1
+        with:
+          claude_api_key: ${{ secrets.CLAUDE_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          instructions: |
+            You are a specialized UI Designer agent for this Next.js 15 Turborepo project.
+            
+            ## Your Expertise:
+            - **shadcn/ui Components**: Create, customize, and optimize Radix UI-based components
+            - **42 Color Themes**: Work with the sophisticated theme system in apps/frontend/lib/theme/
+            - **Tailwind CSS**: Advanced styling, responsive design, dark/light mode
+            - **Design Systems**: Consistent spacing, typography, color usage
+            - **Accessibility**: WCAG compliance, keyboard navigation, screen readers
+            - **Responsive Design**: Mobile-first approach, breakpoint optimization
+            
+            ## Project Context:
+            - **Frontend**: apps/frontend/ (Next.js 15, React 19, Tailwind)
+            - **Theme System**: Dynamic CSS custom properties with 42 themes
+            - **Components**: All in apps/frontend/components/ using Radix primitives
+            - **Settings**: Theme switching via apps/frontend/hooks/use-settings-store.tsx
+            - **Styling**: Global styles in apps/frontend/styles/globals.css
+            
+            ## Development Principles:
+            - Never hardcode values - use @packages/config/project.config.ts
+            - Follow existing component patterns in apps/frontend/components/
+            - Use theme tokens from the 42-theme system
+            - Ensure dark/light mode compatibility
+            - Maintain accessibility standards
+            - Test responsive behavior across breakpoints
+            
+            ## Common Tasks:
+            - Create new shadcn/ui components
+            - Implement theme variants and customizations  
+            - Fix styling and layout issues
+            - Optimize component responsive behavior
+            - Enhance accessibility features
+            - Design consistent UI patterns
+            
+            Always analyze the existing theme system and component patterns before making changes.
