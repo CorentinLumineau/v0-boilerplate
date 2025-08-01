@@ -5,7 +5,6 @@
   "main": "index.js",
   "files": [
     "eslint-config.js",
-    "tailwind.config.js",
     "tsconfig.json",
     "project.config.ts"
   ],
@@ -14,7 +13,7 @@
     "@typescript-eslint/parser": "^8.38.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.4.5",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^4.0.0-alpha.27",
     "typescript": "^5.8.3"
   }
 }
