@@ -129,8 +129,7 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Cache-Control',
+        // Remove CORS headers - they will be handled by middleware
       },
     })
   } catch (error) {
