@@ -1,6 +1,6 @@
 # Deploying Both Frontend and Backend on Vercel - Monorepo Setup
 
-This guide will walk you through deploying both your frontend and backend applications simultaneously using Vercel's monorepo support.
+This guide will walk you through deploying both your frontend and backend applications simultaneously using Vercel's monorepo support. This supports deploying to **Production**, **Staging**, and **Development** environments.
 
 ## Prerequisites
 
@@ -102,25 +102,69 @@ Add backend-specific environment variables:
 2. Go to **Domains**
 3. Add your API subdomain (e.g., `api.yourdomain.com`)
 
-## Step 5: Verify Deployment
+## Step 5: Set Up Staging Environment (Optional)
 
-### 5.1 Test Frontend
+### 5.1 Create Staging Frontend Project
+1. In Vercel Dashboard, click **"New Project"** 
+2. Select the **same repository** (`v0-boilerplate`)
+3. **Project Name**: `your-app-frontend-staging`
+4. **Framework Preset**: `Next.js`
+5. **Root Directory**: `apps/frontend`
+6. **Build Command**: `pnpm build`
+7. **Output Directory**: `.next`
+8. **Install Command**: `pnpm install`
+9. **Environment Variables**:
+   - `NODE_ENV`: `staging`
+   - `VERCEL_ENV`: `preview`
+   - `NEXT_PUBLIC_API_URL`: (will be set after staging backend is deployed)
+
+### 5.2 Create Staging Backend Project
+1. Create another **"New Project"**
+2. Select the **same repository**
+3. **Project Name**: `your-app-backend-staging`
+4. **Framework Preset**: `Next.js`
+5. **Root Directory**: `apps/backend`
+6. **Build Command**: `pnpm build`
+7. **Output Directory**: `.next`
+8. **Install Command**: `pnpm install`
+9. **Environment Variables**:
+   - `NODE_ENV`: `staging`
+   - `VERCEL_ENV`: `preview`
+   - `DATABASE_URL`: Your staging database connection string
+   - `BETTER_AUTH_SECRET`: Same as production or different staging secret
+   - `BETTER_AUTH_BASE_URL`: Your staging backend URL (e.g., `https://your-app-backend-staging.vercel.app`)
+   - `NEXT_PUBLIC_APP_URL`: Your staging frontend URL (e.g., `https://your-app-frontend-staging.vercel.app`)
+
+### 5.3 Configure Staging Domains
+1. Set up custom domains for staging:
+   - Frontend: `myapp-staging.yourdomain.com`
+   - Backend: `api.myapp-staging.yourdomain.com`
+2. Update environment variables to use staging domain URLs
+
+## Step 6: Verify Deployment
+
+### 6.1 Test Frontend
 - Visit your frontend URL
 - Verify the app loads correctly
 - Check that it can communicate with the backend
 
-### 5.2 Test Backend
+### 6.2 Test Backend
 - Visit your backend URL + `/api/health` (e.g., `https://your-app-backend.vercel.app/api/health`)
 - Verify the API responds correctly
 
-## Step 6: Set Up Automatic Deployments
+### 6.3 Test Staging (if configured)
+- Visit your staging frontend URL
+- Verify staging backend at `/api/health`
+- Confirm staging environment variables are working correctly
 
-### 6.1 Both projects will automatically deploy when you:
+## Step 7: Set Up Automatic Deployments
+
+### 7.1 Both projects will automatically deploy when you:
 - Push to the `main` branch
 - Create a pull request
 - Merge a pull request
 
-### 6.2 Deployment Order
+### 7.2 Deployment Order
 - Both projects deploy simultaneously
 - Backend typically deploys first (faster build)
 - Frontend deploys second and picks up the new backend URL
@@ -251,16 +295,25 @@ If you want to deploy from the root directory, you would need:
 ### Frontend Environment Variables
 - `NEXT_PUBLIC_API_URL`: Backend API URL
 - `NEXT_PUBLIC_APP_URL`: Frontend app URL
+- `NODE_ENV`: Environment (production/staging/development)
+- `VERCEL_ENV`: Vercel environment (production/preview/development)
 
 ### Backend Environment Variables
 - `DATABASE_URL`: Database connection string
 - `BETTER_AUTH_SECRET`: Better Auth signing secret (32+ characters)
 - `BETTER_AUTH_BASE_URL`: Backend URL with protocol (e.g., `https://api.yourdomain.com`)
 - `NEXT_PUBLIC_APP_URL`: Frontend URL for CORS and redirects
-- `NODE_ENV`: Environment (production/development)
+- `NODE_ENV`: Environment (production/staging/development)
+- `VERCEL_ENV`: Vercel environment (production/preview/development)
+
+### Staging-Specific Variables
+- Set `NODE_ENV=staging` and `VERCEL_ENV=preview` for staging deployments
+- Use separate staging database and auth configurations
+- Staging domains should follow pattern: `myapp-staging.domain.com` and `api.myapp-staging.domain.com`
 
 ## Deployment Checklist
 
+### Production Deployment
 - [ ] Frontend project created with correct root directory (`apps/frontend`)
 - [ ] Backend project created with correct root directory (`apps/backend`)
 - [ ] Build commands set to `pnpm build` (not with --filter flag)
@@ -269,6 +322,14 @@ If you want to deploy from the root directory, you would need:
 - [ ] Custom domains configured (if needed)
 - [ ] Health checks passing
 - [ ] Monitoring and analytics set up
+
+### Staging Deployment (Optional)
+- [ ] Staging frontend project created with staging environment variables
+- [ ] Staging backend project created with staging database
+- [ ] Staging domains configured (e.g., `myapp-staging.domain.com`)
+- [ ] Staging environment variables properly set (`NODE_ENV=staging`, `VERCEL_ENV=preview`)
+- [ ] Staging health checks passing
+- [ ] Staging database migrations working
 
 ## Key Points to Remember
 

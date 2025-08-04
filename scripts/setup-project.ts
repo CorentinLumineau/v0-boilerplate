@@ -96,9 +96,8 @@ async function collectProjectInfo(): Promise<ProjectAnswers> {
   const productionBackendUrl = await question('Production backend URL (e.g., https://api.myapp.com): ');
   
   // Staging Configuration
-  console.log('\n🚧 STAGING CONFIGURATION');
-  const stagingFrontendUrl = await question('Staging frontend URL (e.g., https://staging.myapp.com): ');
-  const stagingBackendUrl = await question('Staging backend URL (e.g., https://api.staging.myapp.com): ');
+  const stagingFrontendUrl = await question('Staging frontend URL (e.g., https://myapp-staging.com): ');
+  const stagingBackendUrl = await question('Staging backend URL (e.g., https://api.myapp-staging.com): ');
   
   // Security
   console.log('\n🔐 SECURITY CONFIGURATION');

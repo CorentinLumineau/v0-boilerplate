@@ -125,7 +125,7 @@ export const getRepositoryUrl = () => PROJECT_CONFIG.urls.repository;
 export const getHomepageUrl = () => PROJECT_CONFIG.urls.homepage;
 export const getFrontendUrl = () => {
   const isProduction = process.env.NODE_ENV === 'production';
-  const isStaging = process.env.NODE_ENV === 'staging' || process.env.VERCEL_ENV === 'preview';
+  const isStaging = process.env.VERCEL_ENV === 'preview' || process.env.NODE_ENV === 'staging';
   
   if (isProduction) return PROJECT_CONFIG.production.frontend.url;
   if (isStaging) return PROJECT_CONFIG.staging.frontend.url;
