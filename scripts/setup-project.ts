@@ -35,6 +35,10 @@ interface ProjectAnswers {
   productionFrontendUrl: string;
   productionBackendUrl: string;
   
+  // Staging configuration
+  stagingFrontendUrl: string;
+  stagingBackendUrl: string;
+  
   // Security
   authSecret: string;
 }
@@ -91,6 +95,11 @@ async function collectProjectInfo(): Promise<ProjectAnswers> {
   const productionFrontendUrl = await question('Production frontend URL (e.g., https://myapp.com): ');
   const productionBackendUrl = await question('Production backend URL (e.g., https://api.myapp.com): ');
   
+  // Staging Configuration
+  console.log('\n🚧 STAGING CONFIGURATION');
+  const stagingFrontendUrl = await question('Staging frontend URL (e.g., https://staging.myapp.com): ');
+  const stagingBackendUrl = await question('Staging backend URL (e.g., https://api.staging.myapp.com): ');
+  
   // Security
   console.log('\n🔐 SECURITY CONFIGURATION');
   console.log('Generating secure authentication secret...');
@@ -115,6 +124,8 @@ async function collectProjectInfo(): Promise<ProjectAnswers> {
     backendPort,
     productionFrontendUrl,
     productionBackendUrl,
+    stagingFrontendUrl,
+    stagingBackendUrl,
     authSecret,
   };
 }
@@ -140,6 +151,10 @@ function updateProjectConfig(answers: ProjectAnswers) {
   // Update production URLs
   config = config.replace(/url: "https:\/\/boilerplate\.lumineau\.app"/, `url: "${answers.productionFrontendUrl}"`);
   config = config.replace(/url: "https:\/\/api\.boilerplate\.lumineau\.app"/, `url: "${answers.productionBackendUrl}"`);
+  
+  // Update staging URLs
+  config = config.replace(/url: "https:\/\/boilerplate-staging\.lumineau\.app"/, `url: "${answers.stagingFrontendUrl}"`);
+  config = config.replace(/url: "https:\/\/api\.boilerplate-staging\.lumineau\.app"/, `url: "${answers.stagingBackendUrl}"`);
 
   // Update namespace
   config = config.replace(/namespace: "@boilerplate"/, `namespace: "${answers.namespace}"`);
@@ -390,6 +405,10 @@ function displaySummary(answers: ProjectAnswers) {
   console.log('🌍 PRODUCTION URLS:');
   console.log(`  Frontend: ${answers.productionFrontendUrl}`);
   console.log(`  Backend: ${answers.productionBackendUrl}`);
+  console.log('');
+  console.log('🚧 STAGING URLS:');
+  console.log(`  Frontend: ${answers.stagingFrontendUrl}`);
+  console.log(`  Backend: ${answers.stagingBackendUrl}`);
   console.log('');
   console.log('🔐 SECURITY:');
   console.log(`  Auth Secret: ${answers.authSecret.substring(0, 16)}... (64 chars)`);

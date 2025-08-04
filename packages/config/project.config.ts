@@ -28,6 +28,16 @@ export const PROJECT_CONFIG = {
       url: "https://api.boilerplate.lumineau.app",
     },
   },
+
+  // Staging URLs
+  staging: {
+    frontend: {
+      url: "https://boilerplate-staging.lumineau.app",
+    },
+    backend: {
+      url: "https://api.boilerplate-staging.lumineau.app",
+    },
+  },
   
   // Author Information
   author: {
@@ -115,16 +125,26 @@ export const getRepositoryUrl = () => PROJECT_CONFIG.urls.repository;
 export const getHomepageUrl = () => PROJECT_CONFIG.urls.homepage;
 export const getFrontendUrl = () => {
   const isProduction = process.env.NODE_ENV === 'production';
-  return isProduction ? PROJECT_CONFIG.production.frontend.url : PROJECT_CONFIG.development.frontend.url;
+  const isStaging = process.env.NODE_ENV === 'staging' || process.env.VERCEL_ENV === 'preview';
+  
+  if (isProduction) return PROJECT_CONFIG.production.frontend.url;
+  if (isStaging) return PROJECT_CONFIG.staging.frontend.url;
+  return PROJECT_CONFIG.development.frontend.url;
 };
 
 export const getBackendUrl = () => {
   const isProduction = process.env.NODE_ENV === 'production';
-  return isProduction ? PROJECT_CONFIG.production.backend.url : PROJECT_CONFIG.development.backend.url;
+  const isStaging = process.env.NODE_ENV === 'staging' || process.env.VERCEL_ENV === 'preview';
+  
+  if (isProduction) return PROJECT_CONFIG.production.backend.url;
+  if (isStaging) return PROJECT_CONFIG.staging.backend.url;
+  return PROJECT_CONFIG.development.backend.url;
 };
 
 export const getProductionFrontendUrl = () => PROJECT_CONFIG.production.frontend.url;
 export const getProductionBackendUrl = () => PROJECT_CONFIG.production.backend.url;
+export const getStagingFrontendUrl = () => PROJECT_CONFIG.staging.frontend.url;
+export const getStagingBackendUrl = () => PROJECT_CONFIG.staging.backend.url;
 export const getDevelopmentFrontendUrl = () => PROJECT_CONFIG.development.frontend.url;
 export const getDevelopmentBackendUrl = () => PROJECT_CONFIG.development.backend.url;
 export const getFrontendPort = () => PROJECT_CONFIG.development.frontend.port;
