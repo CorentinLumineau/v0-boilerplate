@@ -12,6 +12,8 @@ import { InstallPrompt } from "@/components/pwa/install-prompt"
 import { OfflineIndicator } from "@/components/pwa/offline-indicator"
 import { NotificationProvider } from "@/hooks/use-notifications"
 import { QueryProvider } from "@/providers/query-provider"
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -39,6 +41,8 @@ export default function RootLayout({
                 <AppLayout version={version}>{children}</AppLayout>
                 <InstallPrompt />
                 <OfflineIndicator />
+                <Analytics />
+                <SpeedInsights />
               </NotificationProvider>
             </SettingsStoreProvider>
           </ThemeProvider>
