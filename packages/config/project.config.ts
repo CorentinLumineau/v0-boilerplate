@@ -134,7 +134,7 @@ export const getFrontendUrl = () => {
 
 export const getBackendUrl = () => {
   const isProduction = process.env.NODE_ENV === 'production';
-  const isStaging = process.env.VERCEL_ENV === 'preview' || process.env.NODE_ENV === 'staging';
+  const isStaging = process.env.NODE_ENV === 'staging' || process.env.VERCEL_ENV === 'preview';
   
   if (isProduction) return PROJECT_CONFIG.production.backend.url;
   if (isStaging) return PROJECT_CONFIG.staging.backend.url;

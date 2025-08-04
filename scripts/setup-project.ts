@@ -96,7 +96,6 @@ async function collectProjectInfo(): Promise<ProjectAnswers> {
   const productionBackendUrl = await question('Production backend URL (e.g., https://api.myapp.com): ');
   
   // Staging Configuration
-  console.log('\n🎭 STAGING CONFIGURATION');
   const stagingFrontendUrl = await question('Staging frontend URL (e.g., https://myapp-staging.com): ');
   const stagingBackendUrl = await question('Staging backend URL (e.g., https://api.myapp-staging.com): ');
   
@@ -406,7 +405,7 @@ function displaySummary(answers: ProjectAnswers) {
   console.log(`  Frontend: ${answers.productionFrontendUrl}`);
   console.log(`  Backend: ${answers.productionBackendUrl}`);
   console.log('');
-  console.log('🎭 STAGING URLS:');
+  console.log('🚧 STAGING URLS:');
   console.log(`  Frontend: ${answers.stagingFrontendUrl}`);
   console.log(`  Backend: ${answers.stagingBackendUrl}`);
   console.log('');
