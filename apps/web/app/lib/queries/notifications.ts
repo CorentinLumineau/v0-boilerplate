@@ -12,7 +12,7 @@ export const notificationQueryKeys = {
 }
 
 // Queries
-export function useNotifications(filters?: { status?: string; type?: string; limit?: number }) {
+export function useNotifications(filters?: { status?: string; type?: string; limit?: number }, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: notificationQueryKeys.list(filters || {}),
     queryFn: async (): Promise<Notification[]> => {
@@ -39,10 +39,11 @@ export function useNotifications(filters?: { status?: string; type?: string; lim
     },
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
+    enabled: options?.enabled !== false, // Allow disabling the query
   })
 }
 
-export function useUnreadNotificationsCount() {
+export function useUnreadNotificationsCount(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: notificationQueryKeys.unreadCount(),
     queryFn: async (): Promise<number> => {
@@ -62,6 +63,7 @@ export function useUnreadNotificationsCount() {
     },
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
+    enabled: options?.enabled !== false, // Allow disabling the query
   })
 }
 

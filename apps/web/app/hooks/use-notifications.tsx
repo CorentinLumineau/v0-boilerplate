@@ -12,6 +12,7 @@ import {
   addNotificationOptimistically,
   notificationQueryKeys
 } from '@/lib/queries/notifications'
+import { useSession } from '@/lib/auth-client'
 import type { Notification } from '@boilerplate/types'
 import { NotificationStatus } from '@boilerplate/types'
 
@@ -41,10 +42,14 @@ interface NotificationProviderProps {
 }
 
 export function NotificationProvider({ children }: NotificationProviderProps) {
-  // Use TanStack Query hooks
+  // Get authentication status
+  const { data: session, isPending: authLoading } = useSession()
+  const isAuthenticated = !!session?.user && !authLoading
+  
+  // Use TanStack Query hooks - only enable when authenticated
   const queryClient = useQueryClient()
-  const { data: notifications = [], isLoading: loading, error: queryError } = useNotificationsQuery()
-  const { data: unreadCount = 0 } = useUnreadNotificationsCount()
+  const { data: notifications = [], isLoading: loading, error: queryError } = useNotificationsQuery(undefined, { enabled: isAuthenticated })
+  const { data: unreadCount = 0 } = useUnreadNotificationsCount({ enabled: isAuthenticated })
   const markAsReadMutation = useMarkNotificationAsRead()
   const markAllAsReadMutation = useMarkAllNotificationsAsRead()
   const deleteNotificationMutation = useDeleteNotification()
@@ -147,6 +152,11 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 
   // Set up SSE connection - stable function
   const connectToSSE = useCallback(() => {
+    // Only connect if authenticated
+    if (!isAuthenticated) {
+      return
+    }
+    
     // Close existing connection
     if (eventSourceRef.current) {
       eventSourceRef.current.close()
@@ -204,14 +214,23 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     }
 
     eventSourceRef.current = es
-  }, [])
+  }, [isAuthenticated])
 
   const reconnect = useCallback(() => {
     connectToSSE()
   }, [connectToSSE])
 
-  // Initialize only once using a ref guard
+  // Initialize only when authenticated
   useEffect(() => {
+    if (!isAuthenticated) {
+      // Close connection if not authenticated
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        setIsConnected(false)
+      }
+      return
+    }
+    
     if (initializeRef.current) return
     initializeRef.current = true
     
@@ -223,7 +242,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
         eventSourceRef.current.close()
       }
     }
-  }, []) // Empty dependency array
+  }, [isAuthenticated, fetchNotifications, connectToSSE]) // Watch authentication status
 
   const value: NotificationContextType = {
     notifications,

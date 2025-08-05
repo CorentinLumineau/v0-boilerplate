@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 /**
- * Complete Project Setup Script
+ * Complete Project Setup Script for Web App
  * 
- * Run this script after cloning the template to fully setup your project.
+ * Run this script after cloning the template to fully setup your web application.
  * Usage: npx tsx scripts/setup-project.ts
  */
 
@@ -20,6 +20,7 @@ interface ProjectAnswers {
   authorUrl: string;
   repositoryUrl: string;
   homepageUrl: string;
+  githubUrl: string;
   namespace: string;
   
   // Database configuration
@@ -27,13 +28,14 @@ interface ProjectAnswers {
   dbUser: string;
   dbPassword: string;
   
-  // Development configuration
-  frontendPort: string;
-  backendPort: string;
+  // Development configuration - Single port
+  webPort: string;
   
-  // Production configuration
-  productionFrontendUrl: string;
-  productionBackendUrl: string;
+  // Production configuration - Single domain
+  productionWebUrl: string;
+  
+  // Staging configuration - Single domain
+  stagingWebUrl: string;
   
   // Security
   authSecret: string;
@@ -55,8 +57,8 @@ function generateSecretKey(): string {
 }
 
 async function collectProjectInfo(): Promise<ProjectAnswers> {
-  console.log('🚀 Welcome to the V0 Boilerplate Complete Setup!\n');
-  console.log('This script will configure your entire project in one go.\n');
+  console.log('🚀 Welcome to the V0 Boilerplate Web App Setup!\n');
+  console.log('This script will configure your unified web application in one go.\n');
 
   // Project Information
   console.log('📋 PROJECT INFORMATION');
@@ -73,6 +75,7 @@ async function collectProjectInfo(): Promise<ProjectAnswers> {
   // Repository Information
   console.log('\n🔗 REPOSITORY INFORMATION');
   const repositoryUrl = await question('Repository URL: ');
+  const githubUrl = await question('GitHub URL (same as repository if GitHub): ') || repositoryUrl;
   const homepageUrl = await question('Homepage URL (optional): ');
   
   // Database Configuration
@@ -81,15 +84,20 @@ async function collectProjectInfo(): Promise<ProjectAnswers> {
   const dbUser = await question(`Database user [${name}_user]: `) || `${name}_user`;
   const dbPassword = await question('Database password [auto-generated]: ') || randomBytes(16).toString('hex');
   
-  // Development Configuration
+  // Development Configuration - Single port
   console.log('\n⚙️  DEVELOPMENT CONFIGURATION');
-  const frontendPort = await question('Frontend port [3100]: ') || '3100';
-  const backendPort = await question('Backend port [3101]: ') || '3101';
+  const webPort = await question('Web app port [3000]: ') || '3000';
   
-  // Production Configuration
+  // Production Configuration - Single domain
   console.log('\n🌐 PRODUCTION CONFIGURATION');
-  const productionFrontendUrl = await question('Production frontend URL (e.g., https://myapp.com): ');
-  const productionBackendUrl = await question('Production backend URL (e.g., https://api.myapp.com): ');
+  const productionWebUrl = await question('Production web URL (e.g., https://myapp.com): ');
+  
+  // Staging Configuration - Single domain
+  console.log('\n🟡 STAGING CONFIGURATION');
+  const domain = productionWebUrl.replace('https://', '').split('.').slice(-2).join('.');
+  const appName = productionWebUrl.replace('https://', '').split('.')[0];
+  
+  const stagingWebUrl = await question(`Staging web URL [https://${appName}-staging.${domain}]: `) || `https://${appName}-staging.${domain}`;
   
   // Security
   console.log('\n🔐 SECURITY CONFIGURATION');
@@ -106,15 +114,15 @@ async function collectProjectInfo(): Promise<ProjectAnswers> {
     authorEmail,
     authorUrl,
     repositoryUrl,
+    githubUrl,
     homepageUrl,
     namespace,
     dbName,
     dbUser,
     dbPassword,
-    frontendPort,
-    backendPort,
-    productionFrontendUrl,
-    productionBackendUrl,
+    webPort,
+    productionWebUrl,
+    stagingWebUrl,
     authSecret,
   };
 }
@@ -136,19 +144,26 @@ function updateProjectConfig(answers: ProjectAnswers) {
   // Update URLs
   config = config.replace(/repository: ".*?"/, `repository: "${answers.repositoryUrl}"`);
   config = config.replace(/homepage: ".*?"/, `homepage: "${answers.homepageUrl}"`);
+  config = config.replace(/github: ".*?"/, `github: "${answers.githubUrl}"`);
 
-  // Update production URLs
-  config = config.replace(/url: "https:\/\/boilerplate\.lumineau\.app"/, `url: "${answers.productionFrontendUrl}"`);
-  config = config.replace(/url: "https:\/\/api\.boilerplate\.lumineau\.app"/, `url: "${answers.productionBackendUrl}"`);
+  // Update production URLs - Single domain
+  config = config.replace(/url: "https:\/\/boilerplate\.lumineau\.app"/, `url: "${answers.productionWebUrl}"`);
+
+  // Update staging URLs - Single domain
+  config = config.replace(/url: "https:\/\/boilerplate-staging\.lumineau\.app"/, `url: "${answers.stagingWebUrl}"`);
+
+  // Update develop URL patterns - Single domain
+  const domain = answers.productionWebUrl.replace('https://', '').split('.').slice(-2).join('.');
+  const appName = answers.productionWebUrl.replace('https://', '').split('.')[0];
+  
+  config = config.replace(/urlPattern: "https:\/\/boilerplate-git-\{branch\}\.lumineau\.app"/, `urlPattern: "https://${appName}-git-{branch}.${domain}"`);
 
   // Update namespace
   config = config.replace(/namespace: "@boilerplate"/, `namespace: "${answers.namespace}"`);
 
-  // Update development configuration
-  config = config.replace(/port: 3100/, `port: ${answers.frontendPort}`);
-  config = config.replace(/url: "http:\/\/localhost:3100"/, `url: "http://localhost:${answers.frontendPort}"`);
-  config = config.replace(/port: 3101/, `port: ${answers.backendPort}`);
-  config = config.replace(/url: "http:\/\/localhost:3101"/, `url: "http://localhost:${answers.backendPort}"`);
+  // Update development configuration - Single port
+  config = config.replace(/port: 3000/, `port: ${answers.webPort}`);
+  config = config.replace(/url: "http:\/\/localhost:3000"/, `url: "http://localhost:${answers.webPort}"`);
 
   // Update database configuration
   config = config.replace(/name: "auth_db"/, `name: "${answers.dbName}"`);
@@ -156,7 +171,7 @@ function updateProjectConfig(answers: ProjectAnswers) {
   config = config.replace(/password: "auth_password"/, `password: "${answers.dbPassword}"`);
 
   // Update Docker container name
-  config = config.replace(/containerName: "v0-boilerplate-postgres"/, `containerName: "${answers.name}-postgres"`);
+  config = config.replace(/containerName: "boilerplate-postgres"/, `containerName: "${answers.name}-postgres"`);
 
   writeFileSync(configPath, config);
   console.log('✅ Updated packages/config/project.config.ts');
@@ -182,24 +197,14 @@ function updatePackageJson(answers: ProjectAnswers) {
   writeFileSync(rootPackagePath, JSON.stringify(rootPackage, null, 2));
   console.log('✅ Updated root package.json');
 
-  // Update frontend package.json
-  const frontendPackagePath = join(process.cwd(), 'apps/frontend/package.json');
-  if (existsSync(frontendPackagePath)) {
-    const frontendPackage = JSON.parse(readFileSync(frontendPackagePath, 'utf-8'));
-    frontendPackage.name = `${answers.namespace}/frontend`;
-    frontendPackage.description = `${answers.displayName} - Frontend Application`;
-    writeFileSync(frontendPackagePath, JSON.stringify(frontendPackage, null, 2));
-    console.log('✅ Updated frontend package.json');
-  }
-
-  // Update backend package.json
-  const backendPackagePath = join(process.cwd(), 'apps/backend/package.json');
-  if (existsSync(backendPackagePath)) {
-    const backendPackage = JSON.parse(readFileSync(backendPackagePath, 'utf-8'));
-    backendPackage.name = `${answers.namespace}/backend`;
-    backendPackage.description = `${answers.displayName} - Backend API`;
-    writeFileSync(backendPackagePath, JSON.stringify(backendPackage, null, 2));
-    console.log('✅ Updated backend package.json');
+  // Update web app package.json
+  const webPackagePath = join(process.cwd(), 'apps/web/package.json');
+  if (existsSync(webPackagePath)) {
+    const webPackage = JSON.parse(readFileSync(webPackagePath, 'utf-8'));
+    webPackage.name = `${answers.namespace}/web`;
+    webPackage.description = `${answers.displayName} - Web Application`;
+    writeFileSync(webPackagePath, JSON.stringify(webPackage, null, 2));
+    console.log('✅ Updated web app package.json');
   }
 }
 
@@ -208,7 +213,7 @@ function updateDockerCompose(answers: ProjectAnswers) {
   let dockerCompose = readFileSync(dockerComposePath, 'utf-8');
 
   // Update container name
-  dockerCompose = dockerCompose.replace(/container_name: v0-boilerplate-postgres/, `container_name: ${answers.name}-postgres`);
+  dockerCompose = dockerCompose.replace(/container_name: boilerplate-postgres/, `container_name: ${answers.name}-postgres`);
   
   // Update database configuration
   dockerCompose = dockerCompose.replace(/POSTGRES_USER: auth_user/, `POSTGRES_USER: ${answers.dbUser}`);
@@ -219,57 +224,45 @@ function updateDockerCompose(answers: ProjectAnswers) {
   dockerCompose = dockerCompose.replace(/pg_isready -U auth_user -d auth_db/, `pg_isready -U ${answers.dbUser} -d ${answers.dbName}`);
   
   // Update volume name
-  dockerCompose = dockerCompose.replace(/name: v0-boilerplate-postgres-data/, `name: ${answers.name}-postgres-data`);
+  dockerCompose = dockerCompose.replace(/name: boilerplate-postgres-data/, `name: ${answers.name}-postgres-data`);
   
   // Update network name
-  dockerCompose = dockerCompose.replace(/name: v0-boilerplate-network/g, `name: ${answers.name}-network`);
-  dockerCompose = dockerCompose.replace(/- v0-boilerplate-network/, `- ${answers.name}-network`);
-  dockerCompose = dockerCompose.replace(/v0-boilerplate-network:/, `${answers.name}-network:`);
+  dockerCompose = dockerCompose.replace(/name: boilerplate-network/g, `name: ${answers.name}-network`);
+  dockerCompose = dockerCompose.replace(/- boilerplate-network/, `- ${answers.name}-network`);
+  dockerCompose = dockerCompose.replace(/boilerplate-network:/, `${answers.name}-network:`);
 
   writeFileSync(dockerComposePath, dockerCompose);
   console.log('✅ Updated docker-compose.yml');
 }
 
 function createEnvironmentFiles(answers: ProjectAnswers) {
-  // Create backend .env file
-  const backendEnvPath = join(process.cwd(), 'apps/backend/.env');
+  // Create web app .env.local file (for local development)
+  const webEnvPath = join(process.cwd(), 'apps/web/.env.local');
   const databaseUrl = `postgresql://${answers.dbUser}:${answers.dbPassword}@localhost:5432/${answers.dbName}`;
   
-  const backendEnvContent = `# Database Configuration
+  const webEnvContent = `# Local Development Environment Variables
+
+# Database Configuration (Required)
 DATABASE_URL="${databaseUrl}"
 
-# Authentication Configuration
+# Authentication Configuration (Required)
 BETTER_AUTH_SECRET="${answers.authSecret}"
-BETTER_AUTH_URL="http://localhost:${answers.backendPort}"
 
-# CORS Configuration
-FRONTEND_URL="http://localhost:${answers.frontendPort}"
-
-# Development Configuration (optional)
-NODE_ENV="development"
-DEBUG="1"
+# Optional: Social OAuth providers (for local testing)
+# GITHUB_CLIENT_ID="your-github-client-id"
+# GITHUB_CLIENT_SECRET="your-github-client-secret"
+# GOOGLE_CLIENT_ID="your-google-client-id"
+# GOOGLE_CLIENT_SECRET="your-google-client-secret"
 `;
 
-  writeFileSync(backendEnvPath, backendEnvContent);
-  console.log('✅ Created apps/backend/.env');
-
-  // Create frontend .env.local file (optional)
-  const frontendEnvPath = join(process.cwd(), 'apps/frontend/.env.local');
-  const frontendEnvContent = `# Frontend Configuration (optional)
-NEXT_PUBLIC_API_URL="http://localhost:${answers.backendPort}"
-
-# Development Configuration
-NODE_ENV="development"
-`;
-
-  writeFileSync(frontendEnvPath, frontendEnvContent);
-  console.log('✅ Created apps/frontend/.env.local');
+  writeFileSync(webEnvPath, webEnvContent);
+  console.log('✅ Created apps/web/.env.local');
 
   // Create .env.project file for Docker Compose
   const projectEnvPath = join(process.cwd(), '.env.project');
-  const projectEnvContent = `# Project configuration environment variables
-# This file is generated from project.config.ts by the setup script
-# These variables are used by docker-compose.yml
+  const projectEnvContent = `# Docker Compose Configuration Variables
+# This file is generated by scripts/setup-project.ts
+# Used exclusively by docker-compose.yml for local PostgreSQL container
 
 PROJECT_NAME=${answers.name}
 DB_NAME=${answers.dbName}
@@ -282,24 +275,28 @@ DB_PORT=5432
   console.log('✅ Created .env.project for Docker Compose');
 
   // Update .env.example files
-  const backendEnvExamplePath = join(process.cwd(), 'apps/backend/.env.example');
-  if (existsSync(backendEnvExamplePath)) {
-    const exampleContent = `# Database Configuration
+  const webEnvExamplePath = join(process.cwd(), 'apps/web/.env.example');
+  if (existsSync(webEnvExamplePath)) {
+    const exampleContent = `# Local Development Environment Variables
+# Copy this file to .env.local and customize for your setup
+
+# Database Configuration (Required)
 DATABASE_URL="postgresql://${answers.dbUser}:${answers.dbPassword}@localhost:5432/${answers.dbName}"
 
-# Authentication Configuration
-BETTER_AUTH_SECRET="your-super-secret-key-here"
-BETTER_AUTH_URL="http://localhost:${answers.backendPort}"
+# Authentication Configuration (Required)
+BETTER_AUTH_SECRET="your-super-secret-key-here-at-least-32-characters-long"
 
-# CORS Configuration
-FRONTEND_URL="http://localhost:${answers.frontendPort}"
+# Optional: Social OAuth providers (for local testing)
+# GITHUB_CLIENT_ID="your-github-client-id"
+# GITHUB_CLIENT_SECRET="your-github-client-secret"
+# GOOGLE_CLIENT_ID="your-google-client-id"
+# GOOGLE_CLIENT_SECRET="your-google-client-secret"
 
-# Development Configuration (optional)
-NODE_ENV="development"
-DEBUG="1"
+# Note: For production deployment, see docs/vercel-deployment.md
+# Environment detection is handled automatically via project.config.ts
 `;
-    writeFileSync(backendEnvExamplePath, exampleContent);
-    console.log('✅ Updated apps/backend/.env.example');
+    writeFileSync(webEnvExamplePath, exampleContent);
+    console.log('✅ Updated apps/web/.env.example');
   }
 }
 
@@ -310,15 +307,15 @@ function updateMakefile(answers: ProjectAnswers) {
   // Update title comment
   makefile = makefile.replace(/# V0 Boilerplate Makefile/, `# ${answers.displayName} Makefile`);
 
-  // Update db:push filter
-  makefile = makefile.replace(/pnpm --filter @boilerplate\/backend/, `pnpm --filter ${answers.namespace}/backend`);
+  // Update db:push filter - Single app
+  makefile = makefile.replace(/pnpm --filter @boilerplate\/backend/, `pnpm --filter ${answers.namespace}/web`);
 
   writeFileSync(makefilePath, makefile);
   console.log('✅ Updated Makefile');
 }
 
 function updateManifestJson(answers: ProjectAnswers) {
-  const manifestPath = join(process.cwd(), 'apps/frontend/public/manifest.json');
+  const manifestPath = join(process.cwd(), 'apps/web/public/manifest.json');
   
   if (existsSync(manifestPath)) {
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
@@ -328,9 +325,9 @@ function updateManifestJson(answers: ProjectAnswers) {
     manifest.short_name = answers.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     manifest.description = answers.description;
     
-    // Update start URL based on frontend URL
-    if (answers.productionFrontendUrl) {
-      manifest.start_url = new URL('/', answers.productionFrontendUrl).pathname;
+    // Update start URL based on web URL
+    if (answers.productionWebUrl) {
+      manifest.start_url = new URL('/', answers.productionWebUrl).pathname;
     }
     
     writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
@@ -351,15 +348,15 @@ function updateSetupGuide(answers: ProjectAnswers) {
     `git clone ${answers.repositoryUrl} ${answers.name}`);
   setup = setup.replace(/cd my-new-project/, `cd ${answers.name}`);
 
-  // Update package filter examples
-  setup = setup.replace(/pnpm --filter @boilerplate\/backend/g, `pnpm --filter ${answers.namespace}/backend`);
-  setup = setup.replace(/pnpm --filter @boilerplate\/frontend/g, `pnpm --filter ${answers.namespace}/frontend`);
+  // Update package filter examples - Single app
+  setup = setup.replace(/pnpm --filter @boilerplate\/backend/g, `pnpm --filter ${answers.namespace}/web`);
+  setup = setup.replace(/pnpm --filter @boilerplate\/frontend/g, `pnpm --filter ${answers.namespace}/web`);
 
-  // Update port references
-  setup = setup.replace(/localhost:3100/g, `localhost:${answers.frontendPort}`);
-  setup = setup.replace(/localhost:3101/g, `localhost:${answers.backendPort}`);
-  setup = setup.replace(/port 3100/g, `port ${answers.frontendPort}`);
-  setup = setup.replace(/port 3101/g, `port ${answers.backendPort}`);
+  // Update port references - Single port
+  setup = setup.replace(/localhost:3100/g, `localhost:${answers.webPort}`);
+  setup = setup.replace(/localhost:3101/g, `localhost:${answers.webPort}`);
+  setup = setup.replace(/port 3100/g, `port ${answers.webPort}`);
+  setup = setup.replace(/port 3101/g, `port ${answers.webPort}`);
 
   // Update database configuration in setup guide
   setup = setup.replace(/postgresql:\/\/auth_user:auth_password@localhost:5432\/auth_db/, 
@@ -367,6 +364,36 @@ function updateSetupGuide(answers: ProjectAnswers) {
 
   writeFileSync(setupPath, setup);
   console.log('✅ Updated SETUP.md');
+}
+
+function updateVercelDeploymentGuide(answers: ProjectAnswers) {
+  const deploymentGuidePath = join(process.cwd(), 'docs/vercel-deployment.md');
+  
+  if (!existsSync(deploymentGuidePath)) {
+    console.log('ℹ️  Vercel deployment guide not found, skipping...');
+    return;
+  }
+  
+  let guide = readFileSync(deploymentGuidePath, 'utf-8');
+  
+  // Extract domain information
+  const domain = answers.productionWebUrl.replace('https://', '').split('.').slice(-2).join('.');
+  const appName = answers.productionWebUrl.replace('https://', '').split('.')[0];
+  
+  // Replace template placeholders
+  guide = guide.replace(/\{\{PROJECT_NAME\}\}/g, answers.name);
+  guide = guide.replace(/\{\{PROJECT_DISPLAY_NAME\}\}/g, answers.displayName);
+  guide = guide.replace(/\{\{PROJECT_NAMESPACE\}\}/g, answers.namespace);
+  guide = guide.replace(/\{\{PRODUCTION_WEB_URL\}\}/g, answers.productionWebUrl);
+  guide = guide.replace(/\{\{STAGING_WEB_URL\}\}/g, answers.stagingWebUrl);
+  guide = guide.replace(/\{\{CUSTOM_WEB_DOMAIN\}\}/g, answers.productionWebUrl.replace('https://', ''));
+  
+  // Development URL patterns
+  guide = guide.replace(/\{\{DEVELOP_WEB_URL_PATTERN\}\}/g, `https://${appName}-git-{branch}.${domain}`);
+  guide = guide.replace(/\{\{EXAMPLE_DEVELOP_WEB_URL\}\}/g, `https://${appName}-git-feature-auth.${domain}`);
+  
+  writeFileSync(deploymentGuidePath, guide);
+  console.log('✅ Updated docs/vercel-deployment.md with project configuration');
 }
 
 function displaySummary(answers: ProjectAnswers) {
@@ -383,13 +410,14 @@ function displaySummary(answers: ProjectAnswers) {
   console.log(`  Password: ${answers.dbPassword}`);
   console.log('');
   console.log('🌐 DEVELOPMENT URLS:');
-  console.log(`  Frontend: http://localhost:${answers.frontendPort}`);
-  console.log(`  Backend: http://localhost:${answers.backendPort}`);
-  console.log(`  API Health: http://localhost:${answers.backendPort}/api/health`);
+  console.log(`  Web App: http://localhost:${answers.webPort}`);
+  console.log(`  API Health: http://localhost:${answers.webPort}/api/health`);
   console.log('');
   console.log('🌍 PRODUCTION URLS:');
-  console.log(`  Frontend: ${answers.productionFrontendUrl}`);
-  console.log(`  Backend: ${answers.productionBackendUrl}`);
+  console.log(`  Web App: ${answers.productionWebUrl}`);
+  console.log('');
+  console.log('🟡 STAGING URLS:');
+  console.log(`  Web App: ${answers.stagingWebUrl}`);
   console.log('');
   console.log('🔐 SECURITY:');
   console.log(`  Auth Secret: ${answers.authSecret.substring(0, 16)}... (64 chars)`);
@@ -408,20 +436,21 @@ async function main() {
     updateMakefile(answers);
     updateManifestJson(answers);
     updateSetupGuide(answers);
+    updateVercelDeploymentGuide(answers);
     
     displaySummary(answers);
     
-    console.log('\n🎉 Complete setup finished successfully!');
+    console.log('\n🎉 Complete web app setup finished successfully!');
     console.log('\n🚀 NEXT STEPS:');
     console.log('1. Run `pnpm install` to install dependencies');
     console.log('2. Run `make db-up` to start the database');
-    console.log('3. Run `make dev` to start development servers');
-    console.log(`4. Open http://localhost:${answers.frontendPort} in your browser`);
+    console.log('3. Run `make dev` to start the web application');
+    console.log(`4. Open http://localhost:${answers.webPort} in your browser`);
     console.log('5. Create your first account and start building!');
     console.log('');
     console.log('💡 OPTIONAL:');
     console.log('- Delete this setup script: rm scripts/setup-project.ts');
-    console.log('- Commit your initial configuration: git add . && git commit -m "Initial project setup"');
+    console.log('- Commit your initial configuration: git add . && git commit -m "Initial web app setup"');
     console.log('');
     console.log('📚 For more details, check the updated SETUP.md file.');
     

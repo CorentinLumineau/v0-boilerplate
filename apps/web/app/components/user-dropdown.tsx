@@ -1,36 +1,52 @@
 "use client"
 
 import { useState } from "react"
-import { LogOut, Monitor, Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
+import { LogOut, User, Monitor, Moon, Sun, Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 
-// Update imports to use the consolidated file
 import { useThemeSettings, useLanguageSettings } from "@/hooks/use-settings-store"
+import { type ColorTheme, themes } from "@/lib/theme"
 import { signOut, useSession } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { FlagGB, FlagFR } from "@/components/flags"
-import { ColorSelectorDropdown } from "@/components/settings/color-selector-dropdown"
+import { getAvailableThemes } from "@boilerplate/config/project.config"
 
-export function UserDropdown() {
+interface UserDropdownProps {
+  showUsername?: boolean
+  showLogout?: boolean
+}
+
+export function UserDropdown({ showUsername = true, showLogout = true }: UserDropdownProps = {}) {
+  const { t } = useLanguageSettings()
   const { theme, setTheme } = useTheme()
-  const { radiusValue, setRadiusValue } = useThemeSettings()
-  const { language, setLanguage, t } = useLanguageSettings()
+  const { radiusValue, setRadiusValue, colorTheme, setColorTheme } = useThemeSettings()
+  const { language, setLanguage } = useLanguageSettings()
   const session = useSession()
   const router = useRouter()
 
   const [open, setOpen] = useState(false)
+
+  const handleLogout = async () => {
+    try {
+      await signOut()
+      router.push("/login")
+    } catch (error) {
+      // Silently handle logout errors
+      router.push("/login")
+    }
+  }
 
   const handleThemeChange = (value: string) => {
     if (value) {
@@ -44,6 +60,10 @@ export function UserDropdown() {
     }
   }
 
+  const handleColorThemeChange = (theme: ColorTheme) => {
+    setColorTheme(theme)
+  }
+
   const radiusValues = [
     { value: "0", label: "0" },
     { value: "0.3", label: "0.3" },
@@ -52,14 +72,15 @@ export function UserDropdown() {
     { value: "1.0", label: "1.0" },
   ]
 
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      router.push("/login")
-    } catch (error) {
-      // Silently handle logout errors
-      router.push("/login")
-    }
+  const availableThemes = getAvailableThemes()
+
+  // Function to get primary color for a theme
+  const getThemePrimaryColor = (themeName: string) => {
+    const theme = themes[themeName as ColorTheme]
+    if (!theme) return "hsl(0 0% 0%)" // fallback to black
+    
+    // Use light mode primary color for consistency
+    return `hsl(${theme.light.primary})`
   }
 
   // Use real user data or fallback to translated username
@@ -67,12 +88,117 @@ export function UserDropdown() {
   const displayName = user?.name || user?.email || t("username")
   const userEmail = user?.email
 
+  // For non-authenticated users, show settings only
+  if (!user) {
+    return (
+      <div className="relative z-50">
+        <DropdownMenu open={open} onOpenChange={setOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Settings className="h-4 w-4" />
+              <span className="sr-only">Settings</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-64 z-50" align="end">
+            <DropdownMenuGroup>
+              <div className="px-2 py-1.5">
+                <p className="text-sm mb-2">{t("theme")}</p>
+                <ToggleGroup type="single" value={theme || "system"} onValueChange={handleThemeChange} className="w-full">
+                  <ToggleGroupItem value="light" aria-label="Light Mode" title="Light Mode" className="flex-1 px-2">
+                    <Sun className="h-5 w-5" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="dark" aria-label="Dark Mode" title="Dark Mode" className="flex-1 px-2">
+                    <Moon className="h-5 w-5" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="system" aria-label="System Mode" title="System Mode" className="flex-1 px-2">
+                    <Monitor className="h-5 w-5" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <div className="px-2 py-1.5">
+                <p className="text-sm mb-2">{t("language")}</p>
+                <ToggleGroup type="single" value={language} onValueChange={handleLanguageChange} className="w-full">
+                  <ToggleGroupItem value="en" aria-label="English" title="English" className="flex-1 px-2">
+                    <span className="flex items-center justify-center gap-2">
+                      <FlagGB size="lg" />
+                      <span className="text-sm">EN</span>
+                    </span>
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="fr" aria-label="French" title="French" className="flex-1 px-2">
+                    <span className="flex items-center justify-center gap-2">
+                      <FlagFR size="lg" />
+                      <span className="text-sm">FR</span>
+                    </span>
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <div className="px-2 py-1.5">
+                <p className="text-sm mb-2">{t("colorTheme")}</p>
+                <div className="grid grid-cols-4 gap-1">
+                  {availableThemes.map((themeName) => (
+                    <button
+                      key={themeName}
+                      className={cn(
+                        "h-6 w-12 rounded border-2 transition-all hover:scale-105 focus:outline-none focus:ring-1 focus:ring-ring relative bg-background",
+                        colorTheme === themeName
+                          ? "border-primary scale-105"
+                          : "border-border hover:border-primary/50"
+                      )}
+                      onClick={() => handleColorThemeChange(themeName as ColorTheme)}
+                      title={themeName}
+                    >
+                      <div 
+                        className="absolute inset-1 rounded-sm"
+                        style={{
+                          backgroundColor: getThemePrimaryColor(themeName),
+                        }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <div className="px-2 py-1.5">
+                <p className="text-sm mb-2">{t("borderRadius")}</p>
+                <div className="flex flex-wrap gap-1">
+                  {radiusValues.map((radius) => (
+                    <button
+                      key={radius.value}
+                      className={cn(
+                        "flex h-8 min-w-[36px] items-center justify-center rounded-md border px-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                        radiusValue === radius.value
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
+                      )}
+                      onClick={() => setRadiusValue(radius.value as any)}
+                    >
+                      {radius.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    )
+  }
+
   return (
     <div className="relative z-50">
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative">
-            {displayName}
+          <Button variant="ghost" size={showUsername ? "default" : "icon"} className="relative">
+            {showUsername ? displayName : <User className="h-4 w-4" />}
+            {!showUsername && <span className="sr-only">User menu</span>}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64 z-50" align="end">
@@ -85,6 +211,8 @@ export function UserDropdown() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+          
+          {/* Settings Panel */}
           <DropdownMenuGroup>
             <div className="px-2 py-1.5">
               <p className="text-sm mb-2">{t("theme")}</p>
@@ -107,13 +235,15 @@ export function UserDropdown() {
               <p className="text-sm mb-2">{t("language")}</p>
               <ToggleGroup type="single" value={language} onValueChange={handleLanguageChange} className="w-full">
                 <ToggleGroupItem value="en" aria-label="English" title="English" className="flex-1 px-2">
-                  <span className="flex items-center justify-center">
-                    <FlagGB className="mr-1" />
+                  <span className="flex items-center justify-center gap-2">
+                    <FlagGB size="lg" />
+                    <span className="text-sm">EN</span>
                   </span>
                 </ToggleGroupItem>
                 <ToggleGroupItem value="fr" aria-label="French" title="French" className="flex-1 px-2">
-                  <span className="flex items-center justify-center">
-                    <FlagFR className="mr-1" />
+                  <span className="flex items-center justify-center gap-2">
+                    <FlagFR size="lg" />
+                    <span className="text-sm">FR</span>
                   </span>
                 </ToggleGroupItem>
               </ToggleGroup>
@@ -123,7 +253,28 @@ export function UserDropdown() {
           <DropdownMenuGroup>
             <div className="px-2 py-1.5">
               <p className="text-sm mb-2">{t("colorTheme")}</p>
-              <ColorSelectorDropdown />
+              <div className="grid grid-cols-4 gap-1">
+                {availableThemes.map((themeName) => (
+                  <button
+                    key={themeName}
+                    className={cn(
+                      "h-6 w-12 rounded border-2 transition-all hover:scale-105 focus:outline-none focus:ring-1 focus:ring-ring relative bg-background",
+                      colorTheme === themeName
+                        ? "border-primary scale-105"
+                        : "border-border hover:border-primary/50"
+                    )}
+                    onClick={() => handleColorThemeChange(themeName as ColorTheme)}
+                    title={themeName}
+                  >
+                    <div 
+                      className="absolute inset-1 rounded-sm"
+                      style={{
+                        backgroundColor: getThemePrimaryColor(themeName),
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -148,14 +299,19 @@ export function UserDropdown() {
               </div>
             </div>
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem 
-            className="text-destructive hover:bg-destructive/10 font-medium cursor-pointer"
-            onClick={handleLogout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>{t("logout")}</span>
-          </DropdownMenuItem>
+          
+          {showLogout && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                className="text-red-500 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/20 font-medium cursor-pointer"
+                onClick={handleLogout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>{t("logout")}</span>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

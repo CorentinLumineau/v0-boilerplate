@@ -9,11 +9,12 @@ import { cn } from "@/lib/utils"
 
 // Update imports to use the consolidated file
 import { useThemeSettings, useLanguageSettings } from "@/hooks/use-settings-store"
-import { ColorSelectorDropdown } from "@/components/settings/color-selector-dropdown"
+import { type ColorTheme, themes } from "@/lib/theme"
+import { getAvailableThemes } from "@boilerplate/config/project.config"
 
 export function SettingsPanel() {
   const { theme, setTheme } = useTheme()
-  const { radiusValue, setRadiusValue } = useThemeSettings()
+  const { radiusValue, setRadiusValue, colorTheme, setColorTheme } = useThemeSettings()
   const { language, setLanguage, t } = useLanguageSettings()
 
   const handleThemeChange = (value: string) => {
@@ -28,6 +29,10 @@ export function SettingsPanel() {
     }
   }
 
+  const handleColorThemeChange = (theme: ColorTheme) => {
+    setColorTheme(theme)
+  }
+
   const radiusValues = [
     { value: "0", label: "0" },
     { value: "0.3", label: "0.3" },
@@ -35,6 +40,17 @@ export function SettingsPanel() {
     { value: "0.75", label: "0.75" },
     { value: "1.0", label: "1.0" },
   ]
+
+  const availableThemes = getAvailableThemes()
+
+  // Function to get primary color for a theme
+  const getThemePrimaryColor = (themeName: string) => {
+    const theme = themes[themeName as ColorTheme]
+    if (!theme) return "hsl(0 0% 0%)" // fallback to black
+    
+    // Use light mode primary color for consistency
+    return `hsl(${theme.light.primary})`
+  }
 
   return (
     <div className="space-y-6">
@@ -76,7 +92,28 @@ export function SettingsPanel() {
 
       <div>
         <h3 className="mb-3 text-lg font-medium">{t("colorTheme")}</h3>
-        <ColorSelectorDropdown />
+        <div className="grid grid-cols-4 gap-2">
+          {availableThemes.map((themeName) => (
+            <button
+              key={themeName}
+              className={cn(
+                "h-10 w-16 rounded border-2 transition-all hover:scale-105 focus:outline-none focus:ring-1 focus:ring-ring relative bg-background",
+                colorTheme === themeName
+                  ? "border-primary scale-105"
+                  : "border-border hover:border-primary/50"
+              )}
+              onClick={() => handleColorThemeChange(themeName as ColorTheme)}
+              title={themeName}
+            >
+              <div 
+                className="absolute inset-1 rounded-sm"
+                style={{
+                  backgroundColor: getThemePrimaryColor(themeName),
+                }}
+              />
+            </button>
+          ))}
+        </div>
       </div>
 
       <div>

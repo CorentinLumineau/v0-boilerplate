@@ -4,13 +4,12 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { getWebUrl } from "@boilerplate/config/project.config";
 
-// Determine if we're in production (more robust detection)
+// Determine if we're in production (simplified for single domain)
 const isProduction = process.env.NODE_ENV === 'production' || 
-                    process.env.VERCEL_ENV === 'production' ||
-                    (process.env.BETTER_AUTH_BASE_URL && process.env.BETTER_AUTH_BASE_URL.includes('https://'));
+                    process.env.VERCEL_ENV === 'production';
 
-// Get web app URL from project config with environment variable overrides
-const webUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.BETTER_AUTH_BASE_URL || getWebUrl();
+// Get web app URL from project config (dynamic environment detection)
+const webUrl = getWebUrl();
 
 // Extract the root domain for cross-subdomain cookies (e.g., lumineau.app from boilerplate.lumineau.app)
 const getRootDomain = (url: string) => {

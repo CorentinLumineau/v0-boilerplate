@@ -7,16 +7,17 @@
 
 export const PROJECT_CONFIG = {
   // Basic Project Information
-  name: "v0-boilerplate",
+  name: "boilerplate",
   displayName: "V0 Boilerplate",
   description: "A Next.js 15 web application with authentication, theming, and TypeScript",
-  version: "1.0.1",
+  version: "0.1.0",
   
   // URLs and Domains - Single domain architecture
   urls: {
-    repository: "https://github.com/your-username/v0-boilerplate",
+    repository: "https://github.com/your-username/boilerplate",
     homepage: "https://your-domain.com",
     documentation: "https://docs.your-domain.com",
+    github: "https://github.com/your-username/boilerplate",
   },
 
   // Production URLs - Single domain
@@ -91,7 +92,7 @@ export const PROJECT_CONFIG = {
   docker: {
     postgres: {
       image: "postgres:16-alpine",
-      containerName: "v0-boilerplate-postgres",
+      containerName: "boilerplate-postgres",
     },
   },
   
@@ -179,6 +180,7 @@ export const getVersion = () => PROJECT_CONFIG.version;
 export const getAuthor = () => PROJECT_CONFIG.author;
 export const getRepositoryUrl = () => PROJECT_CONFIG.urls.repository;
 export const getHomepageUrl = () => PROJECT_CONFIG.urls.homepage;
+export const getGithubUrl = () => PROJECT_CONFIG.urls.github;
 
 // Web app specific helpers
 export const getWebPort = () => PROJECT_CONFIG.development.web.port;
@@ -186,11 +188,21 @@ export const getProductionWebUrl = () => PROJECT_CONFIG.production.web.url;
 export const getStagingWebUrl = () => PROJECT_CONFIG.staging.web.url;
 export const getDevelopmentWebUrl = () => PROJECT_CONFIG.development.web.url;
 
+// Theme helpers
+export const getAvailableThemes = () => PROJECT_CONFIG.themes.available;
+export const getDefaultTheme = () => PROJECT_CONFIG.themes.default;
+
+// i18n helpers
+export const getSupportedLocales = () => PROJECT_CONFIG.i18n.locales;
+export const getDefaultLocale = () => PROJECT_CONFIG.i18n.defaultLocale;
+
 // Legacy compatibility functions (deprecated but maintained for migration)
 export const getFrontendUrl = getWebUrl;
 export const getBackendUrl = getWebUrl;
 export const getFrontendPort = getWebPort;
 export const getBackendPort = getWebPort;
+export const getDevelopmentFrontendUrl = getDevelopmentWebUrl;
+export const getProductionFrontendUrl = getProductionWebUrl;
 
 // Type exports for TypeScript
 export type ProjectConfig = typeof PROJECT_CONFIG;

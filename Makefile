@@ -1,19 +1,27 @@
 # V0 Boilerplate Makefile
 # Commands for managing the development environment
 
-.PHONY: help db-up db-down db-restart db-logs db-clean db-migrate db-migrate-deploy db-migrate-reset dev dev-backend dev-frontend build install clean version-patch version-minor version-major version-sync release-patch release-minor release-major
+.PHONY: all help db-up db-down db-restart db-logs db-clean db-migrate db-migrate-deploy db-migrate-reset db-studio dev dev-backend dev-frontend build install clean version-patch version-minor version-major version-sync release-patch release-minor release-major
 
 # Default target
+all: install db-up
+	@echo "✅ Complete setup finished!"
+	@echo "🚀 Run 'make dev' to start development servers"
+
 help:
 	@echo "Available commands:"
+	@echo "  make all          - Complete setup: install dependencies + start database"
 	@echo "  make db-up        - Start PostgreSQL database"
+	@echo "  make db-up-all    - Start PostgreSQL database + Prisma Studio"
 	@echo "  make db-down      - Stop PostgreSQL database"
+	@echo "  make db-down-all  - Stop all database services"
 	@echo "  make db-restart   - Restart PostgreSQL database"
 	@echo "  make db-logs      - Show database logs"
 	@echo "  make db-clean     - Remove database container and volumes"
 	@echo "  make db-migrate   - Run database migrations (development)"
 	@echo "  make db-migrate-deploy - Deploy migrations (production)"
 	@echo "  make db-migrate-reset  - Reset database with fresh migrations"
+	@echo "  make db-studio    - Open Prisma Studio for database management"
 	@echo "  make dev          - Start all development servers"
 	@echo "  make dev-web      - Start web application development server"
 	@echo "  make build        - Build all apps"
@@ -34,11 +42,16 @@ help:
 # Database commands
 db-up:
 	@echo "Starting PostgreSQL database with docker compose..."
+	@echo "Stopping any running containers and cleaning up networks..."
+	@docker compose down 2>/dev/null || true
+	@docker network rm boilerplate-network 2>/dev/null || true
+	@docker network rm app-network 2>/dev/null || true
+	@echo "Starting fresh database setup..."
 	docker compose up -d
 	@echo "Database started! Waiting for it to be ready..."
 	@sleep 5
 	@echo "Running database migrations..."
-	pnpm --filter @boilerplate/web db:migrate
+	DATABASE_URL="postgresql://auth_user:auth_password@localhost:5432/auth_db" pnpm --filter @boilerplate/web db:migrate
 
 db-down:
 	@echo "Stopping PostgreSQL database..."
@@ -54,23 +67,31 @@ db-logs:
 db-clean:
 	@echo "Cleaning database (this will delete all data)..."
 	docker compose down -v
+	@echo "Cleaning up Docker networks..."
+	@docker network rm boilerplate-network 2>/dev/null || true
+	@docker network rm app-network 2>/dev/null || true
 	@echo "Database cleaned!"
 
 db-migrate:
 	@echo "Running database migrations (development)..."
-	pnpm --filter @boilerplate/web db:migrate
+	DATABASE_URL="postgresql://auth_user:auth_password@localhost:5432/auth_db" pnpm --filter @boilerplate/web db:migrate
 	@echo "Migrations completed!"
 
 db-migrate-deploy:
 	@echo "Deploying database migrations (production)..."
-	pnpm --filter @boilerplate/web db:migrate:deploy
+	DATABASE_URL="postgresql://auth_user:auth_password@localhost:5432/auth_db" pnpm --filter @boilerplate/web db:migrate
 	@echo "Migrations deployed!"
 
 db-migrate-reset:
 	@echo "⚠️  Resetting database with fresh migrations (this will delete all data)..."
 	@read -p "Are you sure? Type 'yes' to continue: " confirm && [ "$$confirm" = "yes" ]
-	pnpm --filter @boilerplate/web db:migrate:reset
+	DATABASE_URL="postgresql://auth_user:auth_password@localhost:5432/auth_db" pnpm --filter @boilerplate/web db:migrate:reset
 	@echo "Database reset completed!"
+
+db-studio:
+	@echo "Opening Prisma Studio for database management..."
+	@echo "Prisma Studio will open in your browser at http://localhost:5555"
+	DATABASE_URL="postgresql://auth_user:auth_password@localhost:5432/auth_db" pnpm --filter @boilerplate/web db:studio
 
 # Development commands
 dev:

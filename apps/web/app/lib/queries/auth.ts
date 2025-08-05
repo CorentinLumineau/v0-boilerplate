@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { betterFetch } from '@better-fetch/fetch'
-import { getBackendUrl } from '@boilerplate/config/project.config'
 import type { AuthSession, LoginCredentials, SignupCredentials } from '@boilerplate/types'
 
 // Query Keys
@@ -16,7 +15,6 @@ export function useSession() {
     queryFn: async (): Promise<AuthSession | null> => {
       try {
         const { data } = await betterFetch('/api/auth/get-session', {
-          baseURL: getBackendUrl(), 
           credentials: 'include',
         })
         return data as AuthSession || null
@@ -39,7 +37,6 @@ export function useLogin() {
     mutationFn: async (credentials: LoginCredentials) => {
       const { data, error } = await betterFetch('/api/auth/sign-in', {
         method: 'POST',
-        baseURL: getBackendUrl(),
         credentials: 'include',
         body: {
           email: credentials.email,
@@ -67,7 +64,6 @@ export function useSignup() {
     mutationFn: async (credentials: SignupCredentials) => {
       const { data, error } = await betterFetch('/api/auth/sign-up', {
         method: 'POST',
-        baseURL: getBackendUrl(),
         credentials: 'include',
         body: {
           email: credentials.email,
@@ -96,7 +92,6 @@ export function useLogout() {
     mutationFn: async () => {
       const { error } = await betterFetch('/api/auth/sign-out', {
         method: 'POST',
-        baseURL: getBackendUrl(),
         credentials: 'include',
       })
       
