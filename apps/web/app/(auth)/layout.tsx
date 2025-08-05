@@ -20,7 +20,7 @@ function AuthHeader() {
             </Link>
           </Button>
           
-          <UserDropdown showUsername={false} showLogout={false} showSettings={true} />
+          <UserDropdown showUsername={false} showLogout={false} />
         </div>
       </div>
     </header>

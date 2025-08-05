@@ -6,18 +6,17 @@ import { type ColorTheme, applyTheme } from "@/lib/theme"
 import { useTheme } from "next-themes"
 import { getTranslation, type Language } from "@/lib/i18n"
 
-type RadiusValue = "0" | "0.3" | "0.5" | "0.75" | "1.0"
-
-interface SettingsStoreContextType {
+// Settings store context type
+type SettingsStoreContextType = {
   // Theme settings
   colorTheme: ColorTheme
   setColorTheme: (theme: ColorTheme) => void
-  radiusValue: RadiusValue
-  setRadiusValue: (value: RadiusValue) => void
-
+  
   // Language settings
   language: Language
   setLanguage: (language: Language) => void
+  
+  // Translation function
   t: (key: string) => string
 }
 
@@ -28,7 +27,6 @@ const SettingsStoreContext = createContext<SettingsStoreContextType | undefined>
 export function SettingsStoreProvider({ children }: { children: React.ReactNode }) {
   // Theme settings
   const [colorTheme, setColorTheme] = useState<ColorTheme>("default")
-  const [radiusValue, setRadiusValue] = useState<RadiusValue>("0.5")
   const { theme } = useTheme()
 
   // Language settings
@@ -43,15 +41,10 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     try {
       const storedColorTheme = localStorage.getItem("colorTheme") as ColorTheme
-      const storedRadiusValue = localStorage.getItem("radiusValue") as RadiusValue
       const storedLanguage = localStorage.getItem("language") as Language
 
       if (storedColorTheme) {
         setColorTheme(storedColorTheme)
-      }
-
-      if (storedRadiusValue) {
-        setRadiusValue(storedRadiusValue)
       }
 
       if (storedLanguage && (storedLanguage === "en" || storedLanguage === "fr")) {
@@ -65,8 +58,8 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
   // Apply theme when colorTheme or theme mode changes
   useEffect(() => {
     try {
-      // Apply radius value to CSS variable
-      document.documentElement.style.setProperty("--radius", `${radiusValue}rem`)
+      // Set fixed border radius to 0.5rem
+      document.documentElement.style.setProperty("--radius", "0.5rem")
 
       // Apply theme based on current mode and color theme
       const mode = theme === "dark" ? "dark" : "light"
@@ -74,33 +67,34 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
 
       // Save theme settings to localStorage
       localStorage.setItem("colorTheme", colorTheme)
-      localStorage.setItem("radiusValue", radiusValue)
     } catch (error) {
       // Silently handle theme application errors
     }
-  }, [colorTheme, radiusValue, theme])
+  }, [colorTheme, theme])
 
-  // Save language setting to localStorage when it changes
+  // Save language to localStorage when it changes
   useEffect(() => {
     try {
       localStorage.setItem("language", language)
     } catch (error) {
-      // Silently handle language storage errors
+      // Silently handle localStorage errors
     }
   }, [language])
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({
+      colorTheme,
+      setColorTheme,
+      language,
+      setLanguage,
+      t,
+    }),
+    [colorTheme, language, t],
+  )
+
   return (
-    <SettingsStoreContext.Provider
-      value={{
-        colorTheme,
-        setColorTheme,
-        radiusValue,
-        setRadiusValue,
-        language,
-        setLanguage,
-        t,
-      }}
-    >
+    <SettingsStoreContext.Provider value={contextValue}>
       {children}
     </SettingsStoreContext.Provider>
   )
@@ -117,7 +111,7 @@ export function useSettingsStore() {
 
 // Specialized hooks that use the settings store
 export function useThemeSettings() {
-  const { colorTheme, setColorTheme, radiusValue, setRadiusValue } = useSettingsStore()
+  const { colorTheme, setColorTheme } = useSettingsStore()
 
   // Memoize the setter functions to prevent unnecessary re-renders
   const setColorThemeMemoized = useCallback(
@@ -127,29 +121,20 @@ export function useThemeSettings() {
     [setColorTheme],
   )
 
-  const setRadiusValueMemoized = useCallback(
-    (value: RadiusValue) => {
-      setRadiusValue(value)
-    },
-    [setRadiusValue],
-  )
-
   // Return a memoized object to prevent unnecessary re-renders
   return useMemo(
     () => ({
       colorTheme,
       setColorTheme: setColorThemeMemoized,
-      radiusValue,
-      setRadiusValue: setRadiusValueMemoized,
     }),
-    [colorTheme, setColorThemeMemoized, radiusValue, setRadiusValueMemoized],
+    [colorTheme, setColorThemeMemoized],
   )
 }
 
 export function useLanguageSettings() {
   const { language, setLanguage, t } = useSettingsStore()
 
-  // Memoize the setter function to prevent unnecessary re-renders
+  // Memoize the setter functions to prevent unnecessary re-renders
   const setLanguageMemoized = useCallback(
     (lang: Language) => {
       setLanguage(lang)
@@ -157,38 +142,16 @@ export function useLanguageSettings() {
     [setLanguage],
   )
 
-  // Memoize the translation function
-  const tMemoized = useCallback(
-    (key: string) => {
-      return t(key)
-    },
-    [t, language],
-  ) // Include language as a dependency since t depends on it
-
   // Return a memoized object to prevent unnecessary re-renders
   return useMemo(
     () => ({
       language,
       setLanguage: setLanguageMemoized,
-      t: tMemoized,
+      t,
     }),
-    [language, setLanguageMemoized, tMemoized],
+    [language, setLanguageMemoized, t],
   )
 }
 
-// Combined hook for backward compatibility
-export function useSettings() {
-  const themeSettings = useThemeSettings()
-  const languageSettings = useLanguageSettings()
-
-  return useMemo(
-    () => ({
-      ...themeSettings,
-      ...languageSettings,
-    }),
-    [themeSettings, languageSettings],
-  )
-}
-
-// For backward compatibility
-export const SettingsProvider = SettingsStoreProvider
+// Legacy hook for backward compatibility
+export const useSettings = useSettingsStore

@@ -40,7 +40,7 @@ export default function ProtectedHome() {
         <Button 
           variant="outline" 
           onClick={() => signOut()}
-          className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+          className="text-red-500 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400"
         >
           <LogOut className="mr-2 h-4 w-4" />
           Sign Out

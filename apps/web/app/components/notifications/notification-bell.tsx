@@ -98,7 +98,7 @@ export function NotificationBell() {
         )}
         
         {error && (
-          <div className="p-4 text-center text-sm text-destructive">
+          <div className="p-4 text-center text-sm text-red-500">
             {error}
           </div>
         )}
