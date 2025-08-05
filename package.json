@@ -1,6 +1,10 @@
 {
   "private": true,
   "packageManager": "pnpm@10.10.1",
+  "workspaces": [
+    "apps/web",
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -9,7 +13,17 @@
     "test": "turbo run test",
     "clean": "turbo run clean",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,json}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,md,json}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,md,json}\"",
+    "web:dev": "pnpm --filter @boilerplate/web dev",
+    "web:build": "pnpm --filter @boilerplate/web build",
+    "web:start": "pnpm --filter @boilerplate/web start",
+    "web:lint": "pnpm --filter @boilerplate/web lint",
+    "web:type-check": "pnpm --filter @boilerplate/web type-check",
+    "db:studio": "pnpm --filter @boilerplate/web db:studio",
+    "db:migrate": "pnpm --filter @boilerplate/web db:migrate",
+    "db:generate": "pnpm --filter @boilerplate/web db:generate",
+    "db:reset": "pnpm --filter @boilerplate/web db:reset",
+    "db:seed": "pnpm --filter @boilerplate/web db:seed"
   },
   "devDependencies": {
     "@types/node": "^22.17.0",

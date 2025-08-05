@@ -5,7 +5,9 @@
     "NODE_ENV",
     "DATABASE_URL",
     "BETTER_AUTH_SECRET",
-    "BETTER_AUTH_BASE_URL"
+    "VERCEL_ENV",
+    "VERCEL_GIT_COMMIT_REF",
+    "VERCEL_URL"
   ],
   "tasks": {
     "build": {
@@ -19,23 +21,20 @@
       ],
       "env": [
         "NODE_ENV", 
-        "FRONTEND_URL", 
-        "BACKEND_URL",
-        "NEXT_PUBLIC_API_URL",
-        "NEXT_PUBLIC_APP_URL",
         "DATABASE_URL",
         "BETTER_AUTH_SECRET",
-        "BETTER_AUTH_BASE_URL"
+        "VERCEL_ENV",
+        "VERCEL_GIT_COMMIT_REF"
       ]
     },
     "dev": {
       "cache": false,
       "persistent": true,
-      "env": ["NODE_ENV", "FRONTEND_URL", "BACKEND_URL"]
+      "env": ["NODE_ENV", "DATABASE_URL", "BETTER_AUTH_SECRET"]
     },
     "start": {
       "dependsOn": ["build"],
-      "env": ["NODE_ENV", "FRONTEND_URL", "BACKEND_URL"]
+      "env": ["NODE_ENV"]
     },
     "lint": {
       "outputs": []

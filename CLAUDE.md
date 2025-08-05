@@ -4,13 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Monorepo Structure
 
-This is a **Turborepo monorepo** with the following **simplified** structure:
+This is a **Turborepo monorepo** with the following **single web app** structure:
 
 ```
 /
 ├── apps/
-│   ├── frontend/          # Next.js 15 application (contains all UI components)
-│   └── backend/           # Next.js 15 API server
+│   └── web/               # Next.js 15 unified web application (frontend + API)
+│       ├── app/
+│       │   ├── (web)/     # Public pages (landing page)
+│       │   ├── (auth)/    # Authentication pages  
+│       │   ├── (protected)/ # Protected dashboard pages
+│       │   ├── api/       # API routes
+│       │   ├── components/ # UI components
+│       │   └── lib/       # Utilities and libraries
+│       ├── prisma/        # Database schema and migrations
+│       └── public/        # Static assets
 ├── packages/
 │   ├── config/            # Shared configurations (ESLint, Tailwind, TypeScript)
 │   └── types/             # Shared API types only
@@ -40,8 +48,8 @@ This is a **Turborepo monorepo** with the following **simplified** structure:
 - `pnpm format` - Format code with Prettier
 
 ### Individual App Commands
-- `pnpm --filter @boilerplate/frontend dev` - Start only frontend
-- `pnpm --filter @boilerplate/backend dev` - Start only backend
+- `pnpm --filter @boilerplate/web dev` - Start web application
+- `make dev-web` - Start web application (alternative)
 
 ### Package Management
 - Uses `pnpm` workspaces with `pnpm@10.10.0`
@@ -50,23 +58,20 @@ This is a **Turborepo monorepo** with the following **simplified** structure:
 
 ## Architecture Overview
 
-This is a **full-stack TypeScript monorepo** with comprehensive theming and internationalization.
+This is a **unified web application** built with TypeScript, featuring comprehensive theming and internationalization.
 
 ### Key Technologies
 
-#### Frontend (apps/frontend)
-- **Next.js 15** with App Router and React 19
+#### Web Application (apps/web)
+- **Next.js 15** with App Router and React 19 (unified frontend + API)
 - **TypeScript** with strict configuration
 - **Tailwind CSS** with shadcn/ui components
 - **next-themes** for dark/light mode switching
 - **Radix UI** primitives for accessible components
 - **Lucide React** for icons
-
-#### Backend (apps/backend)
-- **Next.js 15** with API Routes
-- **TypeScript** with full-stack support
-- **Built-in CORS** via middleware
-- **Environment variables** support
+- **Better Auth** for authentication
+- **Prisma** for database operations
+- **PWA support** with next-pwa
 
 #### Shared Packages (Minimal)
 - **@boilerplate/config** - Shared ESLint, Tailwind, and TypeScript configs
@@ -74,53 +79,55 @@ This is a **full-stack TypeScript monorepo** with comprehensive theming and inte
 
 ### Core Architecture Patterns
 
-#### Theme System (Frontend)
-The frontend features a sophisticated theming system:
-- **42 color themes** defined in `apps/frontend/lib/theme/` (from amber to zinc)
+#### Theme System (Web App)
+The web application features a sophisticated theming system:
+- **8 color themes** defined in `apps/web/app/lib/theme/` (default, red, orange, green, blue, teal, purple, pink)
 - **Dynamic theme switching** via CSS custom properties
 - **Radius customization** with 5 preset values (0 to 1.0rem)
 - **Base theme structure** defining color tokens
 - **Shared theme types** in `@boilerplate/types`
 
-#### Settings Management (Frontend)
-- **Context-based settings store** in `apps/frontend/hooks/use-settings-store.tsx`
+#### Settings Management (Web App)
+- **Context-based settings store** in `apps/web/app/hooks/use-settings-store.tsx`
 - **Specialized hooks** for theme and language settings
 - **localStorage persistence** for user preferences
 - **Memoized setters** to prevent unnecessary re-renders
 
 #### Component Architecture (Simplified)
-- **All UI components** in `apps/frontend/components/` using Radix UI primitives
+- **All UI components** in `apps/web/app/components/` using Radix UI primitives
 - **Layout components**: Sidebar, Header with user dropdown
 - **Settings panel**: Color theme selector, radius selector
-- **Shared utilities**: `apps/frontend/lib/utils.ts`
+- **Shared utilities**: `apps/web/app/lib/utils.ts`
 
-#### API Architecture (Backend)
-- **Next.js API Routes** at `/api/*`
+#### API Architecture (Unified)
+- **Next.js API Routes** at `/api/*` (same domain as frontend)
 - **Health check endpoint** at `/api/health`
-- **CORS middleware** for frontend communication
+- **No CORS needed** - same origin for frontend and API
 - **Built-in TypeScript support**
+- **Better Auth integration** for authentication
 
 #### Internationalization
 - **Two languages supported**: English and French
-- **Translation files** in `apps/frontend/locales/`
-- **i18n utilities** in `apps/frontend/lib/i18n.ts`
+- **Translation files** in `apps/web/app/locales/`
+- **i18n utilities** in `apps/web/app/lib/i18n.ts`
 - **Language switching** integrated into settings store
 
 ### Workspace Structure
 
 #### Apps
-- `apps/frontend/` - Next.js 15 application with App Router
-  - `app/` - Next.js pages and layouts
-  - `components/` - App-specific components
-  - `hooks/` - Custom React hooks (settings management)
-  - `lib/` - App-specific utilities and theme logic
-  - `locales/` - Translation files
-  - `styles/` - Global CSS styles
-
-- `apps/backend/` - Next.js 15 API server
-  - `app/api/` - API route handlers
-  - `middleware.ts` - Next.js middleware
-  - `app/page.tsx` - Backend documentation page
+- `apps/web/` - Next.js 15 unified web application
+  - `app/` - Next.js pages, layouts, and API routes
+    - `(web)/` - Public pages (landing page)
+    - `(auth)/` - Authentication pages
+    - `(protected)/` - Protected dashboard pages
+    - `api/` - API route handlers
+    - `components/` - UI components
+    - `hooks/` - Custom React hooks (settings management)
+    - `lib/` - Utilities, auth, database, and theme logic
+    - `locales/` - Translation files
+  - `middleware.ts` - Next.js middleware for auth
+  - `prisma/` - Database schema and migrations
+  - `public/` - Static assets and PWA files
 
 #### Packages (Minimal)
 - `packages/config/` - Shared tool configurations
@@ -128,18 +135,14 @@ The frontend features a sophisticated theming system:
 
 ### Configuration Notes
 
-#### Frontend Configuration
+#### Web App Configuration
 - **ESLint and TypeScript errors ignored during builds** for flexible development
 - **Images unoptimized** for deployment flexibility
 - **shadcn/ui configuration** with neutral base color
 - **Path aliases** configured for clean imports (@/components, @/lib, etc.)
 - **Tailwind config extends** shared configuration from `@boilerplate/config`
-
-#### Backend Configuration
-- **Next.js 15** with TypeScript support
-- **Environment variables** in `.env` files
-- **CORS configured** via middleware
-- **Development mode** with Next.js dev server
+- **PWA support** with next-pwa configuration
+- **Vercel deployment** optimized with vercel.json
 
 #### Turborepo Configuration
 - **Pipeline tasks**: build, dev, lint, type-check, test, clean
@@ -148,23 +151,114 @@ The frontend features a sophisticated theming system:
 - **Workspace dependencies** properly configured
 
 ### Development Patterns (Simplified)
+- **Single domain architecture** - no CORS complexity
 - **Minimal workspace dependencies** - only essential shared packages
 - **Shared configs** centralized in `@boilerplate/config`
 - **Type safety** with local types and shared API types
 - **Direct component imports** - no build step needed
-- **Settings persistence** with error handling in frontend
-- **API communication** between Next.js apps
+- **Settings persistence** with error handling
+- **Same-origin API communication** - no cross-domain requests
 
 ### Getting Started
 1. Install dependencies: `pnpm install`
-2. Start development: `pnpm dev` (starts both Next.js apps)
-3. Build all: `pnpm build`
-4. Frontend: http://localhost:3100
-5. Backend API: http://localhost:3101
+2. Start database: `make db-up`
+3. Start development: `pnpm dev` (starts web application)
+4. Build all: `pnpm build`
+5. Web App: http://localhost:3000
 
-### Why This Simplified Structure?
-- **Faster development** - No build step for UI components
-- **Easier debugging** - Direct component access
-- **Simpler onboarding** - Less complexity for new developers
-- **Future flexibility** - Easy to extract packages when you need multiple frontends
+### Database Management
+
+#### Docker-Compose Services
+The project includes two containerized database services:
+
+- **PostgreSQL Database** (`postgres`): Main database server on port 5432
+- **Prisma Studio** (`prisma-studio`): Database GUI management tool on port 5555
+
+#### Database Commands
+```bash
+# Database lifecycle
+make db-up        # Start PostgreSQL database + run migrations
+make db-down      # Stop database
+make db-restart   # Restart database
+make db-clean     # Remove database + volumes (⚠️ deletes data)
+
+# Database management
+make db-migrate   # Run migrations
+make db-reset     # Reset database with fresh schema
+make db-logs      # Show database logs
+
+# Prisma Studio (GUI database management)
+make db-studio           # Start local Prisma Studio (via pnpm)
+make db-studio-up        # Start containerized Prisma Studio
+make db-studio-down      # Stop containerized Prisma Studio  
+make db-studio-logs      # Show Prisma Studio container logs
+
+# Alternative commands (root level)
+pnpm db:studio    # Local Prisma Studio
+pnpm db:migrate   # Run migrations
+pnpm db:generate  # Generate Prisma client
+```
+
+#### Database Access
+- **PostgreSQL**: `postgresql://auth_user:auth_password@localhost:5432/auth_db`
+- **Prisma Studio**: http://localhost:5555 (when running)
+- **Container Studio**: http://localhost:5555 (containerized version)
+
+### Deployment
+
+#### Multi-Environment Vercel Deployment
+This boilerplate supports automatic multi-environment deployment:
+
+- **Production** (`main` branch): Auto-deploy to production domain
+- **Staging** (`staging` branch): Auto-deploy to staging subdomain  
+- **Development** (feature branches): Auto-deploy to preview URLs
+
+**Key Benefits:**
+- ✅ **Single domain** - No CORS configuration needed
+- ✅ **Automatic environment detection** via `@packages/config/project.config.ts`
+- ✅ **Database branching** with Neon PostgreSQL (recommended)
+- ✅ **Enhanced security headers** in vercel.json
+- ✅ **Debug page** at `/debug` for troubleshooting
+
+**Setup:**
+1. Set `DATABASE_URL` and `BETTER_AUTH_SECRET` in Vercel environment variables
+2. Configure custom domain for production
+3. Push to branches for automatic deployment
+
+See `docs/vercel-deployment.md` for complete deployment guide.
+
+#### Environment Configuration
+The project automatically detects environments using:
+- **Local development**: `NODE_ENV=development`
+- **Vercel production**: `VERCEL_ENV=production` + `main` branch
+- **Vercel staging**: `VERCEL_GIT_COMMIT_REF=staging`
+- **Vercel preview**: All other branches
+
+Configuration handled in `@packages/config/project.config.ts` with functions:
+- `getEnvironmentType()` - Detect current environment
+- `getWebUrl()` - Get appropriate URL for environment
+- `getCurrentEnvironmentUrls()` - Get all environment URLs
+
+### Debugging & Troubleshooting
+
+#### Debug Page
+Visit `/debug` in any environment for:
+- Environment detection status
+- Session and authentication information  
+- Cookie inspection
+- API health checks
+- Configuration verification (non-sensitive)
+
+#### Common Issues
+- **Authentication problems**: Check `/debug` for session and cookie status
+- **Environment detection**: Verify VERCEL_ENV and branch name
+- **Database issues**: Check API health at `/api/health`
+
+### Why This Single Web App Structure?
+- **No CORS issues** - Same origin for frontend and API
+- **Simplified deployment** - One Vercel project instead of two
+- **Better performance** - No cross-origin requests
+- **Shared authentication** - Cookies work seamlessly across app and API
+- **Easier maintenance** - Single codebase to manage
+- **Cost effective** - Single project billing on Vercel
 ```

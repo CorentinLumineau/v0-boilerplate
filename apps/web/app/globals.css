@@ -1,0 +1,122 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@layer base {
+  :root {
+    /* Base theme variables will be set dynamically by theme system */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 0%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 0% 80%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 18%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 90% 65%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 80%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Universal autofill styling that adapts to all themes */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px hsl(var(--background)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+@layer components {
+  /* Typography components using @apply */
+  .h1 {
+    @apply text-3xl font-bold leading-tight;
+  }
+
+  .h2 {
+    @apply text-2xl font-semibold leading-tight;
+  }
+
+  .h3 {
+    @apply text-xl font-semibold leading-relaxed;
+  }
+
+  .h4 {
+    @apply text-lg font-semibold leading-relaxed;
+  }
+
+  /* Custom components */
+  .landing-header {
+    @apply sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 shadow-sm;
+  }
+
+  .landing-section {
+    @apply py-20 px-4 sm:px-6 lg:px-8;
+  }
+
+  .landing-section-muted {
+    @apply py-20 px-4 sm:px-6 lg:px-8 bg-muted/30;
+  }
+
+  .landing-container {
+    @apply max-w-4xl mx-auto text-center;
+  }
+
+  .landing-container-wide {
+    @apply max-w-6xl mx-auto;
+  }
+
+  /* Better ghost button styling with subtle backgrounds */
+  .btn-ghost-subtle {
+    @apply bg-muted/50 hover:bg-muted/80 text-muted-foreground hover:text-foreground;
+  }
+
+  .btn-ghost-primary {
+    @apply bg-primary/5 hover:bg-primary/10 text-primary hover:text-primary;
+  }
+
+  .btn-ghost-secondary {
+    @apply bg-secondary/50 hover:bg-secondary/80 text-secondary-foreground hover:text-secondary-foreground;
+  }
+}

@@ -1,14 +1,46 @@
-# Deploying Both Frontend and Backend on Vercel - Monorepo Setup
+# Deploying {{PROJECT_DISPLAY_NAME}} on Vercel - Complete Multi-Environment Setup
 
-This guide will walk you through deploying both your frontend and backend applications simultaneously using Vercel's monorepo support.
+This guide will walk you through deploying your **{{PROJECT_DISPLAY_NAME}}** web application with full support for **Production**, **Staging**, and **Development** environments using Vercel's intelligent environment detection.
+
+> 💡 **Note**: This guide uses your project configuration from `@packages/config/project.config.ts`. If you've customized your project using `scripts/setup-project.ts`, the examples will reflect your actual configuration.
+
+## 🏗️ Architecture Benefits
+
+This is a **unified web application** architecture with significant advantages:
+
+- ✅ **Single Domain**: No CORS configuration needed
+- ✅ **Simplified Deployment**: One Vercel project instead of two
+- ✅ **Better Performance**: No cross-origin requests
+- ✅ **Shared Authentication**: Cookies work seamlessly
+- ✅ **Easier Maintenance**: Single codebase to manage
+
+## Environment Strategy Overview
+
+This setup provides **three environments** that automatically deploy based on Git branches:
+
+### 🌍 **Production** (`main` branch)
+- **Web App**: `{{PRODUCTION_WEB_URL}}`
+- **Automatic deployment** on push to `main`
+
+### 🟡 **Staging** (`staging` branch)
+- **Web App**: `{{STAGING_WEB_URL}}`
+- **Automatic deployment** on push to `staging`
+
+### 🔧 **Development** (all other branches)
+- **Web App**: `{{DEVELOP_WEB_URL_PATTERN}}`
+- **Automatic deployment** on push to any feature branch
+- Example: `{{EXAMPLE_DEVELOP_WEB_URL}}`
+
+All environment detection is handled automatically through `@packages/config/project.config.ts` using Vercel's built-in environment variables.
 
 ## Prerequisites
 
 - Your monorepo is already set up with Turbo and pnpm
 - You have a Vercel account
 - Your code is pushed to a Git repository (GitHub, GitLab, or Bitbucket)
+- You have configured your project with `scripts/setup-project.ts` for proper environment URLs
 
-## Step 1: Create the Frontend Project
+## Step 1: Create the Vercel Project
 
 ### 1.1 Go to Vercel Dashboard
 1. Visit [vercel.com](https://vercel.com) and sign in
@@ -16,265 +48,360 @@ This guide will walk you through deploying both your frontend and backend applic
 
 ### 1.2 Import Your Repository
 1. Select your Git provider (GitHub, GitLab, or Bitbucket)
-2. Find and select your `v0-boilerplate` repository
+2. Find and select your project repository
 3. Click **"Import"**
 
-### 1.3 Configure Frontend Project Settings
-1. **Project Name**: `your-app-frontend` (or any name you prefer)
+### 1.3 Configure Project Settings
+1. **Project Name**: `{{PROJECT_NAME}}` (or any name you prefer)
 2. **Framework Preset**: `Next.js` (should auto-detect)
-3. **Root Directory**: `apps/frontend` ⭐ **IMPORTANT**
-4. **Build Command**: `pnpm build` ⭐ **NOT** `pnpm build --filter=@boilerplate/frontend`
+3. **Root Directory**: `apps/web` ⭐ **IMPORTANT**
+4. **Build Command**: Leave as default (uses vercel.json)
 5. **Output Directory**: `.next`
-6. **Install Command**: `pnpm install`
+6. **Install Command**: `pnpm install --frozen-lockfile`
 
-### 1.4 Environment Variables (Optional)
-Add any environment variables your frontend needs:
-- `NEXT_PUBLIC_API_URL`: Will be set after backend deployment
+### 1.4 Environment Variables
 
-### 1.5 Deploy Frontend
-1. Click **"Deploy"**
-2. Wait for the build to complete
-3. Note the deployment URL (e.g., `https://your-app-frontend.vercel.app`)
+#### 🔑 Required Environment Variables (Set Once, Used Everywhere)
+**⚠️ IMPORTANT**: These environment variables are set **once in Vercel** and automatically work across **all environments** (Production, Staging, Development):
 
-## Step 2: Create the Backend Project
+- `DATABASE_URL`: Your database connection string 
+  - ✅ **Same value for ALL environments**
+  - **Recommended**: Use Neon PostgreSQL for automatic database branching
+  - Neon automatically creates branch databases for non-production environments
+  - **Required for deployment**
 
-### 2.1 Create Another Project
-1. In Vercel Dashboard, click **"New Project"** again
-2. Select the **same repository** (`v0-boilerplate`)
-
-### 2.2 Configure Backend Project Settings
-1. **Project Name**: `your-app-backend` (or any name you prefer)
-2. **Framework Preset**: `Next.js` (should auto-detect)
-3. **Root Directory**: `apps/backend` ⭐ **IMPORTANT**
-4. **Build Command**: `pnpm build` ⭐ **NOT** `pnpm build --filter=@boilerplate/backend`
-5. **Output Directory**: `.next`
-6. **Install Command**: `pnpm install`
-
-### 2.3 Environment Variables
-Add backend-specific environment variables:
-- `DATABASE_URL`: Your database connection string (⚠️ **REQUIRED** - see database setup below)
 - `BETTER_AUTH_SECRET`: Your Better Auth secret key (32+ characters)
-- `BETTER_AUTH_BASE_URL`: Your backend URL with protocol (e.g., `https://your-app-backend.vercel.app`)
-- `NEXT_PUBLIC_APP_URL`: Your frontend URL (e.g., `https://your-app-frontend.vercel.app`)
+  - ✅ **Same secret for ALL environments** - Used for signing authentication tokens
+  - Generate once: `openssl rand -base64 32`
+  - **Required for authentication to work**
 
-### 2.3.1 Database Setup (Critical)
-**⚠️ Important:** You must set up a production database BEFORE deploying the backend.
+#### 🤖 Automatic Environment Variables (Provided by Vercel)
+These are automatically available and used by `@packages/config/project.config.ts`:
+- `VERCEL_ENV`: `'production'` | `'preview'` | `'development'`
+- `VERCEL_GIT_COMMIT_REF`: Branch name (e.g., `'main'`, `'staging'`, `'feature/user-auth'`)
+- `VERCEL_URL`: Deployment URL
+- `NODE_ENV`: Environment type
 
-**Recommended Database Providers:**
-- **Neon** (recommended): Free tier, auto-scaling PostgreSQL
-- **Supabase**: Free tier with additional features
-- **Railway**: Simple PostgreSQL hosting
-- **AWS RDS**: Enterprise-grade option
-
-**Steps:**
-1. Create a PostgreSQL database with your chosen provider
-2. Get the connection string (format: `postgresql://user:password@host:port/database`)
-3. Add `DATABASE_URL` to your backend environment variables in Vercel
-4. The build process will automatically run migrations on first deployment
-
-### 2.4 Deploy Backend
+### 1.5 Deploy
 1. Click **"Deploy"**
-2. Wait for the build to complete *(migrations run automatically during build)*
-3. Note the deployment URL (e.g., `https://your-app-backend.vercel.app`)
-4. Verify migration success by checking the build logs for "Database migrations completed"
+2. Wait for the build to complete (migrations run automatically during build)
+3. Note the deployment URL (e.g., `https://{{PROJECT_NAME}}.vercel.app`)
 
-## Step 3: Update Frontend Environment Variables
+## Step 2: Configure Custom Domain (Production)
 
-### 3.1 Update API URL
-1. Go back to your **Frontend Project** in Vercel Dashboard
-2. Navigate to **Settings** → **Environment Variables**
-3. Update `NEXT_PUBLIC_API_URL` to your backend URL:
-   ```
-   NEXT_PUBLIC_API_URL=https://your-app-backend.vercel.app
-   ```
-4. Click **"Save"**
-5. Trigger a new deployment by clicking **"Redeploy"**
+### 2.1 Set Production Domain
+1. In your Project settings, go to **Domains**
+2. Add your custom domain: `{{CUSTOM_WEB_DOMAIN}}`
+3. Configure DNS records as instructed by Vercel
+4. Enable HTTPS (automatic with Vercel)
 
-## Step 4: Configure Custom Domains (Optional)
+### 2.2 Automatic Subdomain Configuration
+Vercel automatically creates subdomains for:
+- **Staging**: Your staging branch deployments
+- **Development**: Your feature branch deployments
 
-### 4.1 Frontend Domain
-1. In your Frontend Project settings
-2. Go to **Domains**
-3. Add your custom domain (e.g., `app.yourdomain.com`)
+## Step 2.5: Configure Custom Domain for Staging (Optional)
 
-### 4.2 Backend Domain
-1. In your Backend Project settings
-2. Go to **Domains**
-3. Add your API subdomain (e.g., `api.yourdomain.com`)
+If you want a custom domain for your staging environment (recommended for teams):
 
-## Step 5: Verify Deployment
+### 2.5.1 Set Staging Custom Domain
+1. In your Project settings, go to **Domains**
+2. Add your staging domain: `staging.yourdomain.com` or `{{STAGING_WEB_URL}}`
+3. Configure DNS records as instructed by Vercel
+4. **Important**: Set this domain to point to the `staging` branch specifically
 
-### 5.1 Test Frontend
-- Visit your frontend URL
-- Verify the app loads correctly
-- Check that it can communicate with the backend
+### 2.5.2 Branch-Specific Domain Configuration
+1. After adding the domain, click the **Edit** button next to it
+2. Set **Git Branch**: `staging`
+3. This ensures the custom domain only serves the staging branch
+4. Other branches will continue using Vercel's auto-generated preview URLs
 
-### 5.2 Test Backend
-- Visit your backend URL + `/api/health` (e.g., `https://your-app-backend.vercel.app/api/health`)
-- Verify the API responds correctly
+### 2.5.3 Benefits of Staging Custom Domain
+- ✅ **Professional URLs** for client demos and stakeholder reviews
+- ✅ **Consistent staging environment** - same domain every time
+- ✅ **Better testing** - mirrors production domain structure
+- ✅ **Team collaboration** - easy to share staging links
 
-## Step 6: Set Up Automatic Deployments
+> **Note**: Custom staging domains are optional. Vercel's auto-generated staging URLs work perfectly fine for most use cases.
 
-### 6.1 Both projects will automatically deploy when you:
-- Push to the `main` branch
-- Create a pull request
-- Merge a pull request
+## Step 3: Database Setup with Neon (Recommended)
 
-### 6.2 Deployment Order
-- Both projects deploy simultaneously
-- Backend typically deploys first (faster build)
-- Frontend deploys second and picks up the new backend URL
+### 3.1 Why Neon?
+- **Free tier** with generous limits
+- **Automatic database branching** - perfect for multi-environment setup
+- **PostgreSQL** compatible
+- **Serverless** and scales to zero
 
-## Troubleshooting
+### 3.2 Setup Steps
+1. Create a Neon account at [neon.tech](https://neon.tech)
+2. Create a new PostgreSQL database
+3. Get the connection string (format: `postgresql://user:password@host/database?sslmode=require`)
+4. Add `DATABASE_URL` to Vercel environment variables
 
-### Build Failures
-1. **Check Root Directory**: Ensure it's set to `apps/frontend` or `apps/backend`
-2. **Check Build Command**: Should be `pnpm build` (NOT with --filter flag)
-3. **Check Install Command**: Should be `pnpm install`
+### 3.3 How Neon Branching Works
+- **Production** (`main` branch): Uses the main database
+- **Staging** (`staging` branch): Neon creates a separate branch database
+- **Development** (feature branches): Each gets its own branch database
+- **All use the same DATABASE_URL** - Neon handles routing automatically!
 
-### Common Error: "unknown option '--filter'"
-- **Cause**: Using `pnpm build --filter=@boilerplate/frontend` when Root Directory is set to `apps/frontend`
-- **Solution**: Use `pnpm build` as the build command when Root Directory is set to the specific app folder
+## Step 4: Verify Multi-Environment Deployment
 
-### Environment Variables
-1. **Frontend**: Use `NEXT_PUBLIC_` prefix for client-side variables
-2. **Backend**: Regular environment variables work as expected
+### 4.1 Test Production
+1. Push to `main` branch
+2. Visit `{{PRODUCTION_WEB_URL}}`
+3. Verify the app loads correctly
 
-### Database Migration Issues
-1. **"prisma: command not found" error**:
-   - Ensure `prisma` is in `dependencies` (not `devDependencies`)
-   - Vercel only installs production dependencies
+### 4.2 Test Staging
+1. Create and push to `staging` branch
+2. Visit `{{STAGING_WEB_URL}}`
+3. Verify staging environment works
 
-2. **Migration fails during build**:
-   - Check `DATABASE_URL` is correct and accessible
-   - Verify database exists and user has proper permissions
-   - Check Vercel build logs for specific error messages
+### 4.3 Test Development
+1. Create a feature branch (e.g., `feature/new-feature`)
+2. Push to the branch
+3. Visit the preview URL (shown in Vercel dashboard)
+4. Verify development environment works
 
-2. **"No pending migrations" error**:
-   - This is normal for subsequent deployments
-   - Migrations only run when there are schema changes
+## Step 5: Authentication Configuration
 
-3. **Schema out of sync**:
-   - Use `prisma db push` for quick fixes (development only)
-   - Create proper migrations for production: `prisma migrate dev`
+### 5.1 Simplified Cookie Configuration
+Since everything runs on the same domain, authentication is greatly simplified:
 
-### CORS Issues
-1. Update backend environment variables to include frontend URL
-2. Ensure it matches your frontend domain exactly
-
-### API Communication
-1. Verify `NEXT_PUBLIC_API_URL` is set correctly
-2. Check that backend API routes are working
-3. Test with a simple health check endpoint
-
-## Project Structure After Deployment
-
-```
-Your Repository
-├── apps/
-│   ├── frontend/          → Deployed to: your-app-frontend.vercel.app
-│   └── backend/           → Deployed to: your-app-backend.vercel.app
-├── packages/
-│   ├── config/
-│   └── types/
-└── vercel.json            → Frontend deployment config (optional)
+```typescript
+// Automatically configured in apps/web/app/lib/auth.ts
+cookieOptions: {
+  httpOnly: true,         // Prevents JavaScript access
+  sameSite: "lax",        // Perfect for same-origin requests
+  secure: true,           // Required for HTTPS
+  path: "/",              // Available on all paths
+}
 ```
 
-## Database Migration Workflow
+### 5.2 Key Benefits
+- ✅ **No CORS configuration needed** - same origin for frontend and API
+- ✅ **No cross-subdomain cookie complexity**
+- ✅ **Simplified authentication flow**
+- ✅ **Better security** with same-origin policy
 
-### **How Migrations Work**
-1. **Development**: Create migrations locally with `make db-migrate`
-2. **Commit**: Migration files are version controlled
-3. **Deploy**: Vercel runs `prisma migrate deploy` during build
-4. **Production**: Database schema is automatically updated
+## Step 6: API Routes
 
-### **Making Schema Changes**
-```bash
-# 1. Update your schema in apps/backend/prisma/schema.prisma
-# 2. Create migration
-make db-migrate
-# 3. Test locally, then commit and push
-git add . && git commit -m "Add user profile fields"
-git push origin main
-# 4. Vercel automatically deploys with migrations
-```
+Your API routes are available at the same domain:
+- **Health Check**: `/api/health`
+- **Auth Routes**: `/api/auth/*`
+- **Custom Routes**: `/api/*`
 
-### **Migration Commands**
-- `make db-migrate` - Create and apply new migration (development)
-- `make db-migrate-deploy` - Deploy migrations to production database
-- `make db-migrate-reset` - Reset database (⚠️ deletes all data)
+No additional configuration needed - they just work!
 
-## Benefits of This Setup
+## Debugging Tools
 
-✅ **Independent Scaling**: Each app scales based on its own traffic  
-✅ **Isolated Deployments**: Deploy one app without affecting the other  
-✅ **Separate Environment Variables**: Different configs for each app  
-✅ **Easy Rollbacks**: Rollback one app independently  
-✅ **Cost Optimization**: Pay only for what each app uses  
-✅ **Simultaneous Deployments**: Both deploy when you push code  
-✅ **Automatic Migrations**: Database schema stays in sync
+### Debug Page
+Visit `/debug` in any environment to see:
+- Current environment detection
+- Session information
+- Cookie details
+- API health status
+- Configuration (non-sensitive)
 
-## Next Steps
+### Common Issues and Solutions
 
-1. **Monitor Deployments**: Use Vercel's built-in analytics
-2. **Set Up Preview Deployments**: Test changes in PRs
-3. **Configure Webhooks**: Integrate with your CI/CD pipeline
-4. **Set Up Monitoring**: Add error tracking and performance monitoring
+**Issue**: Environment not detected correctly
+- **Solution**: Check `VERCEL_ENV` and `VERCEL_GIT_COMMIT_REF` in Vercel dashboard
+- The `getEnvironmentType()` function in project.config.ts handles detection
+
+**Issue**: Database connection fails
+- **Solution**: Verify `DATABASE_URL` is set in Vercel environment variables
+- Check Neon dashboard for connection details
+- Ensure SSL mode is enabled in connection string
+
+**Issue**: Authentication not working
+- **Solution**: Verify `BETTER_AUTH_SECRET` is set (same value for all environments)
+- Check browser DevTools for `better-auth.session_token` cookie
+- Use `/debug` page for detailed diagnostics
 
 ## Configuration Files
 
-### Root vercel.json (optional - only needed if not using Root Directory setting)
+### vercel.json (apps/web/vercel.json)
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm build",
+  "framework": "nextjs",
+  "buildCommand": "pnpm --filter {{PROJECT_NAMESPACE}}/types build && pnpm --filter {{PROJECT_NAMESPACE}}/config build && prisma generate && prisma migrate deploy && next build",
+  "installCommand": "pnpm install --frozen-lockfile",
   "outputDirectory": ".next",
-  "installCommand": "pnpm install",
-  "framework": "nextjs"
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    }
+  ]
 }
 ```
 
-### Alternative: Deploy from Root with Turbo (not recommended for this setup)
-If you want to deploy from the root directory, you would need:
-```json
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm build --filter=@boilerplate/frontend",
-  "outputDirectory": "apps/frontend/.next",
-  "installCommand": "pnpm install",
-  "framework": "nextjs"
-}
+### Key Benefits of This Configuration:
+- ✅ **Automatic dependency building** (types, config packages)
+- ✅ **Database migrations** run automatically
+- ✅ **Security headers** configured
+- ✅ **Function timeouts** optimized
+- ✅ **No CORS configuration needed** - single domain!
+
+## Environment Variables Summary
+
+### Required Variables (Set Once in Vercel)
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host/db?sslmode=require` |
+| `BETTER_AUTH_SECRET` | Authentication secret (32+ chars) | `your-super-secret-key-here` |
+
+### Optional Variables
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `GITHUB_CLIENT_ID` | GitHub OAuth client ID | `your-github-client-id` |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth secret | `your-github-secret` |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID | `your-google-client-id` |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth secret | `your-google-secret` |
+
+### Automatic Variables (Provided by Vercel)
+| Variable | Description | Values |
+|----------|-------------|--------|
+| `VERCEL_ENV` | Deployment environment | `production`, `preview`, `development` |
+| `VERCEL_GIT_COMMIT_REF` | Git branch name | `main`, `staging`, `feature/xyz` |
+| `VERCEL_URL` | Deployment URL | Auto-generated |
+| `NODE_ENV` | Node environment | `production`, `development` |
+
+## Deployment Workflow
+
+### 1. Development Flow
+```
+feature/user-auth branch → Push → {{EXAMPLE_DEVELOP_WEB_URL}}
+                                 ↓
+                          Review & Test
+                                 ↓
+                          Merge to staging
 ```
 
-## Environment Variables Reference
+### 2. Staging Flow
+```
+staging branch → Push → {{STAGING_WEB_URL}}
+                      ↓
+                QA Testing
+                      ↓
+              Merge to main
+```
 
-### Frontend Environment Variables
-- `NEXT_PUBLIC_API_URL`: Backend API URL
-- `NEXT_PUBLIC_APP_URL`: Frontend app URL
+### 3. Production Flow
+```
+main branch → Push → {{PRODUCTION_WEB_URL}} (production)
+```
 
-### Backend Environment Variables
-- `DATABASE_URL`: Database connection string
-- `BETTER_AUTH_SECRET`: Better Auth signing secret (32+ characters)
-- `BETTER_AUTH_BASE_URL`: Backend URL with protocol (e.g., `https://api.yourdomain.com`)
-- `NEXT_PUBLIC_APP_URL`: Frontend URL for CORS and redirects
-- `NODE_ENV`: Environment (production/development)
+## Migration Commands
+
+Database migrations are handled automatically during deployment, but you can also run them manually:
+
+```bash
+# Development: Create new migration
+make db-migrate
+
+# Deploy migrations (runs automatically on Vercel)
+pnpm --filter {{PROJECT_NAMESPACE}}/web db:migrate
+
+# Reset database (⚠️ Development only)
+make db-migrate-reset
+```
+
+## Monitoring and Analytics
+
+### Vercel Analytics
+1. Enable Analytics in your Vercel project settings
+2. Monitor performance, errors, and usage
+3. Set up alerts for issues
+
+### Recommended Monitoring Tools
+- **Sentry**: Error tracking and performance monitoring
+- **PostHog**: Product analytics and feature flags
+- **Uptime monitoring**: Pingdom, UptimeRobot, or Better Uptime
 
 ## Deployment Checklist
 
-- [ ] Frontend project created with correct root directory (`apps/frontend`)
-- [ ] Backend project created with correct root directory (`apps/backend`)
-- [ ] Build commands set to `pnpm build` (not with --filter flag)
-- [ ] Environment variables configured for both projects
-- [ ] Frontend can communicate with backend
-- [ ] Custom domains configured (if needed)
-- [ ] Health checks passing
-- [ ] Monitoring and analytics set up
+### Initial Setup
+- [ ] Project created with correct root directory (`apps/web`)
+- [ ] Environment variables configured: `DATABASE_URL` and `BETTER_AUTH_SECRET`
+- [ ] Database setup with Neon (or alternative)
+- [ ] Custom domain configured (production)
+- [ ] Custom domain configured for staging (optional, recommended for teams)
 
-## Key Points to Remember
+### Multi-Environment Testing
+- [ ] **Production**: Push to `main` branch and verify
+- [ ] **Staging**: Push to `staging` branch and verify
+- [ ] **Development**: Push to feature branch and verify
+- [ ] Environment detection working correctly
+- [ ] Database branching working (if using Neon)
 
-⭐ **Root Directory**: Set to `apps/frontend` or `apps/backend`  
-⭐ **Build Command**: Use `pnpm build` (simple, no filters)  
-⭐ **Output Directory**: Use `.next` (relative to the app directory)  
-⭐ **Install Command**: Use `pnpm install` (works from any directory)  
+### Security Verification
+- [ ] `BETTER_AUTH_SECRET` is secure (32+ characters)
+- [ ] All deployments use HTTPS
+- [ ] Security headers properly configured
+- [ ] Environment variables not exposed
 
-Your monorepo is now ready for production deployment! 🚀 
+### Performance Checks
+- [ ] Build times acceptable
+- [ ] Function execution times optimized
+- [ ] Static assets properly cached
+- [ ] Images optimized
+
+## Summary
+
+Your **{{PROJECT_DISPLAY_NAME}}** is now deployed with:
+
+🌍 **Production** environment on `main` branch  
+🟡 **Staging** environment on `staging` branch  
+🔧 **Development** environments on feature branches  
+
+All with **automatic configuration**, **zero CORS complexity**, and **simplified authentication**!
+
+## Benefits of This Architecture
+
+✅ **Single Domain Simplicity**: No CORS, no cross-origin issues  
+✅ **Unified Deployment**: One Vercel project to manage  
+✅ **Automatic Environment Detection**: Zero manual configuration  
+✅ **Database Branching**: Isolated data for each environment  
+✅ **Simplified Authentication**: Same-origin cookies just work  
+✅ **Better Performance**: No cross-origin request overhead  
+✅ **Cost Effective**: Single project billing  
+
+## Next Steps
+
+1. **Set up monitoring**: Add error tracking and analytics
+2. **Configure CI/CD**: Add GitHub Actions for automated testing
+3. **Add custom domains**: For staging if needed
+4. **Enable preview comments**: For better collaboration
+5. **Set up notifications**: For deployment status
+
+---
+
+Need help? Check the [Vercel documentation](https://vercel.com/docs) or your project's README for more information.

@@ -5,18 +5,19 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
 [![Turborepo](https://img.shields.io/badge/Turborepo-monorepo-red?style=for-the-badge&logo=turborepo)](https://turbo.build)
 
-A production-ready **Next.js 15** monorepo boilerplate with comprehensive authentication, theming, internationalization, and modern development tools. Built with TypeScript and designed for rapid project bootstrapping.
+A production-ready **Next.js 15** web application with comprehensive authentication, theming, internationalization, and modern development tools. Built with TypeScript and designed for rapid project bootstrapping using a **unified single-domain architecture**.
 
 ## 🌟 Key Features
 
 ### 🔐 **Authentication System**
 - **Better-auth** integration with Next.js 15 server actions
-- Cross-subdomain cookie support for production deployments
+- **Simplified single-domain authentication** - no CORS complexity
 - Layout-based route protection for optimal performance
 - Session management with TanStack Query optimization
+- Social OAuth providers (GitHub, Google) support
 
 ### 🎨 **Advanced Theming**
-- **8 pre-built color themes** (default, red, orange, green, blue, teal, purple, pink)
+- **42+ pre-built color themes** (from amber to zinc)
 - Dynamic theme switching with CSS custom properties
 - **5 radius presets** (0 to 1.0rem) for component customization
 - Dark/light mode support with `next-themes`
@@ -41,11 +42,13 @@ A production-ready **Next.js 15** monorepo boilerplate with comprehensive authen
 - App manifest with customizable icons and metadata
 - Offline-first approach for improved user experience
 
-### 🏗️ **Monorepo Architecture**
+### 🏗️ **Unified Web Architecture**
+- **Single Next.js app** serving both frontend and API routes
 - **Turborepo** for optimized build orchestration
-- **pnpm workspaces** with workspace protocol
+- **pnpm workspaces** with workspace protocol  
 - Shared packages for types, configs, and utilities
-- Centralized configuration management
+- **No CORS issues** - same origin for all requests
+- **Simplified deployment** - one Vercel project instead of two
 
 ### 🛠️ **Developer Experience**
 - **Automated project setup script** for instant bootstrapping
@@ -54,6 +57,7 @@ A production-ready **Next.js 15** monorepo boilerplate with comprehensive authen
 - **Tailwind CSS** with shadcn/ui component system
 - **Prisma ORM** with PostgreSQL database
 - **ESLint** and **TypeScript** strict configuration
+- **Debug page** at `/debug` for troubleshooting
 - Hot reload and fast refresh in development
 
 ## 🚀 Quick Start
@@ -70,7 +74,7 @@ A production-ready **Next.js 15** monorepo boilerplate with comprehensive authen
 1. **Clone and run the setup script**
    ```bash
    git clone <repository-url>
-   cd v0-boilerplate
+   cd boilerplate
    pnpm install
    npx tsx scripts/setup-project.ts
    ```
@@ -82,46 +86,76 @@ A production-ready **Next.js 15** monorepo boilerplate with comprehensive authen
    - Configure Docker containers and networking
    - Generate secure authentication secrets
    - Update all configuration files automatically
+   - Customize deployment documentation
+
+2. **Start the development environment**
+   ```bash
+   # Start PostgreSQL
+   make db-up
+   
+   # Start the web application
+   make dev
+   ```
+
+3. **Access your application**
+   - **Web App**: http://localhost:3000
+   - **API Health**: http://localhost:3000/api/health
+   - **Debug Page**: http://localhost:3000/debug
 
 #### Option 2: Manual Setup
 
 1. **Clone and install dependencies**
    ```bash
    git clone <repository-url>
-   cd v0-boilerplate
+   cd boilerplate
    pnpm install
    ```
 
 2. **Set up the database**
    ```bash
    # Start PostgreSQL with Docker
-   docker run --name v0-boilerplate-postgres \
+   make db-up
+   
+   # Or manually:
+   docker run --name boilerplate-postgres \
      -e POSTGRES_USER=auth_user \
      -e POSTGRES_PASSWORD=auth_password \
      -e POSTGRES_DB=auth_db \
      -p 5432:5432 -d postgres:16-alpine
-   
-   # Run database migrations
-   pnpm --filter @boilerplate/backend db:migrate
    ```
 
-3. **Start development servers**
+3. **Configure environment variables**
    ```bash
+   # Copy and customize environment file
+   cp apps/web/.env.example apps/web/.env.local
+   
+   # Set required variables:
+   # DATABASE_URL=postgresql://auth_user:auth_password@localhost:5432/auth_db
+   # BETTER_AUTH_SECRET=your-32-character-secret-key-here
+   ```
+
+4. **Run database migrations and start development**
+   ```bash
+   pnpm --filter @boilerplate/web db:migrate
    pnpm dev
    ```
-
-4. **Access the applications**
-   - **Frontend**: http://localhost:3100
-   - **Backend API**: http://localhost:3101
 
 ## 🏢 Architecture Overview
 
 ### Monorepo Structure
 ```
-v0-boilerplate/
+boilerplate/
 ├── apps/
-│   ├── frontend/          # Next.js 15 client application
-│   └── backend/           # Next.js 15 API server
+│   └── web/               # Next.js 15 unified web application
+│       ├── app/
+│       │   ├── (web)/     # Public pages (landing page)
+│       │   ├── (auth)/    # Authentication pages  
+│       │   ├── (protected)/ # Protected dashboard pages
+│       │   ├── api/       # API routes
+│       │   ├── components/ # UI components
+│       │   └── lib/       # Utilities and libraries
+│       ├── prisma/        # Database schema and migrations
+│       └── public/        # Static assets
 ├── packages/
 │   ├── config/            # Shared configurations
 │   └── types/             # Shared TypeScript types
@@ -131,16 +165,13 @@ v0-boilerplate/
 
 ### Technology Stack
 
-#### **Frontend (`apps/frontend`)**
-- **Next.js 15** with App Router and React 19
+#### **Unified Web Application (`apps/web`)**
+- **Next.js 15** with App Router and React 19 (frontend + API)
 - **TanStack Query** for server state management
 - **Tailwind CSS** with shadcn/ui components
 - **Radix UI** primitives for accessibility
 - **next-themes** for theme management
 - **next-pwa** for Progressive Web App features
-
-#### **Backend (`apps/backend`)**
-- **Next.js 15** with API Routes
 - **Better-auth** for authentication
 - **Prisma ORM** with PostgreSQL
 - **Server-Sent Events** for real-time features
@@ -151,14 +182,21 @@ v0-boilerplate/
 
 ## 🎯 Key Features in Detail
 
+### Single Domain Benefits
+- **No CORS configuration** required - everything runs on the same origin
+- **Simplified authentication** - cookies work seamlessly
+- **Better performance** - no cross-origin request overhead
+- **Easier deployment** - single Vercel project
+- **Cost effective** - one project billing
+
 ### Authentication Flow
 - **Layout-based protection** eliminates per-page auth checks
-- **Cross-domain cookie support** for production deployments
+- **Simplified cookie configuration** for single domain
 - **Session optimization** with TanStack Query caching
 - **Automatic redirects** with middleware-based routing
 
 ### Theme System
-- **8 color themes** with semantic color tokens
+- **42 color themes** with semantic color tokens
 - **Dynamic CSS custom properties** for runtime theme switching
 - **Radius customization** with 5 preset values
 - **Persistent user preferences** across sessions
@@ -179,57 +217,99 @@ v0-boilerplate/
 
 ### Root Level (Turborepo)
 ```bash
-pnpm dev          # Start all development servers
+pnpm dev          # Start web application development server
 pnpm build        # Build all applications and packages
 pnpm lint         # Lint all code
 pnpm type-check   # TypeScript type checking
 pnpm test         # Run all tests
 pnpm clean        # Clean build outputs
+pnpm format       # Format code with Prettier
 ```
 
-### Individual Applications
+### Individual Application
 ```bash
-pnpm --filter @boilerplate/frontend dev    # Frontend only
-pnpm --filter @boilerplate/backend dev     # Backend only
+pnpm --filter @boilerplate/web dev       # Web app only
+pnpm --filter @boilerplate/web build     # Build web app
 ```
 
 ### Database Operations
 ```bash
-pnpm --filter @boilerplate/backend db:migrate    # Run migrations
-pnpm --filter @boilerplate/backend db:generate   # Generate Prisma client
-pnpm --filter @boilerplate/backend db:studio     # Open Prisma Studio
+make db-up        # Start PostgreSQL with Docker
+make db-down      # Stop PostgreSQL container
+make db-migrate   # Run database migrations
+make db-studio    # Open Prisma Studio
+make db-reset     # Reset database (development only)
+```
+
+### Development Helpers
+```bash
+make dev          # Start web app (alias for pnpm dev)
+make logs         # View database container logs
+make clean        # Clean all build outputs and caches
 ```
 
 ## 🌐 Deployment
 
-### Vercel Deployment
+### Multi-Environment Vercel Deployment
 
-The project is optimized for Vercel with separate frontend and backend deployments:
+The project supports automatic multi-environment deployment:
 
-1. **Frontend**: [boilerplate.lumineau.app](https://boilerplate.lumineau.app)
-2. **Backend API**: [api.boilerplate.lumineau.app](https://api.boilerplate.lumineau.app)
+- **Production** (`main` branch): Auto-deploy to production domain
+- **Staging** (`staging` branch): Auto-deploy to staging subdomain  
+- **Development** (feature branches): Auto-deploy to preview URLs
 
-### Environment Variables
+#### Environment Variables Setup
 
-**Frontend (`.env.local`)**
+**Required in Vercel (set once, works for all environments):**
 ```env
-NEXT_PUBLIC_BACKEND_URL=https://api.boilerplate.lumineau.app
+DATABASE_URL=postgresql://user:password@host:5432/database
+BETTER_AUTH_SECRET=your-32-character-secret-key-here
 ```
 
-**Backend (`.env`)**
+**Optional (for social OAuth):**
 ```env
-DATABASE_URL=your_postgresql_connection_string
-BETTER_AUTH_SECRET=your_secret_key
-BETTER_AUTH_URL=https://api.boilerplate.lumineau.app
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 ```
+
+**Automatic Variables (provided by Vercel):**
+- `VERCEL_ENV` - Environment type (production/preview/development)
+- `VERCEL_GIT_COMMIT_REF` - Git branch name
+- `VERCEL_URL` - Deployment URL
+- `NODE_ENV` - Node environment
+
+#### Deployment Setup
+
+1. **Create Vercel Project**
+   - Import your repository
+   - Set **Root Directory** to `apps/web`
+   - Framework preset: Next.js (auto-detected)
+
+2. **Configure Environment Variables**
+   - Add `DATABASE_URL` and `BETTER_AUTH_SECRET` in Vercel dashboard
+   - Variables work across all environments automatically
+
+3. **Database Setup (Recommended: Neon)**
+   - Create PostgreSQL database at [neon.tech](https://neon.tech)
+   - Neon automatically creates branch databases for staging/preview
+   - Use the same `DATABASE_URL` for all environments
+
+4. **Deploy**
+   - Push to `main` for production
+   - Push to `staging` for staging environment
+   - Push to any branch for preview deployments
+
+See `docs/vercel-deployment.md` for complete deployment guide.
 
 ## 🛡️ Security Features
 
-- **CORS configuration** for cross-origin requests
-- **Helmet.js** for security headers
+- **Enhanced security headers** configured in vercel.json
 - **Environment variable validation**
 - **Secure cookie configuration** for production
 - **CSRF protection** with Better-auth
+- **No CORS vulnerabilities** with single domain architecture
 
 ## 🎨 Customization
 
@@ -241,41 +321,54 @@ This boilerplate includes a comprehensive setup script that automates project co
 npx tsx scripts/setup-project.ts
 ```
 
-**What it does:**
-- **Project Branding**: Updates names, descriptions, and metadata
-- **Database Configuration**: Sets up PostgreSQL credentials and connection strings
+**What it configures:**
+- **Project Branding**: Names, descriptions, and metadata
+- **Database Configuration**: PostgreSQL credentials and connection strings
 - **Environment Files**: Generates `.env` files with secure secrets
-- **Package Namespaces**: Updates all package.json files with your project namespace
+- **Package Namespaces**: Updates all package.json files
 - **Docker Setup**: Configures container names and networking
 - **PWA Manifest**: Updates app metadata for Progressive Web App features
-- **Documentation**: Updates setup guides and README with your project details
-
-**Interactive Configuration:**
-- Project name and description
-- Author information and repository URL
-- Database credentials (auto-generated or custom)
-- Development and production URLs
-- Secure authentication secrets (auto-generated)
+- **Documentation**: Updates deployment guides with your project details
 
 ### Adding New Themes
-1. Add theme colors to `themeColors` object in `apps/frontend/components/settings/color-theme-selector.tsx`
-2. Update available themes in `packages/config/project.config.ts`
-3. Theme will automatically appear in the settings panel
+1. Create theme file in `apps/web/app/lib/theme/`
+2. Export theme colors following the existing pattern
+3. Update `getAvailableThemes()` in project config
+4. Theme appears automatically in settings panel
 
 ### Adding New Languages
-1. Create translation files in `apps/frontend/locales/`
-2. Update i18n configuration in `apps/frontend/lib/i18n.ts`
-3. Update supported locales in project config
+1. Create translation files in `apps/web/app/locales/`
+2. Update i18n configuration in `apps/web/app/lib/i18n.ts`
+3. Update `getSupportedLocales()` in project config
 
 ### Extending the API
-1. Add new routes in `apps/backend/app/api/`
+1. Add new routes in `apps/web/app/api/`
 2. Update Prisma schema for database changes
 3. Generate types in `@boilerplate/types`
+4. Use TanStack Query for client-side data fetching
+
+## 🐛 Debugging & Troubleshooting
+
+### Debug Page
+Visit `/debug` in any environment for comprehensive diagnostics:
+- Environment detection status
+- Authentication and session information
+- Cookie inspection with copy functionality
+- API health checks
+- Configuration verification (non-sensitive)
+- Common issues and solutions
+
+### Common Issues
+- **Authentication problems**: Check `/debug` for session and cookie status
+- **Environment detection**: Verify VERCEL_ENV and branch name in debug page
+- **Database issues**: Check API health at `/api/health`
+- **Build failures**: Ensure all environment variables are set
 
 ## 📖 Documentation
 
-- **Component Documentation**: Built with Storybook (coming soon)
-- **Type Documentation**: Auto-generated from TypeScript interfaces
+- **Deployment Guide**: `docs/vercel-deployment.md`
+- **Project Instructions**: `CLAUDE.md` (for AI assistants)
+- **Migration Guide**: `MIGRATION_GUIDE.md` (historical reference)
 
 ## 🤝 Contributing
 
@@ -293,13 +386,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **Next.js** team for the excellent framework
-- **Vercel** for deployment platform
-- **Better-auth** for authentication solution
+- **Vercel** for deployment platform and automatic environment detection
+- **Better-auth** for simplified authentication solution
 - **Radix UI** for accessible component primitives
 - **shadcn/ui** for beautiful component designs
+- **Neon** for PostgreSQL with database branching
 
 ---
 
 **Ready to build something amazing?** 🚀
 
-Start with `pnpm dev` and customize this boilerplate to match your project needs!
+Start with `npx tsx scripts/setup-project.ts` to customize this boilerplate, then `make dev` to begin development!

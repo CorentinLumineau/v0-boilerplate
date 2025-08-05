@@ -5,8 +5,7 @@ const path = require('path');
 
 // Package.json files to sync
 const packagesToSync = [
-  'apps/frontend/package.json',
-  'apps/backend/package.json',
+  'apps/web/package.json',
   'packages/config/package.json',
   'packages/types/package.json',
 ];

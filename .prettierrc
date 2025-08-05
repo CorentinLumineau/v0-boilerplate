@@ -1,8 +1,1 @@
-{
-  "semi": false,
-  "singleQuote": true,
-  "tabWidth": 2,
-  "trailingComma": "es5",
-  "printWidth": 100,
-  "endOfLine": "lf"
-}
+"@boilerplate/config/prettier.config.json"
