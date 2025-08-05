@@ -5,13 +5,13 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
 [![Turborepo](https://img.shields.io/badge/Turborepo-monorepo-red?style=for-the-badge&logo=turborepo)](https://turbo.build)
 
-A production-ready **Next.js 15** monorepo boilerplate with comprehensive authentication, theming, internationalization, and modern development tools. Built with TypeScript and designed for rapid project bootstrapping.
+A production-ready **Next.js 15** web application with comprehensive authentication, theming, internationalization, and modern development tools. Built with TypeScript and designed for rapid project bootstrapping using a unified single-domain architecture.
 
 ## 🌟 Key Features
 
 ### 🔐 **Authentication System**
 - **Better-auth** integration with Next.js 15 server actions
-- Cross-subdomain cookie support for production deployments
+- Simplified single-domain cookie configuration
 - Layout-based route protection for optimal performance
 - Session management with TanStack Query optimization
 
@@ -41,11 +41,12 @@ A production-ready **Next.js 15** monorepo boilerplate with comprehensive authen
 - App manifest with customizable icons and metadata
 - Offline-first approach for improved user experience
 
-### 🏗️ **Monorepo Architecture**
+### 🏗️ **Unified Web Architecture**
+- **Single Next.js app** serving both frontend and API routes
 - **Turborepo** for optimized build orchestration
-- **pnpm workspaces** with workspace protocol
+- **pnpm workspaces** with workspace protocol  
 - Shared packages for types, configs, and utilities
-- Centralized configuration management
+- **No CORS issues** - same origin for all requests
 
 ### 🛠️ **Developer Experience**
 - **Automated project setup script** for instant bootstrapping
@@ -102,7 +103,7 @@ A production-ready **Next.js 15** monorepo boilerplate with comprehensive authen
      -p 5432:5432 -d postgres:16-alpine
    
    # Run database migrations
-   pnpm --filter @boilerplate/backend db:migrate
+   pnpm --filter @boilerplate/web db:migrate
    ```
 
 3. **Start development servers**
@@ -110,18 +111,24 @@ A production-ready **Next.js 15** monorepo boilerplate with comprehensive authen
    pnpm dev
    ```
 
-4. **Access the applications**
-   - **Frontend**: http://localhost:3100
-   - **Backend API**: http://localhost:3101
+4. **Access the application**
+   - **Web App**: http://localhost:3000 (includes both frontend and API routes)
 
 ## 🏢 Architecture Overview
 
-### Monorepo Structure
+### Web App Structure
 ```
 v0-boilerplate/
 ├── apps/
-│   ├── frontend/          # Next.js 15 client application
-│   └── backend/           # Next.js 15 API server
+│   └── web/               # Unified Next.js 15 web application
+│       ├── app/
+│       │   ├── (web)/     # Frontend pages
+│       │   ├── (auth)/    # Authentication pages  
+│       │   ├── (protected)/ # Protected pages
+│       │   ├── api/       # API routes
+│       │   ├── components/ # UI components
+│       │   └── lib/       # Utilities and configurations
+│       └── prisma/        # Database schema and migrations
 ├── packages/
 │   ├── config/            # Shared configurations
 │   └── types/             # Shared TypeScript types
@@ -131,19 +138,17 @@ v0-boilerplate/
 
 ### Technology Stack
 
-#### **Frontend (`apps/frontend`)**
+#### **Web Application (`apps/web`)**
 - **Next.js 15** with App Router and React 19
+- **API Routes** for backend functionality
 - **TanStack Query** for server state management
 - **Tailwind CSS** with shadcn/ui components
 - **Radix UI** primitives for accessibility
-- **next-themes** for theme management
-- **next-pwa** for Progressive Web App features
-
-#### **Backend (`apps/backend`)**
-- **Next.js 15** with API Routes
 - **Better-auth** for authentication
 - **Prisma ORM** with PostgreSQL
 - **Server-Sent Events** for real-time features
+- **next-themes** for theme management
+- **next-pwa** for Progressive Web App features
 
 #### **Shared Packages**
 - **`@boilerplate/config`** - ESLint, Tailwind, TypeScript, and project configs
@@ -187,46 +192,39 @@ pnpm test         # Run all tests
 pnpm clean        # Clean build outputs
 ```
 
-### Individual Applications
+### Individual Application
 ```bash
-pnpm --filter @boilerplate/frontend dev    # Frontend only
-pnpm --filter @boilerplate/backend dev     # Backend only
+pnpm --filter @boilerplate/web dev         # Web app only
 ```
 
 ### Database Operations
 ```bash
-pnpm --filter @boilerplate/backend db:migrate    # Run migrations
-pnpm --filter @boilerplate/backend db:generate   # Generate Prisma client
-pnpm --filter @boilerplate/backend db:studio     # Open Prisma Studio
+pnpm --filter @boilerplate/web db:migrate    # Run migrations
+pnpm --filter @boilerplate/web db:generate   # Generate Prisma client
+pnpm --filter @boilerplate/web db:studio     # Open Prisma Studio
 ```
 
 ## 🌐 Deployment
 
 ### Vercel Deployment
 
-The project is optimized for Vercel with separate frontend and backend deployments:
+The project is optimized for Vercel as a unified web application:
 
-1. **Frontend**: [boilerplate.lumineau.app](https://boilerplate.lumineau.app)
-2. **Backend API**: [api.boilerplate.lumineau.app](https://api.boilerplate.lumineau.app)
+**Web App**: [boilerplate.lumineau.app](https://boilerplate.lumineau.app)
 
 ### Environment Variables
 
-**Frontend (`.env.local`)**
-```env
-NEXT_PUBLIC_BACKEND_URL=https://api.boilerplate.lumineau.app
-```
-
-**Backend (`.env`)**
+**Web App (`.env`)**
 ```env
 DATABASE_URL=your_postgresql_connection_string
 BETTER_AUTH_SECRET=your_secret_key
-BETTER_AUTH_URL=https://api.boilerplate.lumineau.app
+BETTER_AUTH_BASE_URL=https://boilerplate.lumineau.app
 ```
 
 ## 🛡️ Security Features
 
-- **CORS configuration** for cross-origin requests
-- **Helmet.js** for security headers
+- **Single domain architecture** - no CORS complexity
+- **Security headers** via Next.js middleware
 - **Environment variable validation**
 - **Secure cookie configuration** for production
 - **CSRF protection** with Better-auth

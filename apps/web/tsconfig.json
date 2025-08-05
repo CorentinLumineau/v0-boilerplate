@@ -1,0 +1,28 @@
+{
+  "extends": "@boilerplate/config/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./app/*"],
+      "@/components/*": ["./app/components/*"],
+      "@/lib/*": ["./app/lib/*"],
+      "@/hooks/*": ["./app/hooks/*"],
+      "@/types/*": ["./app/types/*"],
+      "@/locales/*": ["./app/locales/*"],
+      "@/styles/*": ["./app/styles/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

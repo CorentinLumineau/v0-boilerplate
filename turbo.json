@@ -5,7 +5,8 @@
     "NODE_ENV",
     "DATABASE_URL",
     "BETTER_AUTH_SECRET",
-    "BETTER_AUTH_BASE_URL"
+    "BETTER_AUTH_BASE_URL",
+    "NEXT_PUBLIC_APP_URL"
   ],
   "tasks": {
     "build": {
@@ -19,9 +20,6 @@
       ],
       "env": [
         "NODE_ENV", 
-        "FRONTEND_URL", 
-        "BACKEND_URL",
-        "NEXT_PUBLIC_API_URL",
         "NEXT_PUBLIC_APP_URL",
         "DATABASE_URL",
         "BETTER_AUTH_SECRET",
@@ -31,11 +29,11 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "env": ["NODE_ENV", "FRONTEND_URL", "BACKEND_URL"]
+      "env": ["NODE_ENV", "NEXT_PUBLIC_APP_URL"]
     },
     "start": {
       "dependsOn": ["build"],
-      "env": ["NODE_ENV", "FRONTEND_URL", "BACKEND_URL"]
+      "env": ["NODE_ENV", "NEXT_PUBLIC_APP_URL"]
     },
     "lint": {
       "outputs": []

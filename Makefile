@@ -15,8 +15,7 @@ help:
 	@echo "  make db-migrate-deploy - Deploy migrations (production)"
 	@echo "  make db-migrate-reset  - Reset database with fresh migrations"
 	@echo "  make dev          - Start all development servers"
-	@echo "  make dev-backend  - Start only backend development server"
-	@echo "  make dev-frontend - Start only frontend development server"
+	@echo "  make dev-web      - Start web application development server"
 	@echo "  make build        - Build all apps"
 	@echo "  make install      - Install all dependencies"
 	@echo "  make clean        - Clean build outputs"
@@ -39,7 +38,7 @@ db-up:
 	@echo "Database started! Waiting for it to be ready..."
 	@sleep 5
 	@echo "Running database migrations..."
-	pnpm --filter @boilerplate/backend db:push
+	pnpm --filter @boilerplate/web db:migrate
 
 db-down:
 	@echo "Stopping PostgreSQL database..."
@@ -59,18 +58,18 @@ db-clean:
 
 db-migrate:
 	@echo "Running database migrations (development)..."
-	pnpm --filter @boilerplate/backend db:migrate
+	pnpm --filter @boilerplate/web db:migrate
 	@echo "Migrations completed!"
 
 db-migrate-deploy:
 	@echo "Deploying database migrations (production)..."
-	pnpm --filter @boilerplate/backend db:migrate:deploy
+	pnpm --filter @boilerplate/web db:migrate:deploy
 	@echo "Migrations deployed!"
 
 db-migrate-reset:
 	@echo "⚠️  Resetting database with fresh migrations (this will delete all data)..."
 	@read -p "Are you sure? Type 'yes' to continue: " confirm && [ "$$confirm" = "yes" ]
-	pnpm --filter @boilerplate/backend db:migrate:reset
+	pnpm --filter @boilerplate/web db:migrate:reset
 	@echo "Database reset completed!"
 
 # Development commands
@@ -78,13 +77,9 @@ dev:
 	@echo "Starting all development servers..."
 	pnpm dev
 
-dev-backend:
-	@echo "Starting backend development server..."
-	pnpm --filter @boilerplate/backend dev
-
-dev-frontend:
-	@echo "Starting frontend development server..."
-	pnpm --filter @boilerplate/frontend dev
+dev-web:
+	@echo "Starting web application development server..."
+	pnpm --filter @boilerplate/web dev
 
 # Build commands
 build:
