@@ -5,6 +5,15 @@ import { createContext, useContext, useEffect, useState, useCallback, useMemo } 
 import { type ColorTheme, applyTheme } from "@/lib/theme"
 import { useTheme } from "next-themes"
 import { getTranslation, type Language } from "@/lib/i18n"
+import {
+  fetchUserPreferences,
+  updateUserPreferences,
+  getLocalStoragePreferences,
+  saveLocalStoragePreferences,
+  migrateLocalStorageToDatabase,
+  DEFAULT_PREFERENCES,
+} from "@/lib/preferences"
+import type { UserPreferences } from "@boilerplate/types"
 
 type RadiusValue = "0" | "0.3" | "0.5" | "0.75" | "1.0"
 
@@ -34,36 +43,58 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
   // Language settings
   const [language, setLanguage] = useState<Language>("en")
 
+  // Authentication and preferences state
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+  const [preferencesLoaded, setPreferencesLoaded] = useState<boolean>(false)
+
   // Translation function
   const t = (key: string) => {
     return getTranslation(language, key)
   }
 
-  // Load all settings from localStorage on mount
+  // Load preferences on mount
   useEffect(() => {
-    try {
-      const storedColorTheme = localStorage.getItem("colorTheme") as ColorTheme
-      const storedRadiusValue = localStorage.getItem("radiusValue") as RadiusValue
-      const storedLanguage = localStorage.getItem("language") as Language
-
-      if (storedColorTheme) {
-        setColorTheme(storedColorTheme)
+    const loadPreferences = async () => {
+      try {
+        // First, try to fetch from database (for authenticated users)
+        const userPreferences = await fetchUserPreferences()
+        
+        if (userPreferences) {
+          // User is authenticated, use database preferences
+          setIsAuthenticated(true)
+          setColorTheme((userPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme!)
+          setRadiusValue((userPreferences.radiusValue as RadiusValue) || DEFAULT_PREFERENCES.radiusValue!)
+          setLanguage((userPreferences.language as Language) || DEFAULT_PREFERENCES.language!)
+          
+          // Migrate any existing localStorage preferences to database
+          await migrateLocalStorageToDatabase()
+        } else {
+          // User is not authenticated, use localStorage
+          setIsAuthenticated(false)
+          const localPreferences = getLocalStoragePreferences()
+          setColorTheme((localPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme!)
+          setRadiusValue((localPreferences.radiusValue as RadiusValue) || DEFAULT_PREFERENCES.radiusValue!)
+          setLanguage((localPreferences.language as Language) || DEFAULT_PREFERENCES.language!)
+        }
+      } catch (error) {
+        console.error("Error loading preferences:", error)
+        // Fallback to localStorage
+        const localPreferences = getLocalStoragePreferences()
+        setColorTheme((localPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme!)
+        setRadiusValue((localPreferences.radiusValue as RadiusValue) || DEFAULT_PREFERENCES.radiusValue!)
+        setLanguage((localPreferences.language as Language) || DEFAULT_PREFERENCES.language!)
+      } finally {
+        setPreferencesLoaded(true)
       }
-
-      if (storedRadiusValue) {
-        setRadiusValue(storedRadiusValue)
-      }
-
-      if (storedLanguage && (storedLanguage === "en" || storedLanguage === "fr")) {
-        setLanguage(storedLanguage)
-      }
-    } catch (error) {
-      // Silently handle localStorage errors
     }
+
+    loadPreferences()
   }, [])
 
   // Apply theme when colorTheme or theme mode changes
   useEffect(() => {
+    if (!preferencesLoaded) return
+    
     try {
       // Apply radius value to CSS variable
       document.documentElement.style.setProperty("--radius", `${radiusValue}rem`)
@@ -72,22 +103,50 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
       const mode = theme === "dark" ? "dark" : "light"
       applyTheme(colorTheme, mode)
 
-      // Save theme settings to localStorage
-      localStorage.setItem("colorTheme", colorTheme)
-      localStorage.setItem("radiusValue", radiusValue)
-    } catch (error) {
-      // Silently handle theme application errors
-    }
-  }, [colorTheme, radiusValue, theme])
+      // Save preferences
+      const preferences: Partial<UserPreferences> = {
+        colorTheme,
+        radiusValue,
+      }
 
-  // Save language setting to localStorage when it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem("language", language)
+      if (isAuthenticated) {
+        // Save to database (async, don't wait)
+        updateUserPreferences(preferences).catch(error => {
+          console.error("Error saving theme preferences to database:", error)
+          // Fallback to localStorage
+          saveLocalStoragePreferences(preferences)
+        })
+      } else {
+        // Save to localStorage
+        saveLocalStoragePreferences(preferences)
+      }
     } catch (error) {
-      // Silently handle language storage errors
+      console.error("Error applying theme:", error)
     }
-  }, [language])
+  }, [colorTheme, radiusValue, theme, isAuthenticated, preferencesLoaded])
+
+  // Save language setting when it changes
+  useEffect(() => {
+    if (!preferencesLoaded) return
+    
+    try {
+      const preferences: Partial<UserPreferences> = { language }
+
+      if (isAuthenticated) {
+        // Save to database (async, don't wait)
+        updateUserPreferences(preferences).catch(error => {
+          console.error("Error saving language preference to database:", error)
+          // Fallback to localStorage
+          saveLocalStoragePreferences(preferences)
+        })
+      } else {
+        // Save to localStorage
+        saveLocalStoragePreferences(preferences)
+      }
+    } catch (error) {
+      console.error("Error saving language preference:", error)
+    }
+  }, [language, isAuthenticated, preferencesLoaded])
 
   return (
     <SettingsStoreContext.Provider
@@ -119,7 +178,7 @@ export function useSettingsStore() {
 export function useThemeSettings() {
   const { colorTheme, setColorTheme, radiusValue, setRadiusValue } = useSettingsStore()
 
-  // Memoize the setter functions to prevent unnecessary re-renders
+  // Enhanced setter functions that handle both database and localStorage
   const setColorThemeMemoized = useCallback(
     (theme: ColorTheme) => {
       setColorTheme(theme)
@@ -149,7 +208,7 @@ export function useThemeSettings() {
 export function useLanguageSettings() {
   const { language, setLanguage, t } = useSettingsStore()
 
-  // Memoize the setter function to prevent unnecessary re-renders
+  // Enhanced setter function that handles both database and localStorage
   const setLanguageMemoized = useCallback(
     (lang: Language) => {
       setLanguage(lang)

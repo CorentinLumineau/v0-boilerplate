@@ -11,6 +11,14 @@ export interface HealthCheckResponse {
   service: string
 }
 
+// User Preferences types
+export interface UserPreferences {
+  colorTheme?: string    // Color theme preference (default, red, blue, etc.)
+  radiusValue?: string   // Border radius preference (0, 0.3, 0.5, 0.75, 1.0)
+  language?: string      // Language preference (en, fr)
+  themeMode?: string     // Theme mode preference (light, dark, system)
+}
+
 // Auth types
 export interface User {
   id: string
@@ -18,6 +26,7 @@ export interface User {
   emailVerified: boolean
   name?: string
   image?: string
+  preferences?: UserPreferences
   createdAt: Date
   updatedAt: Date
 }

@@ -19,6 +19,7 @@ model User {
   emailVerified Boolean        @default(false)
   name          String?
   image         String?
+  preferences   Json?          // User preferences (theme, language, etc.)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   sessions      Session[]
