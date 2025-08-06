@@ -118,7 +118,7 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
     }
 
     loadPreferences()
-  }, [session, sessionLoading])
+  }, [session, sessionLoading, setTheme])
 
   // Apply theme when colorTheme or theme mode changes
   useEffect(() => {
@@ -284,8 +284,8 @@ export function useLanguageSettings() {
     (key: string) => {
       return t(key)
     },
-    [t, language],
-  ) // Include language as a dependency since t depends on it
+    [t],
+  )
 
   // Return a memoized object to prevent unnecessary re-renders
   return useMemo(

@@ -92,7 +92,7 @@ export async function PATCH(request: NextRequest) {
     // Update user preferences
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
-      data: { preferences: updatedPreferences },
+      data: { preferences: updatedPreferences as any },
       select: { preferences: true },
     })
 
