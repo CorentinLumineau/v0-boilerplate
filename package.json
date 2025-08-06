@@ -26,10 +26,12 @@
     "db:migrate": "pnpm --filter @boilerplate/web db:migrate",
     "db:generate": "pnpm --filter @boilerplate/web db:generate",
     "db:reset": "pnpm --filter @boilerplate/web db:reset",
-    "db:seed": "pnpm --filter @boilerplate/web db:seed"
+    "db:seed": "pnpm --filter @boilerplate/web db:seed",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@types/node": "^22.17.0",
+    "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "tsx": "^4.19.2",
     "turbo": "^2.5.5",

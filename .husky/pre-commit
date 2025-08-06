@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+# Check if lockfile is in sync with package.json files
+echo "🔍 Checking lockfile consistency..."
+if ! pnpm install --frozen-lockfile --silent; then
+  echo "❌ Lockfile is out of sync with package.json files"
+  echo "🔄 Updating lockfile..."
+  pnpm install
+  echo "✅ Lockfile updated"
+  echo "⚠️  Please commit the updated pnpm-lock.yaml file"
+  exit 1
+fi
+
+echo "✅ Lockfile is in sync"
