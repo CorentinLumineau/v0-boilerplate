@@ -10,7 +10,7 @@ export const PROJECT_CONFIG = {
   name: "boilerplate",
   displayName: "V0 Boilerplate",
   description: "A Next.js 15 web application with authentication, theming, and TypeScript",
-  version: "0.1.0",
+  version: "0.1.1",
   
   // URLs and Domains - Single domain architecture
   urls: {
