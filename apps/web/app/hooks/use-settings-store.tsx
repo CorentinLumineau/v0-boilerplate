@@ -15,16 +15,22 @@ import {
 } from "@/lib/preferences"
 import type { UserPreferences } from "@boilerplate/types"
 import { useSession } from "@/lib/auth-client"
+import { logger } from "@/lib/utils/logger"
+import { TIMING, UI } from "@/lib/config/constants"
 
 interface SettingsStoreContextType {
   // Theme settings
   colorTheme: ColorTheme
   setColorTheme: (theme: ColorTheme) => void
+  themeMode: 'light' | 'dark' | 'system'
 
-  // Language settings
+  // Language settings  
   language: Language
   setLanguage: (language: Language) => void
   t: (key: string) => string
+  
+  // Loading state
+  preferencesLoaded: boolean
 }
 
 // Create a context for the settings store
@@ -46,13 +52,63 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
   // Track if we've migrated localStorage to database for this session
   const hasMigratedRef = useRef<boolean>(false)
   
-  // Debounce timer for database updates
+  // Unified debounce timer for all preference updates
   const updateTimerRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Keep track of pending updates to batch them
+  const pendingUpdatesRef = useRef<Partial<UserPreferences>>({})
 
   // Translation function
   const t = (key: string) => {
     return getTranslation(language, key)
   }
+
+  // Unified debounced update function
+  const debouncedUpdatePreferences = useCallback((updates: Partial<UserPreferences>) => {
+    if (!preferencesLoaded) return
+
+    // Merge updates with pending updates
+    pendingUpdatesRef.current = {
+      ...pendingUpdatesRef.current,
+      ...updates
+    }
+
+    // Clear existing timer
+    if (updateTimerRef.current) {
+      clearTimeout(updateTimerRef.current)
+    }
+
+    // Set new timer with unified debounce delay
+    updateTimerRef.current = setTimeout(async () => {
+      const preferencesToSave = { ...pendingUpdatesRef.current }
+      pendingUpdatesRef.current = {} // Clear pending updates
+
+      logger.settingsDebug('Saving batched preferences', { preferencesToSave })
+
+      if (session?.user) {
+        try {
+          const result = await updateUserPreferences(preferencesToSave)
+          if (result) {
+            logger.settingsInfo('Preferences saved to database successfully')
+          } else {
+            logger.settingsWarn('Failed to save preferences to database - falling back to localStorage')
+            saveLocalStoragePreferences(preferencesToSave)
+          }
+        } catch (error) {
+          logger.settingsError('Error saving preferences to database', 
+            { error: error instanceof Error ? error.message : String(error) },
+            error instanceof Error ? error : undefined
+          )
+          // Fallback to localStorage
+          saveLocalStoragePreferences(preferencesToSave)
+        }
+      } else {
+        // Save to localStorage for anonymous users
+        saveLocalStoragePreferences(preferencesToSave)
+        logger.settingsDebug('Preferences saved to localStorage for anonymous user')
+      }
+    }, TIMING.PREFERENCES_UPDATE_DEBOUNCE)
+  }, [session, preferencesLoaded])
 
   // Load preferences based on authentication status
   useEffect(() => {
@@ -63,14 +119,14 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
       try {
         if (session?.user) {
           // User is authenticated
-          console.log('[Settings] User authenticated, loading preferences from database')
+          logger.settingsInfo('User authenticated - loading preferences from database', { userId: session.user.id })
           
           // Try to fetch from database
           const userPreferences = await fetchUserPreferences()
           
           if (userPreferences) {
-            console.log('[Settings] Database preferences loaded:', userPreferences)
-            setColorTheme((userPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme!)
+            logger.settingsDebug('Database preferences loaded', { userPreferences })
+            setColorTheme((userPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme as ColorTheme)
             setLanguage((userPreferences.language as Language) || DEFAULT_PREFERENCES.language!)
             
             // Set theme mode from preferences
@@ -78,7 +134,7 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
               setTheme(userPreferences.themeMode)
             }
           } else {
-            console.log('[Settings] No database preferences found, using defaults')
+            logger.settingsInfo('No database preferences found - using defaults')
             // No preferences in database yet, use defaults
             setColorTheme(DEFAULT_PREFERENCES.colorTheme as ColorTheme)
             setLanguage(DEFAULT_PREFERENCES.language as Language)
@@ -89,31 +145,39 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
           
           // Migrate localStorage preferences to database if not done yet
           if (!hasMigratedRef.current) {
-            console.log('[Settings] Migrating localStorage to database')
-            await migrateLocalStorageToDatabase()
-            hasMigratedRef.current = true
+            logger.settingsInfo('Migrating localStorage preferences to database')
+            const migrationSuccess = await migrateLocalStorageToDatabase()
+            hasMigratedRef.current = migrationSuccess
           }
         } else {
           // User is not authenticated, use localStorage
-          console.log('[Settings] User not authenticated, using localStorage')
+          logger.settingsInfo('User not authenticated - using localStorage')
           const localPreferences = getLocalStoragePreferences()
-          setColorTheme((localPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme!)
-          setLanguage((localPreferences.language as Language) || DEFAULT_PREFERENCES.language!)
+          setColorTheme((localPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme as ColorTheme)
+          setLanguage((localPreferences.language as Language) || DEFAULT_PREFERENCES.language as Language)
           if (localPreferences.themeMode) {
             setTheme(localPreferences.themeMode)
           }
+          // Don't set preferencesLoaded to true when not authenticated
+          // This indicates we're using localStorage/defaults, not loaded from database
         }
       } catch (error) {
-        console.error('[Settings] Error loading preferences:', error)
+        logger.settingsError('Error loading preferences', 
+          { error: error instanceof Error ? error.message : String(error) },
+          error instanceof Error ? error : undefined
+        )
         // Fallback to localStorage
         const localPreferences = getLocalStoragePreferences()
-        setColorTheme((localPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme!)
-        setLanguage((localPreferences.language as Language) || DEFAULT_PREFERENCES.language!)
+        setColorTheme((localPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme as ColorTheme)
+        setLanguage((localPreferences.language as Language) || DEFAULT_PREFERENCES.language as Language)
         if (localPreferences.themeMode) {
           setTheme(localPreferences.themeMode)
         }
       } finally {
-        setPreferencesLoaded(true)
+        // Only set preferences loaded to true if we had a session (were trying to load from DB)
+        if (session?.user) {
+          setPreferencesLoaded(true)
+        }
       }
     }
 
@@ -125,111 +189,61 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
     if (!preferencesLoaded) return
     
     try {
-      // Hardcode radius value to 0.5rem
-      document.documentElement.style.setProperty("--radius", "0.5rem")
+      // Use constant for radius value
+      document.documentElement.style.setProperty("--radius", UI.DEFAULT_RADIUS)
 
       // Apply theme based on current mode and color theme
       const mode = theme === "dark" ? "dark" : "light"
       applyTheme(colorTheme, mode)
+      
+      logger.settingsDebug('Applied theme', { colorTheme, themeMode: theme, mode })
     } catch (error) {
-      console.error('[Settings] Error applying theme:', error)
+      logger.settingsError('Error applying theme', 
+        { colorTheme, themeMode: theme, error: error instanceof Error ? error.message : String(error) },
+        error instanceof Error ? error : undefined
+      )
     }
   }, [colorTheme, theme, preferencesLoaded])
   
-  // Save theme preferences with debouncing
+  // Trigger unified debounced save when theme preferences change
   useEffect(() => {
     if (!preferencesLoaded) return
     
-    // Clear any existing timer
-    if (updateTimerRef.current) {
-      clearTimeout(updateTimerRef.current)
+    const preferences: Partial<UserPreferences> = {
+      colorTheme,
+      themeMode: theme as UserPreferences['themeMode'],
     }
     
-    // Set a new timer to save preferences after 500ms of no changes
-    updateTimerRef.current = setTimeout(async () => {
-      const preferences: Partial<UserPreferences> = {
-        colorTheme,
-        themeMode: theme as UserPreferences['themeMode'],
-      }
-      
-      console.log('[Settings] Saving theme preferences:', preferences)
-      
-      if (session?.user) {
-        try {
-          // Save to database
-          const result = await updateUserPreferences(preferences)
-          if (result) {
-            console.log('[Settings] Theme preferences saved to database')
-          } else {
-            console.warn('[Settings] Failed to save theme preferences to database')
-            // Fallback to localStorage
-            saveLocalStoragePreferences(preferences)
-          }
-        } catch (error) {
-          console.error('[Settings] Error saving theme preferences to database:', error)
-          // Fallback to localStorage
-          saveLocalStoragePreferences(preferences)
-        }
-      } else {
-        // Save to localStorage for anonymous users
-        saveLocalStoragePreferences(preferences)
-        console.log('[Settings] Theme preferences saved to localStorage')
-      }
-    }, 500) // 500ms debounce
+    debouncedUpdatePreferences(preferences)
+  }, [colorTheme, theme, preferencesLoaded, debouncedUpdatePreferences])
+
+  // Trigger unified debounced save when language changes
+  useEffect(() => {
+    if (!preferencesLoaded) return
     
-    // Cleanup function
+    const preferences: Partial<UserPreferences> = { language }
+    debouncedUpdatePreferences(preferences)
+  }, [language, preferencesLoaded, debouncedUpdatePreferences])
+
+  // Cleanup effect to clear pending timers on unmount
+  useEffect(() => {
     return () => {
       if (updateTimerRef.current) {
         clearTimeout(updateTimerRef.current)
       }
     }
-  }, [colorTheme, theme, session, preferencesLoaded])
-
-  // Save language setting when it changes with debouncing
-  useEffect(() => {
-    if (!preferencesLoaded) return
-    
-    // Use a separate timer for language to avoid conflicts
-    const timer = setTimeout(async () => {
-      const preferences: Partial<UserPreferences> = { language }
-      
-      console.log('[Settings] Saving language preference:', preferences)
-      
-      if (session?.user) {
-        try {
-          // Save to database
-          const result = await updateUserPreferences(preferences)
-          if (result) {
-            console.log('[Settings] Language preference saved to database')
-          } else {
-            console.warn('[Settings] Failed to save language preference to database')
-            // Fallback to localStorage
-            saveLocalStoragePreferences(preferences)
-          }
-        } catch (error) {
-          console.error('[Settings] Error saving language preference to database:', error)
-          // Fallback to localStorage
-          saveLocalStoragePreferences(preferences)
-        }
-      } else {
-        // Save to localStorage for anonymous users
-        saveLocalStoragePreferences(preferences)
-        console.log('[Settings] Language preference saved to localStorage')
-      }
-    }, 500) // 500ms debounce
-    
-    // Cleanup function
-    return () => clearTimeout(timer)
-  }, [language, session, preferencesLoaded])
+  }, [])
 
   return (
     <SettingsStoreContext.Provider
       value={{
         colorTheme,
         setColorTheme,
+        themeMode: (theme as 'light' | 'dark' | 'system') || 'system',
         language,
         setLanguage,
         t,
+        preferencesLoaded,
       }}
     >
       {children}

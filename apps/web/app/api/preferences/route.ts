@@ -2,112 +2,183 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
 import { prisma } from "@/lib/prisma"
-import type { UserPreferences } from "@boilerplate/types"
+import { logger } from "@/lib/utils/logger"
+import { API, DEFAULTS } from "@/lib/config/constants"
+import {
+  validatePreferencesUpdate,
+  mapLegacyToDbFormat,
+  mapDbToLegacyFormat,
+  type UpdatePreferencesRequest,
+} from "@/lib/validations/preferences"
 
-// GET /api/preferences - Get user preferences
-export async function GET() {
+/**
+ * GET /api/preferences - Get user preferences
+ * Returns user preferences in legacy format for backward compatibility
+ */
+export async function GET(): Promise<NextResponse> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     })
 
-    if (!session) {
-      console.log('[API] GET /api/preferences - No session found')
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!session?.user) {
+      logger.apiWarn("GET /api/preferences - No session found")
+      return NextResponse.json(
+        { error: "Unauthorized" }, 
+        { status: API.STATUS_CODES.UNAUTHORIZED }
+      )
     }
 
-    console.log('[API] GET /api/preferences - User ID:', session.user.id)
+    const userId = session.user.id
+    logger.apiDebug("GET /api/preferences - User ID", { userId })
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { preferences: true },
+    // Fetch preferences from dedicated table
+    const userPreferences = await prisma.userPreferences.findUnique({
+      where: { userId },
+      select: {
+        colorTheme: true,
+        language: true,
+        themeMode: true,
+      },
     })
 
-    if (!user) {
-      console.error('[API] GET /api/preferences - User not found:', session.user.id)
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    if (!userPreferences) {
+      // Create default preferences if none exist
+      logger.apiInfo("GET /api/preferences - Creating default preferences", { userId })
+      
+      const defaultPrefs = await prisma.userPreferences.create({
+        data: {
+          userId,
+          colorTheme: 'DEFAULT',
+          language: 'EN',
+          themeMode: 'SYSTEM',
+        },
+        select: {
+          colorTheme: true,
+          language: true,
+          themeMode: true,
+        },
+      })
+
+      const legacyFormat = mapDbToLegacyFormat({
+        colorTheme: defaultPrefs.colorTheme,
+        language: defaultPrefs.language,
+        themeMode: defaultPrefs.themeMode,
+      })
+
+      logger.apiDebug("GET /api/preferences - Returning default preferences", { 
+        userId,
+        preferences: legacyFormat 
+      })
+      
+      return NextResponse.json({ data: legacyFormat })
     }
 
-    // Return preferences or empty object if null
-    const preferences = (user.preferences as UserPreferences) || {}
-    console.log('[API] GET /api/preferences - Returning preferences:', preferences)
+    // Convert to legacy format for backward compatibility
+    const legacyFormat = mapDbToLegacyFormat({
+      colorTheme: userPreferences.colorTheme,
+      language: userPreferences.language,
+      themeMode: userPreferences.themeMode,
+    })
 
-    return NextResponse.json({ data: preferences })
+    logger.apiDebug("GET /api/preferences - Returning preferences", { 
+      userId,
+      preferences: legacyFormat 
+    })
+
+    return NextResponse.json({ data: legacyFormat })
   } catch (error) {
-    console.error('[API] GET /api/preferences - Error:', error)
+    logger.apiError("GET /api/preferences - Error", { error: error instanceof Error ? error.message : String(error) }, error instanceof Error ? error : undefined)
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: API.STATUS_CODES.INTERNAL_SERVER_ERROR }
     )
   }
 }
 
-// PATCH /api/preferences - Update user preferences
-export async function PATCH(request: NextRequest) {
+/**
+ * PATCH /api/preferences - Update user preferences  
+ * Accepts legacy format and converts to database format
+ */
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     })
 
-    if (!session) {
-      console.log('[API] PATCH /api/preferences - No session found')
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    console.log('[API] PATCH /api/preferences - User ID:', session.user.id)
-
-    const body = await request.json()
-    const { preferences } = body
-    console.log('[API] PATCH /api/preferences - Received preferences:', preferences)
-
-    if (!preferences || typeof preferences !== "object") {
-      console.error('[API] PATCH /api/preferences - Invalid preferences data:', preferences)
+    if (!session?.user) {
+      logger.apiWarn("PATCH /api/preferences - No session found")
       return NextResponse.json(
-        { error: "Invalid preferences data" },
-        { status: 400 }
+        { error: "Unauthorized" }, 
+        { status: API.STATUS_CODES.UNAUTHORIZED }
       )
     }
 
-    // Get current preferences
-    const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { preferences: true },
-    })
+    const userId = session.user.id
+    logger.apiDebug("PATCH /api/preferences - User ID", { userId })
 
-    if (!currentUser) {
-      console.error('[API] PATCH /api/preferences - User not found:', session.user.id)
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    // Parse and validate request body
+    const body = await request.json()
+    const validationResult = validatePreferencesUpdate(body)
+
+    if (!validationResult.success) {
+      logger.apiWarn("PATCH /api/preferences - Invalid request data", { 
+        userId,
+        errors: validationResult.error.errors,
+        receivedData: body 
+      })
+      return NextResponse.json(
+        { error: "Invalid preferences data", details: validationResult.error.errors },
+        { status: API.STATUS_CODES.BAD_REQUEST }
+      )
     }
 
-    // Merge with existing preferences
-    const currentPreferences = (currentUser.preferences as UserPreferences) || {}
-    const updatedPreferences: UserPreferences = {
-      ...currentPreferences,
-      ...preferences,
-    }
-    
-    console.log('[API] PATCH /api/preferences - Current preferences:', currentPreferences)
-    console.log('[API] PATCH /api/preferences - Updated preferences:', updatedPreferences)
+    const { preferences }: UpdatePreferencesRequest = validationResult.data
+    logger.apiDebug("PATCH /api/preferences - Validated preferences", { userId, preferences })
 
-    // Update user preferences
-    const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
-      data: { preferences: updatedPreferences as any },
-      select: { preferences: true },
+    // Convert legacy format to database format
+    const dbPreferences = mapLegacyToDbFormat(preferences)
+    logger.apiDebug("PATCH /api/preferences - Mapped to DB format", { userId, dbPreferences })
+
+    // Update preferences using upsert for atomic operation
+    const updatedPreferences = await prisma.userPreferences.upsert({
+      where: { userId },
+      create: {
+        userId,
+        colorTheme: dbPreferences.colorTheme || 'DEFAULT',
+        language: dbPreferences.language || 'EN', 
+        themeMode: dbPreferences.themeMode || 'SYSTEM',
+      },
+      update: {
+        ...(dbPreferences.colorTheme && { colorTheme: dbPreferences.colorTheme }),
+        ...(dbPreferences.language && { language: dbPreferences.language }),
+        ...(dbPreferences.themeMode && { themeMode: dbPreferences.themeMode }),
+      },
+      select: {
+        colorTheme: true,
+        language: true,
+        themeMode: true,
+      },
     })
 
-    console.log('[API] PATCH /api/preferences - Successfully updated preferences')
-    return NextResponse.json({ data: updatedUser.preferences })
+    // Convert back to legacy format for response
+    const legacyFormat = mapDbToLegacyFormat({
+      colorTheme: updatedPreferences.colorTheme,
+      language: updatedPreferences.language,
+      themeMode: updatedPreferences.themeMode,
+    })
+
+    logger.apiInfo("PATCH /api/preferences - Successfully updated preferences", {
+      userId,
+      updatedPreferences: legacyFormat
+    })
+
+    return NextResponse.json({ data: legacyFormat })
   } catch (error) {
-    console.error('[API] PATCH /api/preferences - Error:', error)
-    // Log more details about the error
-    if (error instanceof Error) {
-      console.error('[API] PATCH /api/preferences - Error message:', error.message)
-      console.error('[API] PATCH /api/preferences - Error stack:', error.stack)
-    }
+    logger.apiError("PATCH /api/preferences - Error", { error: error instanceof Error ? error.message : String(error) }, error instanceof Error ? error : undefined)
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: API.STATUS_CODES.INTERNAL_SERVER_ERROR }
     )
   }
 }

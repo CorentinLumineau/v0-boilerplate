@@ -10,5 +10,5 @@ export const translations: Record<Language, Record<string, string>> = {
 }
 
 export function getTranslation(language: Language, key: string): string {
-  return translations[language][key] || key
+  return translations[language]?.[key] || key
 }

@@ -8,17 +8,18 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  emailVerified Boolean        @default(false)
+  id            String          @id @default(cuid())
+  email         String          @unique
+  emailVerified Boolean         @default(false)
   name          String?
   image         String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  preferences   Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  preferences   Json? // @deprecated - use userPreferences relation
   accounts      Account[]
   notifications Notification[]
   sessions      Session[]
+  userPreferences UserPreferences?
 }
 
 model Session {
@@ -94,4 +95,39 @@ enum NotificationStatus {
   UNREAD
   READ
   ARCHIVED
+}
+
+model UserPreferences {
+  id         String        @id @default(cuid())
+  userId     String        @unique
+  colorTheme ColorTheme    @default(DEFAULT)
+  language   Language      @default(EN)
+  themeMode  ThemeMode     @default(SYSTEM)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum ColorTheme {
+  DEFAULT
+  RED
+  ORANGE
+  GREEN
+  BLUE
+  TEAL
+  PURPLE
+  PINK
+}
+
+enum Language {
+  EN
+  FR
+}
+
+enum ThemeMode {
+  LIGHT
+  DARK
+  SYSTEM
 }
