@@ -16,14 +16,10 @@ import {
 import type { UserPreferences } from "@boilerplate/types"
 import { useSession } from "@/lib/auth-client"
 
-type RadiusValue = "0" | "0.3" | "0.5" | "0.75" | "1.0"
-
 interface SettingsStoreContextType {
   // Theme settings
   colorTheme: ColorTheme
   setColorTheme: (theme: ColorTheme) => void
-  radiusValue: RadiusValue
-  setRadiusValue: (value: RadiusValue) => void
 
   // Language settings
   language: Language
@@ -38,8 +34,7 @@ const SettingsStoreContext = createContext<SettingsStoreContextType | undefined>
 export function SettingsStoreProvider({ children }: { children: React.ReactNode }) {
   // Theme settings
   const [colorTheme, setColorTheme] = useState<ColorTheme>("default")
-  const [radiusValue, setRadiusValue] = useState<RadiusValue>("0.5")
-  const { theme } = useTheme()
+  const { theme, setTheme } = useTheme()
 
   // Language settings
   const [language, setLanguage] = useState<Language>("en")
@@ -76,14 +71,20 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
           if (userPreferences) {
             console.log('[Settings] Database preferences loaded:', userPreferences)
             setColorTheme((userPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme!)
-            setRadiusValue((userPreferences.radiusValue as RadiusValue) || DEFAULT_PREFERENCES.radiusValue!)
             setLanguage((userPreferences.language as Language) || DEFAULT_PREFERENCES.language!)
+            
+            // Set theme mode from preferences
+            if (userPreferences.themeMode) {
+              setTheme(userPreferences.themeMode)
+            }
           } else {
             console.log('[Settings] No database preferences found, using defaults')
             // No preferences in database yet, use defaults
             setColorTheme(DEFAULT_PREFERENCES.colorTheme as ColorTheme)
-            setRadiusValue(DEFAULT_PREFERENCES.radiusValue as RadiusValue)
             setLanguage(DEFAULT_PREFERENCES.language as Language)
+            if (DEFAULT_PREFERENCES.themeMode) {
+              setTheme(DEFAULT_PREFERENCES.themeMode)
+            }
           }
           
           // Migrate localStorage preferences to database if not done yet
@@ -97,16 +98,20 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
           console.log('[Settings] User not authenticated, using localStorage')
           const localPreferences = getLocalStoragePreferences()
           setColorTheme((localPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme!)
-          setRadiusValue((localPreferences.radiusValue as RadiusValue) || DEFAULT_PREFERENCES.radiusValue!)
           setLanguage((localPreferences.language as Language) || DEFAULT_PREFERENCES.language!)
+          if (localPreferences.themeMode) {
+            setTheme(localPreferences.themeMode)
+          }
         }
       } catch (error) {
         console.error('[Settings] Error loading preferences:', error)
         // Fallback to localStorage
         const localPreferences = getLocalStoragePreferences()
         setColorTheme((localPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme!)
-        setRadiusValue((localPreferences.radiusValue as RadiusValue) || DEFAULT_PREFERENCES.radiusValue!)
         setLanguage((localPreferences.language as Language) || DEFAULT_PREFERENCES.language!)
+        if (localPreferences.themeMode) {
+          setTheme(localPreferences.themeMode)
+        }
       } finally {
         setPreferencesLoaded(true)
       }
@@ -120,8 +125,8 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
     if (!preferencesLoaded) return
     
     try {
-      // Apply radius value to CSS variable
-      document.documentElement.style.setProperty("--radius", `${radiusValue}rem`)
+      // Hardcode radius value to 0.5rem
+      document.documentElement.style.setProperty("--radius", "0.5rem")
 
       // Apply theme based on current mode and color theme
       const mode = theme === "dark" ? "dark" : "light"
@@ -129,7 +134,7 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
     } catch (error) {
       console.error('[Settings] Error applying theme:', error)
     }
-  }, [colorTheme, radiusValue, theme, preferencesLoaded])
+  }, [colorTheme, theme, preferencesLoaded])
   
   // Save theme preferences with debouncing
   useEffect(() => {
@@ -144,7 +149,7 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
     updateTimerRef.current = setTimeout(async () => {
       const preferences: Partial<UserPreferences> = {
         colorTheme,
-        radiusValue,
+        themeMode: theme as UserPreferences['themeMode'],
       }
       
       console.log('[Settings] Saving theme preferences:', preferences)
@@ -178,7 +183,7 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
         clearTimeout(updateTimerRef.current)
       }
     }
-  }, [colorTheme, radiusValue, session, preferencesLoaded])
+  }, [colorTheme, theme, session, preferencesLoaded])
 
   // Save language setting when it changes with debouncing
   useEffect(() => {
@@ -222,8 +227,6 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
       value={{
         colorTheme,
         setColorTheme,
-        radiusValue,
-        setRadiusValue,
         language,
         setLanguage,
         t,
@@ -245,9 +248,9 @@ export function useSettingsStore() {
 
 // Specialized hooks that use the settings store
 export function useThemeSettings() {
-  const { colorTheme, setColorTheme, radiusValue, setRadiusValue } = useSettingsStore()
+  const { colorTheme, setColorTheme } = useSettingsStore()
 
-  // Enhanced setter functions that handle both database and localStorage
+  // Enhanced setter function that handles both database and localStorage
   const setColorThemeMemoized = useCallback(
     (theme: ColorTheme) => {
       setColorTheme(theme)
@@ -255,22 +258,13 @@ export function useThemeSettings() {
     [setColorTheme],
   )
 
-  const setRadiusValueMemoized = useCallback(
-    (value: RadiusValue) => {
-      setRadiusValue(value)
-    },
-    [setRadiusValue],
-  )
-
   // Return a memoized object to prevent unnecessary re-renders
   return useMemo(
     () => ({
       colorTheme,
       setColorTheme: setColorThemeMemoized,
-      radiusValue,
-      setRadiusValue: setRadiusValueMemoized,
     }),
-    [colorTheme, setColorThemeMemoized, radiusValue, setRadiusValueMemoized],
+    [colorTheme, setColorThemeMemoized],
   )
 }
 

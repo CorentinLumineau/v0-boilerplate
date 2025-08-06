@@ -8,7 +8,6 @@ import type { UserPreferences } from "@boilerplate/types"
 // Default preferences
 export const DEFAULT_PREFERENCES: UserPreferences = {
   colorTheme: "default",
-  radiusValue: "0.5",
   language: "en",
   themeMode: "system",
 }
@@ -95,15 +94,13 @@ export function getLocalStoragePreferences(): UserPreferences {
 
   try {
     const colorTheme = localStorage.getItem("colorTheme") || DEFAULT_PREFERENCES.colorTheme
-    const radiusValue = localStorage.getItem("radiusValue") || DEFAULT_PREFERENCES.radiusValue
     const language = localStorage.getItem("language") || DEFAULT_PREFERENCES.language
-    
-    // Note: themeMode is handled by next-themes, so we don't store it in localStorage
+    const themeMode = localStorage.getItem("themeMode") as UserPreferences['themeMode'] || DEFAULT_PREFERENCES.themeMode
 
     return {
       colorTheme,
-      radiusValue,
       language,
+      themeMode,
     }
   } catch (error) {
     console.error("Error reading from localStorage:", error)
@@ -123,13 +120,12 @@ export function saveLocalStoragePreferences(preferences: Partial<UserPreferences
     if (preferences.colorTheme) {
       localStorage.setItem("colorTheme", preferences.colorTheme)
     }
-    if (preferences.radiusValue) {
-      localStorage.setItem("radiusValue", preferences.radiusValue)
-    }
     if (preferences.language) {
       localStorage.setItem("language", preferences.language)
     }
-    // Note: themeMode is handled by next-themes
+    if (preferences.themeMode) {
+      localStorage.setItem("themeMode", preferences.themeMode)
+    }
   } catch (error) {
     console.error("Error saving to localStorage:", error)
   }
@@ -160,8 +156,8 @@ export async function migrateLocalStorageToDatabase(): Promise<void> {
       if (result) {
         console.log('[Preferences] Migration successful, clearing localStorage')
         localStorage.removeItem("colorTheme")
-        localStorage.removeItem("radiusValue")
         localStorage.removeItem("language")
+        localStorage.removeItem("themeMode")
       } else {
         console.warn('[Preferences] Migration failed, keeping localStorage')
       }

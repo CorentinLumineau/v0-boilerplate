@@ -31,7 +31,7 @@ interface UserDropdownProps {
 export function UserDropdown({ showUsername = true, showLogout = true }: UserDropdownProps = {}) {
   const { t } = useLanguageSettings()
   const { theme, setTheme } = useTheme()
-  const { radiusValue, setRadiusValue, colorTheme, setColorTheme } = useThemeSettings()
+  const { colorTheme, setColorTheme } = useThemeSettings()
   const { language, setLanguage } = useLanguageSettings()
   const session = useSession()
   const router = useRouter()
@@ -64,13 +64,6 @@ export function UserDropdown({ showUsername = true, showLogout = true }: UserDro
     setColorTheme(theme)
   }
 
-  const radiusValues = [
-    { value: "0", label: "0" },
-    { value: "0.3", label: "0.3" },
-    { value: "0.5", label: "0.5" },
-    { value: "0.75", label: "0.75" },
-    { value: "1.0", label: "1.0" },
-  ]
 
   const availableThemes = getAvailableThemes()
 
@@ -164,28 +157,6 @@ export function UserDropdown({ showUsername = true, showLogout = true }: UserDro
                 </div>
               </div>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <div className="px-2 py-1.5">
-                <p className="text-sm mb-2">{t("borderRadius")}</p>
-                <div className="flex flex-wrap gap-1">
-                  {radiusValues.map((radius) => (
-                    <button
-                      key={radius.value}
-                      className={cn(
-                        "flex h-8 min-w-[36px] items-center justify-center rounded-md border px-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                        radiusValue === radius.value
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
-                      )}
-                      onClick={() => setRadiusValue(radius.value as any)}
-                    >
-                      {radius.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -272,28 +243,6 @@ export function UserDropdown({ showUsername = true, showLogout = true }: UserDro
                         backgroundColor: getThemePrimaryColor(themeName),
                       }}
                     />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <div className="px-2 py-1.5">
-              <p className="text-sm mb-2">{t("borderRadius")}</p>
-              <div className="flex flex-wrap gap-1">
-                {radiusValues.map((radius) => (
-                  <button
-                    key={radius.value}
-                    className={cn(
-                      "flex h-8 min-w-[36px] items-center justify-center rounded-md border px-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                      radiusValue === radius.value
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
-                    )}
-                    onClick={() => setRadiusValue(radius.value as any)}
-                  >
-                    {radius.label}
                   </button>
                 ))}
               </div>

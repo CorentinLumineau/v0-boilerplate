@@ -14,9 +14,8 @@ export interface HealthCheckResponse {
 // User Preferences types
 export interface UserPreferences {
   colorTheme?: string    // Color theme preference (default, red, blue, etc.)
-  radiusValue?: string   // Border radius preference (0, 0.3, 0.5, 0.75, 1.0)
   language?: string      // Language preference (en, fr)
-  themeMode?: string     // Theme mode preference (light, dark, system)
+  themeMode?: 'light' | 'dark' | 'system'  // Theme mode preference (light, dark, system)
 }
 
 // Auth types
