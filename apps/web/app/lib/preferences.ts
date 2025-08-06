@@ -18,22 +18,29 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
  */
 export async function fetchUserPreferences(): Promise<UserPreferences | null> {
   try {
+    console.log('[Preferences] Fetching user preferences from API')
     const response = await fetch("/api/preferences", {
       credentials: "include",
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
 
     if (!response.ok) {
       if (response.status === 401) {
+        console.log('[Preferences] User not authenticated (401)')
         // User is not authenticated, return null to use localStorage
         return null
       }
+      console.error(`[Preferences] Failed to fetch preferences: ${response.status}`)
       throw new Error(`Failed to fetch preferences: ${response.status}`)
     }
 
     const result = await response.json()
+    console.log('[Preferences] Fetched preferences:', result.data)
     return result.data || {}
   } catch (error) {
-    console.error("Error fetching user preferences:", error)
+    console.error('[Preferences] Error fetching user preferences:', error)
     return null
   }
 }
@@ -45,6 +52,7 @@ export async function updateUserPreferences(
   preferences: Partial<UserPreferences>
 ): Promise<UserPreferences | null> {
   try {
+    console.log('[Preferences] Updating user preferences:', preferences)
     const response = await fetch("/api/preferences", {
       method: "PATCH",
       headers: {
@@ -56,16 +64,23 @@ export async function updateUserPreferences(
 
     if (!response.ok) {
       if (response.status === 401) {
+        console.log('[Preferences] User not authenticated (401)')
         // User is not authenticated, return null to use localStorage
         return null
       }
+      const errorText = await response.text()
+      console.error(`[Preferences] Failed to update preferences: ${response.status}`, errorText)
       throw new Error(`Failed to update preferences: ${response.status}`)
     }
 
     const result = await response.json()
+    console.log('[Preferences] Successfully updated preferences:', result.data)
     return result.data || {}
   } catch (error) {
-    console.error("Error updating user preferences:", error)
+    console.error('[Preferences] Error updating user preferences:', error)
+    if (error instanceof Error) {
+      console.error('[Preferences] Error details:', error.message)
+    }
     return null
   }
 }
@@ -130,23 +145,30 @@ export async function migrateLocalStorageToDatabase(): Promise<void> {
 
   try {
     const localPreferences = getLocalStoragePreferences()
+    console.log('[Preferences] Checking localStorage for migration:', localPreferences)
     
     // Check if there are any preferences to migrate
-    const hasPreferences = Object.values(localPreferences).some(
-      (value, index) => value !== Object.values(DEFAULT_PREFERENCES)[index]
+    const hasPreferences = Object.entries(localPreferences).some(
+      ([key, value]) => value !== DEFAULT_PREFERENCES[key as keyof UserPreferences]
     )
 
     if (hasPreferences) {
+      console.log('[Preferences] Migrating localStorage preferences to database')
       const result = await updateUserPreferences(localPreferences)
       
       // If successfully migrated, clear localStorage
       if (result) {
+        console.log('[Preferences] Migration successful, clearing localStorage')
         localStorage.removeItem("colorTheme")
         localStorage.removeItem("radiusValue")
         localStorage.removeItem("language")
+      } else {
+        console.warn('[Preferences] Migration failed, keeping localStorage')
       }
+    } else {
+      console.log('[Preferences] No localStorage preferences to migrate')
     }
   } catch (error) {
-    console.error("Error migrating preferences to database:", error)
+    console.error('[Preferences] Error migrating preferences to database:', error)
   }
 }

@@ -12,8 +12,11 @@ export async function GET() {
     })
 
     if (!session) {
+      console.log('[API] GET /api/preferences - No session found')
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    console.log('[API] GET /api/preferences - User ID:', session.user.id)
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -21,15 +24,17 @@ export async function GET() {
     })
 
     if (!user) {
+      console.error('[API] GET /api/preferences - User not found:', session.user.id)
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     // Return preferences or empty object if null
     const preferences = (user.preferences as UserPreferences) || {}
+    console.log('[API] GET /api/preferences - Returning preferences:', preferences)
 
     return NextResponse.json({ data: preferences })
   } catch (error) {
-    console.error("Error fetching preferences:", error)
+    console.error('[API] GET /api/preferences - Error:', error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -45,13 +50,18 @@ export async function PATCH(request: NextRequest) {
     })
 
     if (!session) {
+      console.log('[API] PATCH /api/preferences - No session found')
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    console.log('[API] PATCH /api/preferences - User ID:', session.user.id)
+
     const body = await request.json()
     const { preferences } = body
+    console.log('[API] PATCH /api/preferences - Received preferences:', preferences)
 
     if (!preferences || typeof preferences !== "object") {
+      console.error('[API] PATCH /api/preferences - Invalid preferences data:', preferences)
       return NextResponse.json(
         { error: "Invalid preferences data" },
         { status: 400 }
@@ -65,6 +75,7 @@ export async function PATCH(request: NextRequest) {
     })
 
     if (!currentUser) {
+      console.error('[API] PATCH /api/preferences - User not found:', session.user.id)
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
@@ -74,6 +85,9 @@ export async function PATCH(request: NextRequest) {
       ...currentPreferences,
       ...preferences,
     }
+    
+    console.log('[API] PATCH /api/preferences - Current preferences:', currentPreferences)
+    console.log('[API] PATCH /api/preferences - Updated preferences:', updatedPreferences)
 
     // Update user preferences
     const updatedUser = await prisma.user.update({
@@ -82,9 +96,15 @@ export async function PATCH(request: NextRequest) {
       select: { preferences: true },
     })
 
+    console.log('[API] PATCH /api/preferences - Successfully updated preferences')
     return NextResponse.json({ data: updatedUser.preferences })
   } catch (error) {
-    console.error("Error updating preferences:", error)
+    console.error('[API] PATCH /api/preferences - Error:', error)
+    // Log more details about the error
+    if (error instanceof Error) {
+      console.error('[API] PATCH /api/preferences - Error message:', error.message)
+      console.error('[API] PATCH /api/preferences - Error stack:', error.stack)
+    }
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
