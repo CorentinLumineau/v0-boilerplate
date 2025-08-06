@@ -1,13 +1,24 @@
 # V0 Boilerplate Makefile
 # Commands for managing the development environment
 
+# Load environment variables from .env.project if it exists
+ifneq (,$(wildcard .env.project))
+    include .env.project
+    export
+endif
+
+# Default database configuration (fallback values)
+DB_USER ?= auth_user
+DB_PASSWORD ?= auth_password
+DB_NAME ?= auth_db
+PROJECT_NAME ?= boilerplate
+
+# Construct DATABASE_URL from environment variables
+DATABASE_URL := postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5432/$(DB_NAME)
+
 .PHONY: all help db-up db-down db-restart db-logs db-clean db-migrate db-migrate-deploy db-migrate-reset db-studio dev dev-backend dev-frontend build install clean version-patch version-minor version-major version-sync release-patch release-minor release-major
 
-# Default target
-all: install db-up
-	@echo "✅ Complete setup finished!"
-	@echo "🚀 Run 'make dev' to start development servers"
-
+# Default target - show help
 help:
 	@echo "Available commands:"
 	@echo "  make all          - Complete setup: install dependencies + start database"
@@ -28,6 +39,11 @@ help:
 	@echo "  make install      - Install all dependencies"
 	@echo "  make clean        - Clean build outputs"
 	@echo ""
+	@echo "Database Configuration:"
+	@echo "  DB_USER: $(DB_USER)"
+	@echo "  DB_NAME: $(DB_NAME)"
+	@echo "  DATABASE_URL: $(DATABASE_URL)"
+	@echo ""
 	@echo "Version Management:"
 	@echo "  make version-patch   - Increment patch version (1.0.0 -> 1.0.1)"
 	@echo "  make version-minor   - Increment minor version (1.0.0 -> 1.1.0)"
@@ -39,19 +55,28 @@ help:
 	@echo "  make release-minor   - Create minor release with git tag"
 	@echo "  make release-major   - Create major release with git tag"
 
+# Complete setup target
+all: install db-up
+	@echo "✅ Complete setup finished!"
+	@echo "🚀 Run 'make dev' to start development servers"
+
 # Database commands
 db-up:
 	@echo "Starting PostgreSQL database with docker compose..."
+	@echo "Database configuration:"
+	@echo "  User: $(DB_USER)"
+	@echo "  Database: $(DB_NAME)"
+	@echo "  Project: $(PROJECT_NAME)"
 	@echo "Stopping any running containers and cleaning up networks..."
 	@docker compose down 2>/dev/null || true
-	@docker network rm boilerplate-network 2>/dev/null || true
+	@docker network rm $(PROJECT_NAME)-network 2>/dev/null || true
 	@docker network rm app-network 2>/dev/null || true
 	@echo "Starting fresh database setup..."
 	docker compose up -d
 	@echo "Database started! Waiting for it to be ready..."
 	@sleep 5
 	@echo "Running database migrations..."
-	DATABASE_URL="postgresql://auth_user:auth_password@localhost:5432/auth_db" pnpm --filter @boilerplate/web db:migrate
+	DATABASE_URL="$(DATABASE_URL)" pnpm --filter @boilerplate/web db:migrate
 
 db-down:
 	@echo "Stopping PostgreSQL database..."
@@ -68,30 +93,34 @@ db-clean:
 	@echo "Cleaning database (this will delete all data)..."
 	docker compose down -v
 	@echo "Cleaning up Docker networks..."
-	@docker network rm boilerplate-network 2>/dev/null || true
+	@docker network rm $(PROJECT_NAME)-network 2>/dev/null || true
 	@docker network rm app-network 2>/dev/null || true
 	@echo "Database cleaned!"
 
 db-migrate:
 	@echo "Running database migrations (development)..."
-	DATABASE_URL="postgresql://auth_user:auth_password@localhost:5432/auth_db" pnpm --filter @boilerplate/web db:migrate
+	@echo "Using DATABASE_URL: $(DATABASE_URL)"
+	DATABASE_URL="$(DATABASE_URL)" pnpm --filter @boilerplate/web db:migrate
 	@echo "Migrations completed!"
 
 db-migrate-deploy:
 	@echo "Deploying database migrations (production)..."
-	DATABASE_URL="postgresql://auth_user:auth_password@localhost:5432/auth_db" pnpm --filter @boilerplate/web db:migrate
+	@echo "Using DATABASE_URL: $(DATABASE_URL)"
+	DATABASE_URL="$(DATABASE_URL)" pnpm --filter @boilerplate/web db:migrate
 	@echo "Migrations deployed!"
 
 db-migrate-reset:
 	@echo "⚠️  Resetting database with fresh migrations (this will delete all data)..."
+	@echo "Using DATABASE_URL: $(DATABASE_URL)"
 	@read -p "Are you sure? Type 'yes' to continue: " confirm && [ "$$confirm" = "yes" ]
-	DATABASE_URL="postgresql://auth_user:auth_password@localhost:5432/auth_db" pnpm --filter @boilerplate/web db:migrate:reset
+	DATABASE_URL="$(DATABASE_URL)" pnpm --filter @boilerplate/web db:migrate:reset
 	@echo "Database reset completed!"
 
 db-studio:
 	@echo "Opening Prisma Studio for database management..."
 	@echo "Prisma Studio will open in your browser at http://localhost:5555"
-	DATABASE_URL="postgresql://auth_user:auth_password@localhost:5432/auth_db" pnpm --filter @boilerplate/web db:studio
+	@echo "Using DATABASE_URL: $(DATABASE_URL)"
+	DATABASE_URL="$(DATABASE_URL)" pnpm --filter @boilerplate/web db:studio
 
 # Development commands
 dev:

@@ -307,8 +307,8 @@ function updateMakefile(answers: ProjectAnswers) {
   // Update title comment
   makefile = makefile.replace(/# V0 Boilerplate Makefile/, `# ${answers.displayName} Makefile`);
 
-  // Update db:push filter - Single app
-  makefile = makefile.replace(/pnpm --filter @boilerplate\/backend/, `pnpm --filter ${answers.namespace}/web`);
+  // Update package filter references - Replace all @boilerplate/web references
+  makefile = makefile.replace(/@boilerplate\/web/g, `${answers.namespace}/web`);
 
   writeFileSync(makefilePath, makefile);
   console.log('✅ Updated Makefile');
@@ -423,6 +423,54 @@ function displaySummary(answers: ProjectAnswers) {
   console.log(`  Auth Secret: ${answers.authSecret.substring(0, 16)}... (64 chars)`);
 }
 
+function validateSetup(answers: ProjectAnswers) {
+  console.log('\n🔍 Validating setup...');
+  
+  // Check if .env.project exists and has correct values
+  const projectEnvPath = join(process.cwd(), '.env.project');
+  if (!existsSync(projectEnvPath)) {
+    throw new Error('❌ .env.project file not found. Setup may be incomplete.');
+  }
+  
+  const projectEnv = readFileSync(projectEnvPath, 'utf-8');
+  const requiredVars = ['PROJECT_NAME', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'];
+  
+  for (const varName of requiredVars) {
+    if (!projectEnv.includes(`${varName}=`)) {
+      throw new Error(`❌ Missing ${varName} in .env.project file.`);
+    }
+  }
+  
+  // Check if web .env.local exists
+  const webEnvPath = join(process.cwd(), 'apps/web/.env.local');
+  if (!existsSync(webEnvPath)) {
+    throw new Error('❌ apps/web/.env.local file not found. Setup may be incomplete.');
+  }
+  
+  const webEnv = readFileSync(webEnvPath, 'utf-8');
+  if (!webEnv.includes('DATABASE_URL=') || !webEnv.includes('BETTER_AUTH_SECRET=')) {
+    throw new Error('❌ Missing required environment variables in apps/web/.env.local.');
+  }
+  
+  // Check if docker-compose.yml has been updated
+  const dockerComposePath = join(process.cwd(), 'docker-compose.yml');
+  const dockerCompose = readFileSync(dockerComposePath, 'utf-8');
+  
+  if (dockerCompose.includes('auth_user') || dockerCompose.includes('auth_db')) {
+    console.log('⚠️  Warning: docker-compose.yml still contains default values. This is normal for the template.');
+  }
+  
+  // Check if Makefile has been updated
+  const makefilePath = join(process.cwd(), 'Makefile');
+  const makefile = readFileSync(makefilePath, 'utf-8');
+  
+  if (makefile.includes('auth_user:auth_password@localhost:5432/auth_db')) {
+    throw new Error('❌ Makefile still contains hardcoded database credentials. Setup may be incomplete.');
+  }
+  
+  console.log('✅ Setup validation passed!');
+}
+
 async function main() {
   try {
     const answers = await collectProjectInfo();
@@ -437,6 +485,9 @@ async function main() {
     updateManifestJson(answers);
     updateSetupGuide(answers);
     updateVercelDeploymentGuide(answers);
+    
+    // Validate the setup
+    validateSetup(answers);
     
     displaySummary(answers);
     
@@ -453,6 +504,11 @@ async function main() {
     console.log('- Commit your initial configuration: git add . && git commit -m "Initial web app setup"');
     console.log('');
     console.log('📚 For more details, check the updated SETUP.md file.');
+    console.log('');
+    console.log('🔒 SECURITY NOTE:');
+    console.log('- The generated BETTER_AUTH_SECRET is secure and unique');
+    console.log('- Database credentials are automatically generated');
+    console.log('- All sensitive files are in .gitignore');
     
   } catch (error) {
     console.error('❌ Setup failed:', error);

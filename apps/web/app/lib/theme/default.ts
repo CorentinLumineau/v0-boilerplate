@@ -37,7 +37,7 @@ export const defaultTheme: ColorThemeDefinition = {
     mutedForeground: "0 0% 65%",
     accent: "0 0% 15%",
     accentForeground: "0 0% 95%",
-    destructive: "0 90% 65%",
+    destructive: "0 84% 60%",
     destructiveForeground: "0 0% 98%",
     border: "0 0% 15%",
     input: "0 0% 15%",
