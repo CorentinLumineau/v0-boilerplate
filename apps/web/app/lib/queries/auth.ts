@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { betterFetch } from '@better-fetch/fetch'
 import type { AuthSession, LoginCredentials, SignupCredentials } from '@boilerplate/types'
 
 // Query Keys
@@ -14,9 +13,15 @@ export function useSession() {
     queryKey: authQueryKeys.session(),
     queryFn: async (): Promise<AuthSession | null> => {
       try {
-        const { data } = await betterFetch('/api/auth/get-session', {
+        const response = await fetch('/api/auth/get-session', {
           credentials: 'include',
         })
+        
+        if (!response.ok) {
+          return null
+        }
+        
+        const data = await response.json()
         return data as AuthSession || null
       } catch (error) {
         // If session fetch fails, user is not authenticated
@@ -35,20 +40,24 @@ export function useLogin() {
   
   return useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
-      const { data, error } = await betterFetch('/api/auth/sign-in', {
+      const response = await fetch('/api/auth/sign-in', {
         method: 'POST',
         credentials: 'include',
-        body: {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           email: credentials.email,
           password: credentials.password,
-        },
+        }),
       })
       
-      if (error) {
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Login failed' }))
         throw new Error(error.message || 'Login failed')
       }
       
-      return data
+      return response.json()
     },
     onSuccess: () => {
       // Invalidate and refetch session
@@ -62,21 +71,25 @@ export function useSignup() {
   
   return useMutation({
     mutationFn: async (credentials: SignupCredentials) => {
-      const { data, error } = await betterFetch('/api/auth/sign-up', {
+      const response = await fetch('/api/auth/sign-up', {
         method: 'POST',
         credentials: 'include',
-        body: {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           email: credentials.email,
           password: credentials.password,
           name: credentials.name,
-        },
+        }),
       })
       
-      if (error) {
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Signup failed' }))
         throw new Error(error.message || 'Signup failed')
       }
       
-      return data
+      return response.json()
     },
     onSuccess: () => {
       // Invalidate and refetch session
@@ -90,12 +103,13 @@ export function useLogout() {
   
   return useMutation({
     mutationFn: async () => {
-      const { error } = await betterFetch('/api/auth/sign-out', {
+      const response = await fetch('/api/auth/sign-out', {
         method: 'POST',
         credentials: 'include',
       })
       
-      if (error) {
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Logout failed' }))
         throw new Error(error.message || 'Logout failed')
       }
     },

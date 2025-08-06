@@ -1,1 +1,1 @@
-export { useSettings, useThemeSettings, useLanguageSettings, SettingsProvider } from './use-settings-store'
+export { useSettings, useThemeSettings, useLanguageSettings, SettingsStoreProvider } from './use-settings-store'

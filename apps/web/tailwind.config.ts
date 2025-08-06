@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss'
 import sharedConfig from '../../packages/config/tailwind.config.js'
 
-const config: Config = {
+const config = {
   ...sharedConfig,
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
