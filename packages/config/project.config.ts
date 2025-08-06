@@ -150,6 +150,18 @@ export const getBranchName = (): string => {
 
 // Updated URL helper functions for web app
 export const getWebUrl = (): string => {
+  // For Vercel deployments, always use VERCEL_URL if available
+  // This ensures branch deployments use their own URLs
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // Use NEXT_PUBLIC_APP_URL if explicitly set
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  
+  // Otherwise, use environment-based URLs
   const env = getEnvironmentType();
   
   switch (env) {

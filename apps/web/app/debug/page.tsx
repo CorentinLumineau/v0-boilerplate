@@ -159,12 +159,20 @@ export default function DebugPage() {
               <div className="font-mono">{environment}</div>
             </div>
             <div>
-              <div className="text-sm font-medium text-muted-foreground">Web URL</div>
+              <div className="text-sm font-medium text-muted-foreground">Configured Web URL</div>
               <div className="font-mono break-all">{environmentUrls.web}</div>
             </div>
             <div>
-              <div className="text-sm font-medium text-muted-foreground">Current URL</div>
+              <div className="text-sm font-medium text-muted-foreground">Current Origin</div>
+              <div className="font-mono break-all">{typeof window !== 'undefined' ? window.location.origin : 'N/A'}</div>
+            </div>
+            <div>
+              <div className="text-sm font-medium text-muted-foreground">Current Full URL</div>
               <div className="font-mono break-all">{typeof window !== 'undefined' ? window.location.href : 'N/A'}</div>
+            </div>
+            <div>
+              <div className="text-sm font-medium text-muted-foreground">Auth Base URL</div>
+              <div className="font-mono break-all">{typeof window !== 'undefined' ? window.location.origin : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">User Agent</div>
