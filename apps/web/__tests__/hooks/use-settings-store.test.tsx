@@ -5,7 +5,13 @@
 
 import React from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useSettingsStore, SettingsStoreProvider } from '@/hooks/use-settings-store'
+import { 
+  useSettingsStore, 
+  SettingsStoreProvider,
+  useThemeSettings,
+  useLanguageSettings,
+  useSettings
+} from '@/hooks/use-settings-store'
 import { TIMING } from '@/lib/config/constants'
 
 // Mock fetch globally
@@ -560,6 +566,207 @@ describe('useSettingsStore', () => {
       // updateUserPreferences should not be called for the setColorTheme since component was unmounted
       // Initial load uses fetchUserPreferences, not updateUserPreferences, so 0 calls expected
       expect(mockUpdateUserPreferences).toHaveBeenCalledTimes(0)
+    })
+
+    it('should handle translation function', () => {
+      mockUseSession.mockReturnValue({
+        data: null,
+        isPending: false
+      })
+
+      const { result } = renderHook(() => useSettingsStore(), { wrapper })
+
+      // Translation function should work
+      expect(result.current.t).toBeDefined()
+      expect(typeof result.current.t).toBe('function')
+      
+      // Test translation with current language
+      const translationResult = result.current.t('test.key')
+      expect(typeof translationResult).toBe('string')
+    })
+
+    it('should handle database errors with non-Error objects', async () => {
+      mockUseSession.mockReturnValue({
+        data: { user: { id: 'test_user_123' } },
+        isPending: false
+      })
+
+      const { result } = renderHook(() => useSettingsStore(), { wrapper })
+
+      // Wait for initial load
+      await waitFor(() => expect(result.current.preferencesLoaded).toBe(true))
+
+      // Mock updateUserPreferences to throw non-Error object
+      mockUpdateUserPreferences.mockRejectedValue('String error')
+
+      act(() => {
+        result.current.setLanguage('fr')
+      })
+
+      // Should handle string error and fallback to localStorage
+      await waitFor(() => {
+        expect(mockUpdateUserPreferences).toHaveBeenCalled()
+        expect(mockSaveLocalStoragePreferences).toHaveBeenCalled()
+      }, { timeout: TIMING.PREFERENCES_UPDATE_DEBOUNCE + 100 })
+    })
+
+    it('should save to localStorage for anonymous users when preferencesLoaded is true', async () => {
+      // This test covers an edge case where an anonymous user somehow has preferencesLoaded=true
+      // (e.g., from a previous authenticated session that logged out but kept the flag)
+      
+      // Start with authenticated session to set preferencesLoaded to true
+      mockUseSession.mockReturnValue({
+        data: { user: { id: 'test_user_123' } },
+        isPending: false
+      })
+
+      mockFetchUserPreferences.mockResolvedValue({
+        colorTheme: 'default',
+        language: 'en',
+        themeMode: 'system'
+      })
+
+      const { result, rerender } = renderHook(() => useSettingsStore(), { wrapper })
+
+      // Wait for preferencesLoaded to be true
+      await waitFor(() => {
+        expect(result.current.preferencesLoaded).toBe(true)
+      })
+
+      // Now simulate user logging out but preferencesLoaded remaining true
+      mockUseSession.mockReturnValue({
+        data: null, // No authenticated user
+        isPending: false
+      })
+
+      rerender()
+
+      // Now try to update preferences while anonymous but with preferencesLoaded=true
+      act(() => {
+        result.current.setColorTheme('red')
+      })
+
+      expect(result.current.colorTheme).toBe('red')
+
+      // Wait for debounced update to hit the anonymous user localStorage save code
+      await waitFor(() => {
+        expect(mockSaveLocalStoragePreferences).toHaveBeenCalledWith(
+          expect.objectContaining({ colorTheme: 'red' })
+        )
+      }, { timeout: TIMING.PREFERENCES_UPDATE_DEBOUNCE + 100 })
+    })
+
+    it('should handle theme application errors', async () => {
+      mockUseSession.mockReturnValue({
+        data: { user: { id: 'test_user_123' } },
+        isPending: false
+      })
+
+      // Mock applyTheme to throw error
+      const mockApplyTheme = require('@/lib/theme').applyTheme
+      mockApplyTheme.mockImplementation(() => {
+        throw new Error('Theme application failed')
+      })
+
+      const { result } = renderHook(() => useSettingsStore(), { wrapper })
+
+      // Wait for initial load to complete
+      await waitFor(() => expect(result.current.preferencesLoaded).toBe(true))
+
+      // Change theme to trigger theme application
+      act(() => {
+        result.current.setColorTheme('blue')
+      })
+
+      // Wait for theme to be applied (and error to be caught)
+      await waitFor(() => {
+        expect(mockApplyTheme).toHaveBeenCalled()
+      })
+
+      // Error should be caught and logged, but not thrown
+      expect(result.current.colorTheme).toBe('blue')
+    })
+  })
+
+  describe('Hook Error Handling', () => {
+    it('should throw error when useSettingsStore is used outside provider', () => {
+      // Test hook outside provider context
+      expect(() => {
+        renderHook(() => useSettingsStore())
+      }).toThrow('useSettingsStore must be used within a SettingsStoreProvider')
+    })
+
+    it('should throw error when useThemeSettings is used outside provider', () => {
+      expect(() => {
+        renderHook(() => useThemeSettings())
+      }).toThrow('useSettingsStore must be used within a SettingsStoreProvider')
+    })
+
+    it('should throw error when useLanguageSettings is used outside provider', () => {
+      expect(() => {
+        renderHook(() => useLanguageSettings())
+      }).toThrow('useSettingsStore must be used within a SettingsStoreProvider')
+    })
+
+    it('should throw error when useSettings is used outside provider', () => {
+      expect(() => {
+        renderHook(() => useSettings())
+      }).toThrow('useSettingsStore must be used within a SettingsStoreProvider')
+    })
+  })
+
+  describe('Specialized Hooks', () => {
+    it('should provide theme settings through useThemeSettings', () => {
+      const { result } = renderHook(() => useThemeSettings(), { wrapper })
+
+      expect(result.current.colorTheme).toBe('default')
+      expect(typeof result.current.setColorTheme).toBe('function')
+
+      act(() => {
+        result.current.setColorTheme('purple')
+      })
+
+      expect(result.current.colorTheme).toBe('purple')
+    })
+
+    it('should provide language settings through useLanguageSettings', () => {
+      const { result } = renderHook(() => useLanguageSettings(), { wrapper })
+
+      expect(result.current.language).toBe('en')
+      expect(typeof result.current.setLanguage).toBe('function')
+      expect(typeof result.current.t).toBe('function')
+
+      // Test the memoized translation function (line 299)
+      const translationResult = result.current.t('test.key')
+      expect(typeof translationResult).toBe('string')
+
+      act(() => {
+        result.current.setLanguage('fr')
+      })
+
+      expect(result.current.language).toBe('fr')
+      
+      // Test translation function after language change
+      const translationResultFr = result.current.t('test.key.fr')
+      expect(typeof translationResultFr).toBe('string')
+    })
+
+    it('should provide combined settings through useSettings', () => {
+      const { result } = renderHook(() => useSettings(), { wrapper })
+
+      expect(result.current.colorTheme).toBe('default')
+      expect(result.current.language).toBe('en')
+      expect(typeof result.current.setColorTheme).toBe('function')
+      expect(typeof result.current.setLanguage).toBe('function')
+      expect(typeof result.current.t).toBe('function')
+
+      act(() => {
+        result.current.setColorTheme('blue')
+        result.current.setLanguage('fr')
+      })
+
+      expect(result.current.colorTheme).toBe('blue')
+      expect(result.current.language).toBe('fr')
     })
   })
 })

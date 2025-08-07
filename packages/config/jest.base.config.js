@@ -6,6 +6,7 @@ const baseConfig = {
     '^@/(.*)$': '<rootDir>/app/$1',
     '^@boilerplate/types$': '<rootDir>/../../packages/types/src',
     '^@boilerplate/config/(.*)$': '<rootDir>/../../packages/config/$1',
+    '^@boilerplate/ui$': '<rootDir>/../../packages/ui/src',
   },
   
   // File extensions to consider

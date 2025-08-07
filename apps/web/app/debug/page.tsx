@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardTitle } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardTitle, Badge, Button } from "@boilerplate/ui";
 import { useSession } from "../lib/auth-client";
 import { 
   getEnvironmentType, 

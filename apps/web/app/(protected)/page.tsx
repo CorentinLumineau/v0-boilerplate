@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from '@/lib/auth-client'
-import { Button } from '@/components/ui/button'
+import { Button } from '@boilerplate/ui'
 import Link from 'next/link'
 import { Construction, Settings, LogOut } from 'lucide-react'
 import { signOut } from '@/lib/auth-client'

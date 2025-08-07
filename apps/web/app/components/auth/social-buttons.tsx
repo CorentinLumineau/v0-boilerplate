@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@boilerplate/ui";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 

@@ -6,15 +6,7 @@ import { useRouter } from "next/navigation"
 
 import { useLanguageSettings } from "@/hooks/use-settings-store"
 import { signOut, useSession } from "@/lib/auth-client"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@boilerplate/ui"
 import { SettingsPanel } from "@/components/settings/settings-panel"
 
 interface UserDropdownProps {

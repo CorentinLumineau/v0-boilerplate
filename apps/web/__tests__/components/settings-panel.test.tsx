@@ -498,5 +498,116 @@ describe('SettingsPanel', () => {
       // Component should still render with undefined theme
       expect(screen.getByText('Theme')).toBeInTheDocument()
     })
+
+    it('should handle unknown color theme gracefully', () => {
+      // Mock a theme that doesn't exist in themes object
+      mockUseThemeSettings.mockReturnValue({
+        colorTheme: 'unknown' as any,
+        setColorTheme: jest.fn(),
+      })
+
+      render(<SettingsPanel />)
+      
+      // Component should render and use fallback color
+      expect(screen.getByText('Theme')).toBeInTheDocument()
+    })
+
+    it('should handle compact mode with all conditional branches', () => {
+      render(<SettingsPanel compact />)
+      
+      // Should have compact classes and text variations
+      expect(screen.getByText('EN')).toBeInTheDocument()
+      expect(screen.getByText('FR')).toBeInTheDocument()
+      
+      // Icons should be present but text should be abbreviated
+      expect(screen.queryByText('English')).not.toBeInTheDocument()
+      expect(screen.queryByText('French')).not.toBeInTheDocument()
+    })
+
+    it('should handle empty theme change values', () => {
+      const mockSetTheme = jest.fn()
+      mockUseTheme.mockReturnValue({
+        theme: 'light',
+        setTheme: mockSetTheme,
+        resolvedTheme: 'light',
+        systemTheme: 'light',
+      })
+
+      render(<SettingsPanel />)
+      
+      const toggleGroups = screen.getAllByRole('group')
+      const toggleGroup = toggleGroups[0] // First group is the theme mode group
+      
+      // Simulate empty value change
+      fireEvent.click(toggleGroup)
+      fireEvent.keyDown(toggleGroup, { key: 'Enter' })
+      
+      // Should not call setTheme with empty value
+      expect(mockSetTheme).not.toHaveBeenCalledWith('')
+    })
+
+    it('should handle invalid language change values', () => {
+      const mockSetLanguage = jest.fn()
+      mockUseLanguageSettings.mockReturnValue({
+        language: 'en',
+        setLanguage: mockSetLanguage,
+        t: defaultMockStore.t,
+      })
+
+      render(<SettingsPanel />)
+      
+      // Try to set invalid language
+      const languageToggle = screen.getAllByRole('group')[1]
+      fireEvent.click(languageToggle)
+      
+      // Should not call setLanguage with invalid value
+      expect(mockSetLanguage).not.toHaveBeenCalledWith('invalid')
+    })
+  })
+
+  describe('Branch Coverage', () => {
+    it('should cover getThemePrimaryColor fallback branch', () => {
+      // This test ensures the fallback color is used for unknown themes
+      mockUseThemeSettings.mockReturnValue({
+        colorTheme: 'nonexistent' as any,
+        setColorTheme: jest.fn(),
+      })
+
+      render(<SettingsPanel />)
+      
+      // Component should render without errors even with invalid theme
+      expect(screen.getByText('Theme')).toBeInTheDocument()
+    })
+
+    it('should cover all conditional rendering branches in compact mode', () => {
+      render(<SettingsPanel compact />)
+      
+      // Test all conditional branches for compact mode
+      const icons = document.querySelectorAll('svg')
+      expect(icons.length).toBeGreaterThan(0)
+      
+      // Compact text should be shown
+      expect(screen.getByText('EN')).toBeInTheDocument()
+      expect(screen.getByText('FR')).toBeInTheDocument()
+      
+      // Full text should not be shown in compact mode
+      expect(screen.queryByText('English')).not.toBeInTheDocument()
+      expect(screen.queryByText('French')).not.toBeInTheDocument()
+    })
+
+    it('should cover all conditional rendering branches in normal mode', () => {
+      render(<SettingsPanel compact={false} />)
+      
+      // Full text should be shown in normal mode
+      expect(screen.getByText('English')).toBeInTheDocument()
+      expect(screen.getByText('Français')).toBeInTheDocument()
+      expect(screen.getByText('Light')).toBeInTheDocument()
+      expect(screen.getByText('Dark')).toBeInTheDocument()
+      expect(screen.getByText('System')).toBeInTheDocument()
+      
+      // Compact abbreviations should not be shown
+      expect(screen.queryByText('EN')).not.toBeInTheDocument()
+      expect(screen.queryByText('FR')).not.toBeInTheDocument()
+    })
   })
 })

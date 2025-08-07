@@ -465,5 +465,118 @@ describe('/api/preferences', () => {
         themeMode: 'dark'
       })
     })
+
+    describe('Error Handling', () => {
+      it('should handle database errors during update', async () => {
+        const mockSession = { user: { id: 'test_user_123' } }
+        mockAuth.api.getSession.mockResolvedValue(mockSession)
+        
+        const dbError = new Error('Database update failed')
+        mockPrisma.userPreferences.upsert.mockRejectedValue(dbError)
+        
+        const request = createMockRequest('PATCH', {
+          preferences: { colorTheme: 'red' }
+        })
+        const response = await PATCH(request)
+        
+        expect(response.status).toBe(API.STATUS_CODES.INTERNAL_SERVER_ERROR)
+        expect(mockLogger.apiError).toHaveBeenCalledWith(
+          'PATCH /api/preferences - Error',
+          { error: 'Database update failed' },
+          dbError
+        )
+        
+        const body = await response.json()
+        expect(body).toEqual({ error: 'Internal server error' })
+      })
+
+      it('should handle malformed JSON in request body', async () => {
+        const mockSession = { user: { id: 'test_user_123' } }
+        mockAuth.api.getSession.mockResolvedValue(mockSession)
+        
+        // Create a mock request that throws when parsing JSON
+        const request = {
+          json: jest.fn().mockRejectedValue(new SyntaxError('Unexpected token')),
+        } as unknown as NextRequest
+        
+        const response = await PATCH(request)
+        
+        expect(response.status).toBe(API.STATUS_CODES.INTERNAL_SERVER_ERROR)
+        expect(mockLogger.apiError).toHaveBeenCalledWith(
+          'PATCH /api/preferences - Error',
+          { error: 'Unexpected token' },
+          expect.any(SyntaxError)
+        )
+      })
+
+      it('should handle non-Error exceptions in GET', async () => {
+        const mockSession = { user: { id: 'test_user_123' } }
+        mockAuth.api.getSession.mockResolvedValue(mockSession)
+        
+        // Throw a non-Error object
+        mockPrisma.userPreferences.findUnique.mockRejectedValue('String error')
+        
+        const response = await GET()
+        
+        expect(response.status).toBe(API.STATUS_CODES.INTERNAL_SERVER_ERROR)
+        expect(mockLogger.apiError).toHaveBeenCalledWith(
+          'GET /api/preferences - Error',
+          { error: 'String error' },
+          undefined
+        )
+      })
+
+      it('should handle non-Error exceptions in PATCH', async () => {
+        const mockSession = { user: { id: 'test_user_123' } }
+        mockAuth.api.getSession.mockResolvedValue(mockSession)
+        
+        // Throw a non-Error object
+        mockPrisma.userPreferences.upsert.mockRejectedValue('String error')
+        
+        const request = createMockRequest('PATCH', {
+          preferences: { colorTheme: 'red' }
+        })
+        const response = await PATCH(request)
+        
+        expect(response.status).toBe(API.STATUS_CODES.INTERNAL_SERVER_ERROR)
+        expect(mockLogger.apiError).toHaveBeenCalledWith(
+          'PATCH /api/preferences - Error',
+          { error: 'String error' },
+          undefined
+        )
+      })
+    })
+
+    describe('Edge Cases', () => {
+      it('should handle partial preference updates with null/undefined values', async () => {
+        const mockSession = { user: { id: 'test_user_123' } }
+        mockAuth.api.getSession.mockResolvedValue(mockSession)
+        
+        // Mock mapping function to return partial data with some null values
+        const dbResponse = {
+          colorTheme: 'DEFAULT',
+          language: 'EN',
+          themeMode: 'SYSTEM'
+        }
+        mockPrisma.userPreferences.upsert.mockResolvedValue(dbResponse)
+        
+        const request = createMockRequest('PATCH', {
+          preferences: { colorTheme: 'blue' } // Only updating color theme
+        })
+        const response = await PATCH(request)
+        
+        expect(response.status).toBe(200)
+        // Test the create branch with default values when some fields are null
+        expect(mockPrisma.userPreferences.upsert).toHaveBeenCalledWith(
+          expect.objectContaining({
+            create: expect.objectContaining({
+              colorTheme: 'BLUE',
+              language: 'EN', // Default fallback
+              themeMode: 'SYSTEM', // Default fallback
+            })
+          })
+        )
+      })
+    })
   })
 })

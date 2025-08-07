@@ -404,6 +404,11 @@ describe('preferences library', () => {
       mockLocalStorage.removeItem.mockImplementation(() => {})
     })
 
+    afterEach(() => {
+      // Ensure all spies are restored after each test
+      jest.restoreAllMocks()
+    })
+
     it('should migrate localStorage preferences to database', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -555,6 +560,18 @@ describe('preferences library', () => {
         })
       })
     })
+
+    it('should handle exceptions during migration process', async () => {
+      // Mock localStorage.getItem to throw a non-Error exception during getLocalStoragePreferences()
+      // This will trigger the catch block (lines 304-307) at the very beginning of the try block
+      mockLocalStorage.getItem.mockImplementationOnce(() => {
+        throw 'String error accessing localStorage' // Non-Error exception
+      })
+
+      const result = await migrateLocalStorageToDatabase()
+
+      expect(result).toBe(false)
+    }, 10000)
   })
 
   describe('Integration Tests', () => {

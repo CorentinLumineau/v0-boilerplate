@@ -1,7 +1,5 @@
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge } from '@boilerplate/ui'
 import { CheckCircle, Palette, Globe, Shield, Zap, Code, Database, Smartphone } from 'lucide-react'
 import { getGithubUrl } from '@boilerplate/config/project.config'
 

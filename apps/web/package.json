@@ -1,6 +1,6 @@
 {
   "name": "@boilerplate/web",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,10 +11,7 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "node scripts/coverage-report.js",
-    "test:coverage:raw": "jest --coverage",
-    "coverage:summary": "node scripts/generate-coverage-summary.js",
-    "coverage:template": "node scripts/generate-coverage-summary.js --generate-test",
+    "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --watchAll=false",
     "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",
@@ -23,6 +20,7 @@
   "dependencies": {
     "@boilerplate/config": "workspace:*",
     "@boilerplate/types": "workspace:*",
+    "@boilerplate/ui": "workspace:*",
     "@prisma/client": "^6.13.0",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.1",

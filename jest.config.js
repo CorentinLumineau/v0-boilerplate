@@ -1,5 +1,3 @@
-const baseConfig = require('@boilerplate/config/jest.base.config.js')
-
 /** @type {import('jest').Config} */
 const config = {
   // Global configuration
@@ -10,18 +8,22 @@ const config = {
   coverageReporters: ['text', 'text-summary', 'lcov', 'html'],
   coverageDirectory: 'coverage',
   
-  // Use projects to handle different test environments
+  // Use projects to aggregate coverage across the monorepo
   projects: [
-    // Node environment for API tests and utility libraries
+    // Web app API tests
     {
-      displayName: 'API Tests',
+      displayName: 'Web API Tests',
       testEnvironment: 'node',
+      rootDir: './apps/web',
       testMatch: [
         '<rootDir>/__tests__/api/**/*.{ts,tsx}',
         '<rootDir>/__tests__/lib/**/*.{ts,tsx}',
       ],
       setupFilesAfterEnv: ['<rootDir>/jest.setup.node.js'],
-      ...baseConfig,
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/app/$1',
+        '^@boilerplate/(.*)$': '<rootDir>/../../packages/$1/src',
+      },
       transform: {
         '^.+\\.(ts|tsx)$': ['ts-jest', {
           useESM: false,
@@ -38,19 +40,20 @@ const config = {
         '!app/**/index.{ts,tsx}',
       ],
     },
-    // JSDOM environment for component and hook tests
+    // Web app component and hook tests
     {
-      displayName: 'Component & Hook Tests',
+      displayName: 'Web Component & Hook Tests',
       testEnvironment: 'jsdom',
+      rootDir: './apps/web',
       testMatch: [
         '<rootDir>/__tests__/components/**/*.{ts,tsx}',
         '<rootDir>/__tests__/hooks/**/*.{ts,tsx}',
         '<rootDir>/__tests__/utils/**/*.{ts,tsx}'
       ],
       setupFilesAfterEnv: ['<rootDir>/jest.setup.jsdom.js'],
-      ...baseConfig,
       moduleNameMapper: {
-        ...baseConfig.moduleNameMapper,
+        '^@/(.*)$': '<rootDir>/app/$1',
+        '^@boilerplate/(.*)$': '<rootDir>/../../packages/$1/src',
         '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
       },
       transform: {
@@ -72,8 +75,57 @@ const config = {
         '!app/**/index.{ts,tsx}',
         '!app/globals.css',
       ],
+    },
+    // UI package tests
+    {
+      displayName: 'UI Package Tests',
+      preset: 'ts-jest',
+      testEnvironment: 'jsdom',
+      rootDir: './packages/ui',
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+      testMatch: [
+        '<rootDir>/**/__tests__/**/*.{ts,tsx}',
+        '<rootDir>/**/*.{test,spec}.{ts,tsx}'
+      ],
+      transform: {
+        '^.+\\.(ts|tsx)$': 'ts-jest',
+      },
+      transformIgnorePatterns: [
+        'node_modules/(?!(node-fetch)/)'
+      ],
+      collectCoverageFrom: [
+        'src/**/*.{ts,tsx}',
+        '!src/**/*.d.ts',
+        '!src/**/index.{ts,tsx}',
+      ],
+      // Remove individual coverage thresholds to use global ones
+      globals: {
+        'ts-jest': {
+          useESM: false,
+          isolatedModules: true,
+          tsconfig: {
+            jsx: 'react-jsx',
+            jsxImportSource: 'react',
+            esModuleInterop: true,
+            allowSyntheticDefaultImports: true,
+          }
+        }
+      }
     }
   ],
+  
+  // Global coverage thresholds (aggregated across all projects)
+  coverageThreshold: {
+    global: {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+  },
 }
 
 module.exports = config

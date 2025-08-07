@@ -279,5 +279,34 @@ describe('Configuration Constants', () => {
       expect(VALIDATION.PASSWORD.MIN_LENGTH).toBeGreaterThanOrEqual(8) // Security minimum
       expect(DATABASE.PAGINATION.DEFAULT_PAGE_SIZE).toBeLessThan(100) // Reasonable page size
     })
+
+    it('should set appropriate log level based on environment', () => {
+      // Test that DEFAULT_LEVEL is either 1 (production/test) or 3 (development)
+      expect([1, 3]).toContain(LOGGING.DEFAULT_LEVEL)
+      
+      // In test environment, NODE_ENV is typically 'test', so should be 1 (WARN)
+      expect(LOGGING.DEFAULT_LEVEL).toBe(1)
+    })
+
+    it('should set DEBUG level in development environment', () => {
+      // Mock development environment
+      const originalEnv = process.env.NODE_ENV
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'development',
+        writable: true
+      })
+      
+      // Re-import to get updated constant
+      jest.resetModules()
+      const { LOGGING: DEV_LOGGING } = require('@/lib/config/constants')
+      
+      expect(DEV_LOGGING.DEFAULT_LEVEL).toBe(3)
+      
+      // Restore original environment
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: originalEnv,
+        writable: true
+      })
+    })
   })
 })
