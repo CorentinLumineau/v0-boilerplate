@@ -22,6 +22,7 @@ const config = {
       setupFilesAfterEnv: ['<rootDir>/jest.setup.node.js'],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/app/$1',
+        '^@boilerplate/config/(.*)$': '<rootDir>/../../packages/config/$1',
         '^@boilerplate/(.*)$': '<rootDir>/../../packages/$1/src',
       },
       transform: {
@@ -53,6 +54,7 @@ const config = {
       setupFilesAfterEnv: ['<rootDir>/jest.setup.jsdom.js'],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/app/$1',
+        '^@boilerplate/config/(.*)$': '<rootDir>/../../packages/config/$1',
         '^@boilerplate/(.*)$': '<rootDir>/../../packages/$1/src',
         '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
       },

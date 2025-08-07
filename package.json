@@ -29,6 +29,7 @@
     "db:generate": "pnpm --filter @boilerplate/web db:generate",
     "db:reset": "pnpm --filter @boilerplate/web db:reset",
     "db:seed": "pnpm --filter @boilerplate/web db:seed",
+    "check-env": "node scripts/check-env.js",
     "prepare": "husky"
   },
   "devDependencies": {
