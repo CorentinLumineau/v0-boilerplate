@@ -6,13 +6,12 @@ import { type ColorTheme, applyTheme } from "@/lib/theme"
 import { useTheme } from "next-themes"
 import { getTranslation, type Language } from "@/lib/i18n"
 import {
-  fetchUserPreferences,
-  updateUserPreferences,
   getLocalStoragePreferences,
   saveLocalStoragePreferences,
   migrateLocalStorageToDatabase,
   DEFAULT_PREFERENCES,
 } from "@/lib/preferences"
+import { useUserPreferences, useUpdatePreferences } from "@/lib/queries/preferences"
 import type { UserPreferences } from "@boilerplate/types"
 import { useSession } from "@/lib/auth-client"
 import { logger } from "@/lib/utils/logger"
@@ -47,10 +46,48 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
 
   // Authentication state from Better Auth
   const { data: session, isPending: sessionLoading } = useSession()
+  
+  // Loading state
   const [preferencesLoaded, setPreferencesLoaded] = useState<boolean>(false)
+  
+  // Debug logging for session changes
+  useEffect(() => {
+    logger.settingsDebug('Session state changed', {
+      hasSession: !!session?.user,
+      sessionUserId: session?.user?.id,
+      sessionLoading,
+      preferencesLoaded
+    })
+  }, [session?.user, sessionLoading, preferencesLoaded])
+  
+  // TanStack Query hooks for preferences
+  const { 
+    data: userPreferences, 
+    isLoading: preferencesLoading,
+    isSuccess: preferencesSuccess,
+    isError: preferencesError 
+  } = useUserPreferences({ enabled: !!session?.user })
+  
+  // Debug logging for TanStack Query state
+  useEffect(() => {
+    if (session?.user) {
+      logger.settingsDebug('TanStack Query state for authenticated user', {
+        sessionUserId: session.user.id,
+        preferencesLoading,
+        preferencesSuccess,
+        preferencesError,
+        userPreferences,
+        hasUserPreferences: !!userPreferences
+      })
+    }
+  }, [session?.user, preferencesLoading, preferencesSuccess, preferencesError, userPreferences])
+  const updatePreferencesMutation = useUpdatePreferences()
   
   // Track if we've migrated localStorage to database for this session
   const hasMigratedRef = useRef<boolean>(false)
+  
+  // Track if we're currently updating preferences to prevent loops
+  const isUpdatingRef = useRef<boolean>(false)
   
   // Unified debounce timer for all preference updates
   const updateTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -63,10 +100,14 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
     return getTranslation(language, key)
   }
 
-  // Unified debounced update function
+  // Unified debounced update function with proper dependencies
   const debouncedUpdatePreferences = useCallback((updates: Partial<UserPreferences>) => {
-    if (!preferencesLoaded) return
-
+    // Prevent updates if we're already updating
+    if (isUpdatingRef.current) {
+      logger.settingsDebug('Skipping preference update - already updating', { updates })
+      return
+    }
+    
     // Merge updates with pending updates
     pendingUpdatesRef.current = {
       ...pendingUpdatesRef.current,
@@ -85,104 +126,88 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
 
       logger.settingsDebug('Saving batched preferences', { preferencesToSave })
 
-      if (session?.user) {
-        try {
-          const result = await updateUserPreferences(preferencesToSave)
-          if (result) {
-            logger.settingsInfo('Preferences saved to database successfully')
-          } else {
-            logger.settingsWarn('Failed to save preferences to database - falling back to localStorage')
+      // Set updating flag
+      isUpdatingRef.current = true
+
+      try {
+        // Check if user is authenticated at time of save
+        if (session?.user) {
+          try {
+            logger.settingsDebug('Saving preferences to database', { preferencesToSave, userId: session.user.id })
+            await updatePreferencesMutation.mutateAsync(preferencesToSave)
+            logger.settingsInfo('Preferences saved to database successfully via TanStack Query')
+          } catch (error) {
+            logger.settingsError('Error saving preferences to database via TanStack Query', 
+              { error: error instanceof Error ? error.message : String(error) },
+              error instanceof Error ? error : undefined
+            )
+            // Fallback to localStorage
             saveLocalStoragePreferences(preferencesToSave)
           }
-        } catch (error) {
-          logger.settingsError('Error saving preferences to database', 
-            { error: error instanceof Error ? error.message : String(error) },
-            error instanceof Error ? error : undefined
-          )
-          // Fallback to localStorage
+        } else {
+          // Save to localStorage for anonymous users
           saveLocalStoragePreferences(preferencesToSave)
+          logger.settingsDebug('Preferences saved to localStorage for anonymous user')
         }
-      } else {
-        // Save to localStorage for anonymous users
-        saveLocalStoragePreferences(preferencesToSave)
-        logger.settingsDebug('Preferences saved to localStorage for anonymous user')
+      } finally {
+        // Clear updating flag after a short delay to allow for cache updates
+        setTimeout(() => {
+          isUpdatingRef.current = false
+        }, 100)
       }
     }, TIMING.PREFERENCES_UPDATE_DEBOUNCE)
-  }, [session, preferencesLoaded])
+  }, [session?.user, updatePreferencesMutation]) // Include dependencies to avoid stale closures
 
-  // Load preferences based on authentication status
+  // Load preferences from TanStack Query or localStorage
   useEffect(() => {
     // Don't load if session is still loading
     if (sessionLoading) return
     
-    const loadPreferences = async () => {
-      try {
-        if (session?.user) {
-          // User is authenticated
-          logger.settingsInfo('User authenticated - loading preferences from database', { userId: session.user.id })
-          
-          // Try to fetch from database
-          const userPreferences = await fetchUserPreferences()
-          
-          if (userPreferences) {
-            logger.settingsDebug('Database preferences loaded', { userPreferences })
-            setColorTheme((userPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme as ColorTheme)
-            setLanguage((userPreferences.language as Language) || DEFAULT_PREFERENCES.language!)
-            
-            // Set theme mode from preferences
-            if (userPreferences.themeMode) {
-              setTheme(userPreferences.themeMode)
-            }
-          } else {
-            logger.settingsInfo('No database preferences found - using defaults')
-            // No preferences in database yet, use defaults
-            setColorTheme(DEFAULT_PREFERENCES.colorTheme as ColorTheme)
-            setLanguage(DEFAULT_PREFERENCES.language as Language)
-            if (DEFAULT_PREFERENCES.themeMode) {
-              setTheme(DEFAULT_PREFERENCES.themeMode)
-            }
-          }
-          
-          // Migrate localStorage preferences to database if not done yet
-          if (!hasMigratedRef.current) {
-            logger.settingsInfo('Migrating localStorage preferences to database')
-            const migrationSuccess = await migrateLocalStorageToDatabase()
+    if (session?.user) {
+      // User is authenticated - use TanStack Query data
+      if (preferencesSuccess && userPreferences) {
+        logger.settingsDebug('Database preferences loaded via TanStack Query', { userPreferences })
+        
+        // Convert database format (uppercase) to frontend format (lowercase)
+        const colorTheme = userPreferences.colorTheme?.toLowerCase() as ColorTheme || DEFAULT_PREFERENCES.colorTheme as ColorTheme
+        const language = userPreferences.language?.toLowerCase() as Language || DEFAULT_PREFERENCES.language as Language
+        const themeMode = userPreferences.themeMode?.toLowerCase() as UserPreferences['themeMode'] || DEFAULT_PREFERENCES.themeMode
+        
+        setColorTheme(colorTheme)
+        setLanguage(language)
+        setTheme(themeMode || DEFAULT_PREFERENCES.themeMode || 'system')
+        
+        setPreferencesLoaded(true)
+        
+        // Migrate localStorage preferences to database if not done yet
+        if (!hasMigratedRef.current) {
+          logger.settingsInfo('Migrating localStorage preferences to database')
+          migrateLocalStorageToDatabase().then(migrationSuccess => {
             hasMigratedRef.current = migrationSuccess
-          }
-        } else {
-          // User is not authenticated, use localStorage
-          logger.settingsInfo('User not authenticated - using localStorage')
-          const localPreferences = getLocalStoragePreferences()
-          setColorTheme((localPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme as ColorTheme)
-          setLanguage((localPreferences.language as Language) || DEFAULT_PREFERENCES.language as Language)
-          if (localPreferences.themeMode) {
-            setTheme(localPreferences.themeMode)
-          }
-          // Don't set preferencesLoaded to true when not authenticated
-          // This indicates we're using localStorage/defaults, not loaded from database
+          })
         }
-      } catch (error) {
-        logger.settingsError('Error loading preferences', 
-          { error: error instanceof Error ? error.message : String(error) },
-          error instanceof Error ? error : undefined
-        )
-        // Fallback to localStorage
-        const localPreferences = getLocalStoragePreferences()
-        setColorTheme((localPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme as ColorTheme)
-        setLanguage((localPreferences.language as Language) || DEFAULT_PREFERENCES.language as Language)
-        if (localPreferences.themeMode) {
-          setTheme(localPreferences.themeMode)
-        }
-      } finally {
-        // Only set preferences loaded to true if we had a session (were trying to load from DB)
-        if (session?.user) {
-          setPreferencesLoaded(true)
-        }
+      } else if (preferencesError || userPreferences === null) {
+        logger.settingsWarn('Failed to load database preferences via TanStack Query - using defaults')
+        // Use defaults on error or when userPreferences is null
+        setColorTheme(DEFAULT_PREFERENCES.colorTheme as ColorTheme)
+        setLanguage(DEFAULT_PREFERENCES.language as Language)
+        setTheme(DEFAULT_PREFERENCES.themeMode || 'light')
+        setPreferencesLoaded(true)
       }
+      // If still loading, wait for TanStack Query to complete
+    } else {
+      // User is not authenticated, use localStorage
+      logger.settingsInfo('User not authenticated - using localStorage')
+      const localPreferences = getLocalStoragePreferences()
+      setColorTheme((localPreferences.colorTheme as ColorTheme) || DEFAULT_PREFERENCES.colorTheme as ColorTheme)
+      setLanguage((localPreferences.language as Language) || DEFAULT_PREFERENCES.language as Language)
+      if (localPreferences.themeMode) {
+        setTheme(localPreferences.themeMode)
+      }
+      // Set preferencesLoaded to true for localStorage users too
+      setPreferencesLoaded(true)
     }
-
-    loadPreferences()
-  }, [session, sessionLoading, setTheme])
+  }, [session, sessionLoading, preferencesSuccess, preferencesError, userPreferences, setTheme])
 
   // Apply theme when colorTheme or theme mode changes
   useEffect(() => {
@@ -193,8 +218,23 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
       document.documentElement.style.setProperty("--radius", UI.DEFAULT_RADIUS)
 
       // Apply theme based on current mode and color theme
-      const mode = theme === "dark" ? "dark" : "light"
+      // Handle system theme mode properly
+      let mode: "light" | "dark"
+      if (theme === "system") {
+        // Check system preference
+        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+        mode = systemPrefersDark ? "dark" : "light"
+      } else {
+        mode = theme === "dark" ? "dark" : "light"
+      }
+      
       applyTheme(colorTheme, mode)
+      
+      // Force next-themes to sync with our theme state
+      if (theme !== "system") {
+        document.documentElement.classList.remove("dark", "light")
+        document.documentElement.classList.add(mode)
+      }
       
       logger.settingsDebug('Applied theme', { colorTheme, themeMode: theme, mode })
     } catch (error) {
@@ -204,10 +244,76 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
       )
     }
   }, [colorTheme, theme, preferencesLoaded])
+
+  // Listen for system theme changes when theme mode is "system"
+  useEffect(() => {
+    if (!preferencesLoaded || theme !== "system") return
+    
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+    
+    const handleSystemThemeChange = () => {
+      try {
+        const systemPrefersDark = mediaQuery.matches
+        const mode = systemPrefersDark ? "dark" : "light"
+        applyTheme(colorTheme, mode)
+        
+        // Update next-themes classes for system mode
+        document.documentElement.classList.remove("dark", "light")
+        document.documentElement.classList.add(mode)
+        
+        logger.settingsDebug('Applied system theme change', { colorTheme, mode })
+      } catch (error) {
+        logger.settingsError('Error applying system theme change', 
+          { colorTheme, error: error instanceof Error ? error.message : String(error) },
+          error instanceof Error ? error : undefined
+        )
+      }
+    }
+    
+    mediaQuery.addEventListener("change", handleSystemThemeChange)
+    
+    return () => {
+      mediaQuery.removeEventListener("change", handleSystemThemeChange)
+    }
+  }, [colorTheme, theme, preferencesLoaded])
   
   // Trigger unified debounced save when theme preferences change
   useEffect(() => {
-    if (!preferencesLoaded) return
+    if (!preferencesLoaded || isUpdatingRef.current) return
+    
+    // Only save if values actually changed from loaded preferences
+    const currentPrefs = session?.user ? userPreferences : getLocalStoragePreferences()
+    
+    // Convert database format for comparison
+    const currentColorTheme = currentPrefs?.colorTheme?.toLowerCase() as ColorTheme
+    const currentThemeMode = currentPrefs?.themeMode?.toLowerCase() as UserPreferences['themeMode']
+    
+    // More robust comparison to prevent false positives
+    const colorThemeChanged = currentColorTheme !== colorTheme
+    const themeModeChanged = currentThemeMode !== (theme as UserPreferences['themeMode'])
+    
+    const needsUpdate = colorThemeChanged || themeModeChanged
+    
+    if (!needsUpdate) {
+      logger.settingsDebug('No theme preference changes detected', {
+        currentColorTheme,
+        colorTheme,
+        currentThemeMode,
+        theme,
+        colorThemeChanged,
+        themeModeChanged
+      })
+      return
+    }
+    
+    logger.settingsDebug('Theme preferences changed, triggering update', {
+      colorThemeChanged,
+      themeModeChanged,
+      currentColorTheme,
+      colorTheme,
+      currentThemeMode,
+      theme
+    })
     
     const preferences: Partial<UserPreferences> = {
       colorTheme,
@@ -215,15 +321,36 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
     }
     
     debouncedUpdatePreferences(preferences)
-  }, [colorTheme, theme, preferencesLoaded, debouncedUpdatePreferences])
+  }, [colorTheme, theme, preferencesLoaded, session?.user, userPreferences, debouncedUpdatePreferences])
 
   // Trigger unified debounced save when language changes
   useEffect(() => {
-    if (!preferencesLoaded) return
+    if (!preferencesLoaded || isUpdatingRef.current) return
+    
+    // Only save if language actually changed from loaded preferences
+    const currentPrefs = session?.user ? userPreferences : getLocalStoragePreferences()
+    
+    // Convert database format for comparison
+    const currentLanguage = currentPrefs?.language?.toLowerCase() as Language
+    
+    const needsUpdate = currentLanguage !== language
+    
+    if (!needsUpdate) {
+      logger.settingsDebug('No language preference changes detected', {
+        currentLanguage,
+        language
+      })
+      return
+    }
+    
+    logger.settingsDebug('Language preference changed, triggering update', {
+      currentLanguage,
+      language
+    })
     
     const preferences: Partial<UserPreferences> = { language }
     debouncedUpdatePreferences(preferences)
-  }, [language, preferencesLoaded, debouncedUpdatePreferences])
+  }, [language, preferencesLoaded, session?.user, userPreferences, debouncedUpdatePreferences])
 
   // Cleanup effect to clear pending timers on unmount
   useEffect(() => {
@@ -231,6 +358,8 @@ export function SettingsStoreProvider({ children }: { children: React.ReactNode 
       if (updateTimerRef.current) {
         clearTimeout(updateTimerRef.current)
       }
+      // Reset updating flag on unmount
+      isUpdatingRef.current = false
     }
   }, [])
 

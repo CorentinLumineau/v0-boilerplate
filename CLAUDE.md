@@ -32,6 +32,10 @@ This is a **Turborepo monorepo** with the following **single web app** structure
 - Always generate/update the type in @packages/types/ and use them in project. We should not have interfaces created within the frontend/backend
 - Never commit changes
 
+## Memory Notes
+
+- All UI components shadcn should be located to @packages/ui/ not in dedicated project
+
 ## Troubleshooting Notes
 
 - On troubleshooting issue, dont forget to get the latest documentation of technical stack by calling context7 mcp

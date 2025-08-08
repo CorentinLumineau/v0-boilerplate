@@ -34,7 +34,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "app/components/ui/toaster.tsx", "app/components/ui/toast.tsx"  ],
   "exclude": [
     "node_modules"
   ]

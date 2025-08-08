@@ -1,6 +1,7 @@
 import type { UserPreferences } from "@boilerplate/types"
 import { logger } from "@/lib/utils/logger"
 import { TIMING, DEFAULTS } from "@/lib/config/constants"
+import { apiClient, ApiClientError } from "@/lib/api-client"
 
 /**
  * Enhanced preferences service for handling user preference persistence
@@ -22,47 +23,20 @@ export async function fetchUserPreferences(): Promise<UserPreferences | null> {
   try {
     logger.preferencesDebug('Fetching user preferences from API')
     
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), TIMING.API_TIMEOUT)
-
-    const response = await fetch("/api/preferences", {
-      credentials: "include",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        logger.preferencesInfo('User not authenticated - using localStorage fallback')
-        return null
-      }
-      
-      const errorText = await response.text().catch(() => 'Unknown error')
-      logger.preferencesError(`Failed to fetch preferences: ${response.status}`, {
-        status: response.status,
-        statusText: response.statusText,
-        errorBody: errorText
-      })
-      throw new Error(`Failed to fetch preferences: ${response.status}`)
-    }
-
-    const result = await response.json()
-    const preferences: UserPreferences = result.data || DEFAULT_PREFERENCES
+    const response = await apiClient.get<UserPreferences>("/preferences")
+    const preferences = response.data || DEFAULT_PREFERENCES
     
     logger.preferencesDebug('Fetched preferences successfully', { preferences })
     return preferences
   } catch (error) {
-    if (error instanceof Error) {
-      if (error.name === 'AbortError') {
-        logger.preferencesError('Request timeout while fetching preferences')
-      } else {
-        logger.preferencesError('Error fetching user preferences', { error: error.message }, error)
-      }
+    if (error instanceof ApiClientError && error.status === 401) {
+      logger.preferencesInfo('User not authenticated - using localStorage fallback')
+      return null
     }
+    
+    logger.preferencesError('Error fetching user preferences', { 
+      error: error instanceof Error ? error.message : String(error) 
+    }, error instanceof Error ? error : undefined)
     return null
   }
 }
@@ -73,86 +47,25 @@ export async function fetchUserPreferences(): Promise<UserPreferences | null> {
 export async function updateUserPreferences(
   preferences: Partial<UserPreferences>
 ): Promise<UserPreferences | null> {
-  let retryCount = 0
-  const maxRetries = TIMING.MAX_RETRIES
-
-  while (retryCount <= maxRetries) {
-    try {
-      logger.preferencesDebug('Updating user preferences', { preferences, attempt: retryCount + 1 })
-      
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), TIMING.API_TIMEOUT)
-
-      const response = await fetch("/api/preferences", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ preferences }),
-        signal: controller.signal,
-      })
-
-      clearTimeout(timeoutId)
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          logger.preferencesInfo('User not authenticated - using localStorage fallback')
-          return null
-        }
-        
-        const errorText = await response.text().catch(() => 'Unknown error')
-        logger.preferencesError(`Failed to update preferences: ${response.status}`, {
-          status: response.status,
-          statusText: response.statusText,
-          errorBody: errorText,
-          attempt: retryCount + 1
-        })
-        throw new Error(`Failed to update preferences: ${response.status}`)
-      }
-
-      const result = await response.json()
-      const updatedPreferences: UserPreferences = result.data || DEFAULT_PREFERENCES
-      
-      logger.preferencesInfo('Successfully updated preferences', { 
-        updatedPreferences,
-        attempt: retryCount + 1 
-      })
-      return updatedPreferences
-    } catch (error) {
-      retryCount++
-      
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          logger.preferencesError('Request timeout while updating preferences', { attempt: retryCount })
-        } else {
-          logger.preferencesError('Error updating user preferences', { 
-            error: error.message, 
-            attempt: retryCount 
-          }, error)
-        }
-      }
-
-      // Don't retry on certain errors
-      if (error instanceof Error && (
-        error.message.includes('401') ||
-        error.message.includes('400') ||
-        error.name === 'AbortError'
-      )) {
-        return null
-      }
-
-      // If we haven't exhausted retries, wait before trying again
-      if (retryCount <= maxRetries) {
-        const delay = TIMING.RETRY_DELAY_BASE * Math.pow(2, retryCount - 1)
-        logger.preferencesDebug(`Retrying in ${delay}ms`, { attempt: retryCount, maxRetries })
-        await new Promise(resolve => setTimeout(resolve, delay))
-      }
+  try {
+    logger.preferencesDebug('Updating user preferences', { preferences })
+    
+    const response = await apiClient.patch<UserPreferences>("/preferences", { preferences })
+    const updatedPreferences = response.data || DEFAULT_PREFERENCES
+    
+    logger.preferencesInfo('Successfully updated preferences', { updatedPreferences })
+    return updatedPreferences
+  } catch (error) {
+    if (error instanceof ApiClientError && error.status === 401) {
+      logger.preferencesInfo('User not authenticated - using localStorage fallback')
+      return null
     }
+    
+    logger.preferencesError('Error updating user preferences', { 
+      error: error instanceof Error ? error.message : String(error) 
+    }, error instanceof Error ? error : undefined)
+    return null
   }
-
-  logger.preferencesError('Failed to update preferences after all retry attempts', { maxRetries })
-  return null
 }
 
 /**
@@ -230,6 +143,15 @@ export function saveLocalStoragePreferences(preferences: Partial<UserPreferences
 
     if (updates.length > 0) {
       logger.preferencesDebug(`Saved preferences to localStorage: ${updates.join(', ')}`)
+      // Add immediate verification
+      const savedColorTheme = localStorage.getItem("colorTheme")
+      const savedThemeMode = localStorage.getItem("themeMode")
+      logger.preferencesDebug('Verification - localStorage after save', { 
+        savedColorTheme, 
+        savedThemeMode,
+        expectedColorTheme: preferences.colorTheme,
+        expectedThemeMode: preferences.themeMode
+      })
     }
   } catch (error) {
     if (error instanceof Error && error.name === 'QuotaExceededError') {
@@ -268,6 +190,7 @@ export async function migrateLocalStorageToDatabase(): Promise<boolean> {
     logger.preferencesInfo('Migrating localStorage preferences to database', { localPreferences })
     
     // Create a clean preferences object with only non-default values
+    // Note: The API expects lowercase values, but the database stores uppercase
     const preferencesToMigrate: Partial<UserPreferences> = {}
     if (localPreferences.colorTheme !== DEFAULT_PREFERENCES.colorTheme) {
       preferencesToMigrate.colorTheme = localPreferences.colorTheme

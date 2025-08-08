@@ -45,7 +45,7 @@ export const mockTimers = {
 export const createMockFn = <T extends (...args: any[]) => any>(
   implementation?: T
 ): jest.MockedFunction<T> => {
-  const mockFn = jest.fn(implementation) as jest.MockedFunction<T>
+  const mockFn = jest.fn(implementation) as unknown as jest.MockedFunction<T>
   
   // Add helpful methods
   (mockFn as any).wasCalledWith = (...args: Parameters<T>) => {
@@ -136,8 +136,10 @@ export const mockFetch = (responses: MockFetchResponse[] | MockFetchResponse) =>
       clone: jest.fn(),
       redirect: jest.fn(),
       type: 'basic' as ResponseType,
-      url: ''
-    } as Response)
+      url: '',
+      redirected: false,
+      bytes: jest.fn()
+    } as unknown as Response)
   })
   
   global.fetch = fetch

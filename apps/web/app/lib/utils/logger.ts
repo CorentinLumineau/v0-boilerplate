@@ -183,6 +183,23 @@ class Logger {
     this.log('DEBUG', 'NOTIFICATION', message, context)
   }
 
+  // User-specific logging methods
+  userError(message: string, context?: LogContext, error?: Error): void {
+    this.log('ERROR', 'USER', message, context, error)
+  }
+
+  userWarn(message: string, context?: LogContext): void {
+    this.log('WARN', 'USER', message, context)
+  }
+
+  userInfo(message: string, context?: LogContext): void {
+    this.log('INFO', 'USER', message, context)
+  }
+
+  userDebug(message: string, context?: LogContext): void {
+    this.log('DEBUG', 'USER', message, context)
+  }
+
   // Generic logging methods
   error(message: string, context?: LogContext, error?: Error): void {
     this.log('ERROR', 'API', message, context, error)

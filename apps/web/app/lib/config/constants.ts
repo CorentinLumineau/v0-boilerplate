@@ -130,6 +130,7 @@ export const LOGGING = {
     PREFERENCES: '[Preferences]',
     NOTIFICATION: '[Notification]',
     DATABASE: '[Database]',
+    USER: '[User]',
   },
 } as const
 

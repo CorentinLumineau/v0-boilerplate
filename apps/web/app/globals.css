@@ -1,6 +1,29 @@
+/* Font loading optimization */
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+
+/* Ensure Inter font is properly loaded and applied */
+.font-sans {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-display: swap;
+}
+
+/* Font loading fallback */
+@supports (font-display: swap) {
+  .font-sans {
+    font-display: swap;
+  }
+}
+
+/* Ensure font weights are available */
+.font-light { font-weight: 300; }
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.font-extrabold { font-weight: 800; }
+.font-black { font-weight: 900; }
 
 @layer base {
   :root {

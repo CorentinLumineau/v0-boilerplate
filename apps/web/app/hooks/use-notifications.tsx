@@ -9,9 +9,9 @@ import {
   useMarkNotificationAsRead,
   useMarkAllNotificationsAsRead,
   useDeleteNotification,
-  addNotificationOptimistically,
-  notificationQueryKeys
+  addNotificationOptimistically
 } from '@/lib/queries/notifications'
+import { queryKeys } from '@/lib/query-keys'
 import { useSession } from '@/lib/auth-client'
 import type { Notification } from '@boilerplate/types'
 import { NotificationStatus } from '@boilerplate/types'
@@ -80,8 +80,8 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     offset?: number 
   }) => {
     // Invalidate queries to refetch with new params
-    await queryClient.invalidateQueries({ queryKey: notificationQueryKeys.lists() })
-    await queryClient.invalidateQueries({ queryKey: notificationQueryKeys.unreadCount() })
+    await queryClient.invalidateQueries({ queryKey: queryKeys.notifications.lists() })
+    await queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unreadCount() })
   }, [queryClient])
 
   // Mark notification as read using TanStack Query
@@ -184,7 +184,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       
       // Update TanStack Query cache with new notification
       queryClient.setQueriesData(
-        { queryKey: notificationQueryKeys.lists() },
+        { queryKey: queryKeys.notifications.lists() },
         (oldData: Notification[] | undefined) => {
           if (!oldData) return [notification]
           return [notification, ...oldData]
@@ -194,7 +194,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       // Update unread count if it's unread
       if (notification.status === 'UNREAD') {
         queryClient.setQueryData(
-          notificationQueryKeys.unreadCount(),
+          queryKeys.notifications.unreadCount(),
           (oldCount: number | undefined) => (oldCount || 0) + 1
         )
       }

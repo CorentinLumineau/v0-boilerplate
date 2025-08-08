@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardTitle, Badge, Button } from "@boilerplate/ui";
 import { useSession } from "../lib/auth-client";
+import { useHealthStatus } from "@/lib/queries/health";
+import { ThemeTest } from "./theme-test";
 import { 
   getEnvironmentType, 
   getCurrentEnvironmentUrls, 
@@ -32,39 +34,40 @@ interface CookieInfo {
 
 export default function DebugPage() {
   const { data: session, isPending: isLoading } = useSession();
-  const [apiHealth, setApiHealth] = useState<ApiHealthStatus>({ status: 'loading' });
   const [cookies, setCookies] = useState<CookieInfo[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
 
   const environment = getEnvironmentType();
   const environmentUrls = getCurrentEnvironmentUrls();
+  
+  // Use TanStack Query for health check
+  const { 
+    data: healthData, 
+    isLoading: healthLoading, 
+    isError: healthError,
+    error: healthErrorDetail,
+    refetch: refetchHealth 
+  } = useHealthStatus();
+  
+  // Transform health data to match existing interface
+  const apiHealth: ApiHealthStatus = healthLoading 
+    ? { status: 'loading' }
+    : healthError 
+    ? { 
+        status: 'error', 
+        error: healthErrorDetail instanceof Error ? healthErrorDetail.message : 'Failed to reach API' 
+      }
+    : healthData 
+    ? {
+        status: 'ok',
+        message: healthData.message,
+        timestamp: healthData.timestamp
+      }
+    : { status: 'loading' };
 
   useEffect(() => {
-    // Check API health
-    const checkApiHealth = async () => {
-      try {
-        const response = await fetch('/api/health');
-        const data = await response.json();
-        
-        if (response.ok) {
-          setApiHealth({
-            status: 'ok',
-            message: data.message || 'API is healthy',
-            timestamp: data.timestamp || new Date().toISOString()
-          });
-        } else {
-          setApiHealth({
-            status: 'error',
-            error: data.error || 'API health check failed'
-          });
-        }
-      } catch (error) {
-        setApiHealth({
-          status: 'error',
-          error: error instanceof Error ? error.message : 'Failed to reach API'
-        });
-      }
-    };
+    // Only run on client side
+    if (typeof window === 'undefined') return;
 
     // Parse cookies
     const parseCookies = () => {
@@ -87,11 +90,12 @@ export default function DebugPage() {
       setCookies(cookieList);
     };
 
-    checkApiHealth();
     parseCookies();
   }, []);
 
   const copyToClipboard = async (text: string, key: string) => {
+    if (typeof window === 'undefined') return;
+    
     try {
       await navigator.clipboard.writeText(text);
       setCopied(key);
@@ -121,7 +125,32 @@ export default function DebugPage() {
   };
 
   const refreshData = () => {
-    window.location.reload();
+    refetchHealth();
+    
+    // Only parse cookies on client side
+    if (typeof window === 'undefined') return;
+    
+    // Parse cookies again
+    const parseCookies = () => {
+      const cookieString = document.cookie;
+      const cookieList: CookieInfo[] = [];
+      
+      if (cookieString) {
+        const cookies = cookieString.split(';');
+        cookies.forEach(cookie => {
+          const [name, value] = cookie.trim().split('=');
+          if (name && value) {
+            cookieList.push({
+              name: decodeURIComponent(name),
+              value: decodeURIComponent(value)
+            });
+          }
+        });
+      }
+      
+      setCookies(cookieList);
+    };
+    parseCookies();
   };
 
   return (
@@ -349,20 +378,20 @@ export default function DebugPage() {
           <div className="flex flex-wrap gap-2">
             <Button 
               variant="outline" 
-              onClick={() => window.open('/api/health', '_blank')}
+              onClick={() => typeof window !== 'undefined' && window.open('/api/health', '_blank')}
             >
               Test API Health
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => window.open('/api/auth/session', '_blank')}
+              onClick={() => typeof window !== 'undefined' && window.open('/api/auth/session', '_blank')}
             >
               View Raw Session
             </Button>
             {session?.user && (
               <Button 
                 variant="outline" 
-                onClick={() => window.location.href = '/login'}
+                onClick={() => typeof window !== 'undefined' && (window.location.href = '/login')}
               >
                 Sign Out & Test Login
               </Button>
@@ -370,12 +399,20 @@ export default function DebugPage() {
             {!session?.user && (
               <Button 
                 variant="outline" 
-                onClick={() => window.location.href = '/login'}
+                onClick={() => typeof window !== 'undefined' && (window.location.href = '/login')}
               >
                 Test Login
               </Button>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Theme Debug */}
+      <Card>
+        <CardContent className="p-6">
+          <CardTitle className="mb-4">Theme Debug</CardTitle>
+          <ThemeTest />
         </CardContent>
       </Card>
 

@@ -9,75 +9,8 @@ const config = {
   coverageDirectory: 'coverage',
   
   // Use projects to aggregate coverage across the monorepo
+  // Note: Web app tests are currently deleted. When added back, include them here.
   projects: [
-    // Web app API tests
-    {
-      displayName: 'Web API Tests',
-      testEnvironment: 'node',
-      rootDir: './apps/web',
-      testMatch: [
-        '<rootDir>/__tests__/api/**/*.{ts,tsx}',
-        '<rootDir>/__tests__/lib/**/*.{ts,tsx}',
-      ],
-      setupFilesAfterEnv: ['<rootDir>/jest.setup.node.js'],
-      moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/app/$1',
-        '^@boilerplate/config/(.*)$': '<rootDir>/../../packages/config/$1',
-        '^@boilerplate/(.*)$': '<rootDir>/../../packages/$1/src',
-      },
-      transform: {
-        '^.+\\.(ts|tsx)$': ['ts-jest', {
-          useESM: false,
-          tsconfig: {
-            module: 'commonjs',
-            target: 'ES2017'
-          }
-        }],
-      },
-      collectCoverageFrom: [
-        'app/api/**/*.{ts,tsx}',
-        'app/lib/**/*.{ts,tsx}',
-        '!app/**/*.d.ts',
-        '!app/**/index.{ts,tsx}',
-      ],
-    },
-    // Web app component and hook tests
-    {
-      displayName: 'Web Component & Hook Tests',
-      testEnvironment: 'jsdom',
-      rootDir: './apps/web',
-      testMatch: [
-        '<rootDir>/__tests__/components/**/*.{ts,tsx}',
-        '<rootDir>/__tests__/hooks/**/*.{ts,tsx}',
-        '<rootDir>/__tests__/utils/**/*.{ts,tsx}'
-      ],
-      setupFilesAfterEnv: ['<rootDir>/jest.setup.jsdom.js'],
-      moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/app/$1',
-        '^@boilerplate/config/(.*)$': '<rootDir>/../../packages/config/$1',
-        '^@boilerplate/(.*)$': '<rootDir>/../../packages/$1/src',
-        '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-      },
-      transform: {
-        '^.+\\.(ts|tsx)$': ['ts-jest', {
-          useESM: false,
-          tsconfig: {
-            jsx: 'react-jsx',
-            module: 'commonjs',
-            target: 'ES2017'
-          }
-        }],
-      },
-      collectCoverageFrom: [
-        'app/components/**/*.{ts,tsx}',
-        'app/hooks/**/*.{ts,tsx}',
-        'app/lib/**/*.{ts,tsx}',
-        '!app/lib/prisma.ts', // Skip prisma client
-        '!app/**/*.d.ts',
-        '!app/**/index.{ts,tsx}',
-        '!app/globals.css',
-      ],
-    },
     // UI package tests
     {
       displayName: 'UI Package Tests',

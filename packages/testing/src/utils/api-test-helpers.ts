@@ -149,14 +149,15 @@ export const testApiEndpoint = async (
       
       if (scenario.expectations.headers) {
         it('should return expected headers', () => {
-          Object.entries(scenario.expectations.headers).forEach(([key, value]) => {
+          Object.entries(scenario.expectations.headers || {}).forEach(([key, value]) => {
             expect(response.headers.get(key)).toBe(value)
           })
         })
       }
     })
     
-    results.push({ scenario: scenario.name, response })
+    // Note: response is not available in this scope, but we can still track the scenario
+    results.push({ scenario: scenario.name })
   }
   
   return results

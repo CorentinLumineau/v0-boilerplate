@@ -14,7 +14,7 @@
   },
   "include": [
     "src/**/*"
-  ],
+, "../../apps/web/app/components/ui/toaster.tsx", "../../apps/web/app/components/ui/toast.tsx"  ],
   "exclude": [
     "node_modules",
     "dist",
