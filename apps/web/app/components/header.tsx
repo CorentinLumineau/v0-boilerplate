@@ -6,17 +6,9 @@ import { Menu } from "lucide-react"
 
 import { UserDropdown } from "@/components/user-dropdown"
 import { NotificationBell } from "@/components/notifications/notification-bell"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, Button } from "@boilerplate/ui"
 // Update import to use the consolidated file
 import { useLanguageSettings } from "@/hooks/use-settings-store"
-import { Button } from "@/components/ui/button"
 
 /**
  * Renders the application header with dynamic breadcrumb navigation and a user dropdown.

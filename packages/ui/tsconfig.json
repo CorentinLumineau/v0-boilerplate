@@ -1,0 +1,24 @@
+{
+  "extends": "@boilerplate/config/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@boilerplate/config": ["../config/src"]
+    },
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "dist",
+    "incremental": false
+  },
+  "include": [
+    "src/**/*"
+, "../../apps/web/app/components/ui/toaster.tsx", "../../apps/web/app/components/ui/toast.tsx"  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
+}

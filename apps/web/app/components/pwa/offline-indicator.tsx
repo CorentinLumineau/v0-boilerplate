@@ -63,7 +63,7 @@ export function OfflineIndicator() {
         ) : (
           <>
             <WifiOff className="h-4 w-4" />
-            <span>You're offline</span>
+            <span>You&apos;re offline</span>
           </>
         )}
       </div>

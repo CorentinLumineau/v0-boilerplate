@@ -1,41 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { apiClient, handleApiError } from '@/lib/api-client'
+import { queryKeys } from '@/lib/query-keys'
 import type { Notification } from '@boilerplate/types'
-
-// Query Keys
-export const notificationQueryKeys = {
-  all: ['notifications'] as const,
-  lists: () => [...notificationQueryKeys.all, 'list'] as const,
-  list: (filters: Record<string, any>) => [...notificationQueryKeys.lists(), filters] as const,
-  details: () => [...notificationQueryKeys.all, 'detail'] as const,
-  detail: (id: string) => [...notificationQueryKeys.details(), id] as const,
-  unreadCount: () => [...notificationQueryKeys.all, 'unreadCount'] as const,
-}
 
 // Queries
 export function useNotifications(filters?: { status?: string; type?: string; limit?: number }, options?: { enabled?: boolean }) {
   return useQuery({
-    queryKey: notificationQueryKeys.list(filters || {}),
+    queryKey: queryKeys.notifications.list(filters || {}),
     queryFn: async (): Promise<Notification[]> => {
-      const searchParams = new URLSearchParams()
-      if (filters?.status) searchParams.append('status', filters.status)
-      if (filters?.type) searchParams.append('type', filters.type)
-      if (filters?.limit) searchParams.append('limit', filters.limit.toString())
-      
-      const url = `/api/notifications${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-      
-      const response = await fetch(url, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch notifications: ${response.statusText}`)
+      try {
+        const searchParams = new URLSearchParams()
+        if (filters?.status) searchParams.append('status', filters.status)
+        if (filters?.type) searchParams.append('type', filters.type)
+        if (filters?.limit) searchParams.append('limit', filters.limit.toString())
+        
+        const endpoint = `/notifications${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+        const response = await apiClient.get<{ notifications: Notification[] }>(endpoint)
+        return response.data?.notifications || []
+      } catch (error) {
+        handleApiError(error)
       }
-      
-      const data = await response.json()
-      return data.notifications || []
     },
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
@@ -45,21 +29,14 @@ export function useNotifications(filters?: { status?: string; type?: string; lim
 
 export function useUnreadNotificationsCount(options?: { enabled?: boolean }) {
   return useQuery({
-    queryKey: notificationQueryKeys.unreadCount(),
+    queryKey: queryKeys.notifications.unreadCount(),
     queryFn: async (): Promise<number> => {
-      const response = await fetch(`/api/notifications/count`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch notification count: ${response.statusText}`)
+      try {
+        const response = await apiClient.get<{ unreadCount: number }>('/notifications/count')
+        return response.data?.unreadCount || 0
+      } catch (error) {
+        handleApiError(error)
       }
-      
-      const data = await response.json()
-      return data.unreadCount || 0
     },
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
@@ -73,25 +50,17 @@ export function useMarkNotificationAsRead() {
   
   return useMutation({
     mutationFn: async (notificationId: string) => {
-      const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'read' }),
-      })
-      
-      if (!response.ok) {
-        throw new Error(`Failed to mark notification as read: ${response.statusText}`)
+      try {
+        const response = await apiClient.patch(`/notifications/${notificationId}`, { status: 'read' })
+        return response.data
+      } catch (error) {
+        handleApiError(error)
       }
-      
-      return response.json()
     },
     onSuccess: (updatedNotification, notificationId) => {
       // Update the specific notification in all relevant queries
       queryClient.setQueriesData(
-        { queryKey: notificationQueryKeys.lists() },
+        { queryKey: queryKeys.notifications.lists() },
         (oldData: Notification[] | undefined) => {
           if (!oldData) return oldData
           return oldData.map(notification =>
@@ -104,7 +73,7 @@ export function useMarkNotificationAsRead() {
       
       // Update unread count
       queryClient.setQueryData(
-        notificationQueryKeys.unreadCount(),
+        queryKeys.notifications.unreadCount(),
         (oldCount: number | undefined) => Math.max(0, (oldCount || 1) - 1)
       )
     },
@@ -116,24 +85,17 @@ export function useMarkAllNotificationsAsRead() {
   
   return useMutation({
     mutationFn: async () => {
-      const response = await fetch(`/api/notifications/mark-all-read`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      
-      if (!response.ok) {
-        throw new Error(`Failed to mark all notifications as read: ${response.statusText}`)
+      try {
+        const response = await apiClient.patch('/notifications/mark-all-read')
+        return response.data
+      } catch (error) {
+        handleApiError(error)
       }
-      
-      return response.json()
     },
     onSuccess: () => {
       // Mark all notifications as read in cache
       queryClient.setQueriesData(
-        { queryKey: notificationQueryKeys.lists() },
+        { queryKey: queryKeys.notifications.lists() },
         (oldData: Notification[] | undefined) => {
           if (!oldData) return oldData
           return oldData.map(notification => ({
@@ -145,7 +107,7 @@ export function useMarkAllNotificationsAsRead() {
       )
       
       // Reset unread count to 0
-      queryClient.setQueryData(notificationQueryKeys.unreadCount(), 0)
+      queryClient.setQueryData(queryKeys.notifications.unreadCount(), 0)
     },
   })
 }
@@ -155,24 +117,17 @@ export function useDeleteNotification() {
   
   return useMutation({
     mutationFn: async (notificationId: string) => {
-      const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      
-      if (!response.ok) {
-        throw new Error(`Failed to delete notification: ${response.statusText}`)
+      try {
+        const response = await apiClient.delete(`/notifications/${notificationId}`)
+        return response.data
+      } catch (error) {
+        handleApiError(error)
       }
-      
-      return response.json()
     },
     onSuccess: (_, notificationId) => {
       // Remove notification from all lists
       queryClient.setQueriesData(
-        { queryKey: notificationQueryKeys.lists() },
+        { queryKey: queryKeys.notifications.lists() },
         (oldData: Notification[] | undefined) => {
           if (!oldData) return oldData
           return oldData.filter(notification => notification.id !== notificationId)
@@ -181,11 +136,11 @@ export function useDeleteNotification() {
       
       // Update unread count if the deleted notification was unread
       queryClient.setQueryData(
-        notificationQueryKeys.unreadCount(),
+        queryKeys.notifications.unreadCount(),
         (oldCount: number | undefined) => {
           // We'd need to know if the deleted notification was unread
           // For now, we'll refetch the count to be safe
-          queryClient.invalidateQueries({ queryKey: notificationQueryKeys.unreadCount() })
+          queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unreadCount() })
           return oldCount
         }
       )
@@ -208,7 +163,7 @@ export function addNotificationOptimistically(
   
   // Add to all notification lists
   queryClient.setQueriesData(
-    { queryKey: notificationQueryKeys.lists() },
+    { queryKey: queryKeys.notifications.lists() },
     (oldData: Notification[] | undefined) => {
       if (!oldData) return [tempNotification]
       return [tempNotification, ...oldData]
@@ -218,7 +173,7 @@ export function addNotificationOptimistically(
   // Update unread count if it's unread
   if (notification.status === 'UNREAD') {
     queryClient.setQueryData(
-      notificationQueryKeys.unreadCount(),
+      queryKeys.notifications.unreadCount(),
       (oldCount: number | undefined) => (oldCount || 0) + 1
     )
   }

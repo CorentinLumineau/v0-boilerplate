@@ -2,7 +2,7 @@
 
 import type React from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Button } from "@boilerplate/ui"
 import { UserDropdown } from "@/components/user-dropdown"
 
 function AuthHeader() {

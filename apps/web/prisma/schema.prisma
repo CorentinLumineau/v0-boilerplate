@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,26 +8,27 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  emailVerified Boolean        @default(false)
+  id            String          @id @default(cuid())
+  email         String          @unique
+  emailVerified Boolean         @default(false)
   name          String?
   image         String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  sessions      Session[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   accounts      Account[]
   notifications Notification[]
+  sessions      Session[]
+  userPreferences UserPreferences?
 }
 
 model Session {
   id        String   @id @default(cuid())
   expiresAt DateTime
-  token     String   @unique @db.Text
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  ipAddress String?  @db.Text
-  userAgent String?  @db.Text
+  ipAddress String?
+  userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -41,17 +36,17 @@ model Session {
 }
 
 model Account {
-  id                String   @id @default(cuid())
-  accountId         String
-  providerId        String
-  userId            String
-  accessToken       String?  @db.Text
-  refreshToken      String?  @db.Text
-  password          String?  @db.Text
-  expiresAt         DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String    @id @default(cuid())
+  accountId    String
+  providerId   String
+  userId       String
+  accessToken  String?
+  refreshToken String?
+  password     String?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, accountId])
   @@index([userId])
@@ -70,17 +65,17 @@ model Verification {
 }
 
 model Notification {
-  id        String              @id @default(cuid())
+  id        String             @id @default(cuid())
   title     String
-  message   String?             @db.Text
-  type      NotificationType    @default(INFO)
-  status    NotificationStatus  @default(UNREAD)
+  message   String?
+  type      NotificationType   @default(INFO)
+  status    NotificationStatus @default(UNREAD)
   userId    String
-  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  data      Json?               // Additional structured data
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
+  data      Json?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
   readAt    DateTime?
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, status])
@@ -99,4 +94,39 @@ enum NotificationStatus {
   UNREAD
   READ
   ARCHIVED
+}
+
+model UserPreferences {
+  id         String        @id @default(cuid())
+  userId     String        @unique
+  colorTheme ColorTheme    @default(DEFAULT)
+  language   Language      @default(EN)
+  themeMode  ThemeMode     @default(SYSTEM)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum ColorTheme {
+  DEFAULT
+  RED
+  ORANGE
+  GREEN
+  BLUE
+  TEAL
+  PURPLE
+  PINK
+}
+
+enum Language {
+  EN
+  FR
+}
+
+enum ThemeMode {
+  LIGHT
+  DARK
+  SYSTEM
 }

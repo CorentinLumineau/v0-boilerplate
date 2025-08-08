@@ -1,6 +1,12 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import "@fontsource/inter/300.css"
+import "@fontsource/inter/400.css"
+import "@fontsource/inter/500.css"
+import "@fontsource/inter/600.css"
+import "@fontsource/inter/700.css"
+import "@fontsource/inter/800.css"
+import "@fontsource/inter/900.css"
 import "./globals.css"
 
 import { ThemeProvider } from "@/components/theme-provider"
@@ -12,13 +18,13 @@ import { InstallPrompt } from "@/components/pwa/install-prompt"
 import { OfflineIndicator } from "@/components/pwa/offline-indicator"
 import { NotificationProvider } from "@/hooks/use-notifications"
 import { QueryProvider } from "@/providers/query-provider"
-
-const inter = Inter({ subsets: ["latin"] })
+import { ErrorBoundary } from "@/components/error-boundary"
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: "Boilerplate App",
   description: "Next.js boilerplate with sidebar, header, and content area",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -30,15 +36,18 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className="font-sans">
         <QueryProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             {/* Use the correct provider */}
             <SettingsStoreProvider>
               <NotificationProvider>
-                <AppLayout version={version}>{children}</AppLayout>
-                <InstallPrompt />
-                <OfflineIndicator />
+                <ErrorBoundary>
+                  <AppLayout version={version}>{children}</AppLayout>
+                  <InstallPrompt />
+                  <OfflineIndicator />
+                  <Toaster />
+                </ErrorBoundary>
               </NotificationProvider>
             </SettingsStoreProvider>
           </ThemeProvider>

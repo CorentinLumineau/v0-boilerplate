@@ -1,0 +1,29 @@
+# Check if lockfile is in sync with package.json files
+echo "🔍 Checking lockfile consistency..."
+if ! pnpm install --frozen-lockfile --silent; then
+  echo "❌ Lockfile is out of sync with package.json files"
+  echo "🔄 Updating lockfile..."
+  pnpm install
+  echo "✅ Lockfile updated"
+  echo "⚠️  Please commit the updated pnpm-lock.yaml file"
+  exit 1
+fi
+echo "✅ Lockfile is in sync"
+
+# Check environment variables
+echo "🔍 Checking environment variables..."
+if ! node scripts/check-env.js; then
+  echo "❌ Environment variables check failed"
+  echo "🔍 Please set up your environment variables before committing"
+  exit 1
+fi
+echo "✅ Environment variables are properly configured"
+
+# Verifying app is building
+echo "🔧 Verifying app build..."
+if ! pnpm build; then
+  echo "❌ Build failed"
+  echo "🔍 Please check for build errors and fix them before committing"
+  exit 1
+fi
+echo "✅ Build verification passed"

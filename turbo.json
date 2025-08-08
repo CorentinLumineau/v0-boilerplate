@@ -45,6 +45,16 @@
     "test": {
       "outputs": ["coverage/**"]
     },
+    "test:coverage": {
+      "outputs": ["coverage/**"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "test:ci": {
+      "outputs": ["coverage/**"]
+    },
     "clean": {
       "cache": false
     }

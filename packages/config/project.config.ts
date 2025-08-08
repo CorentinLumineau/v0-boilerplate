@@ -10,7 +10,7 @@ export const PROJECT_CONFIG = {
   name: "boilerplate",
   displayName: "V0 Boilerplate",
   description: "A Next.js 15 web application with authentication, theming, and TypeScript",
-  version: "0.1.0",
+  version: "0.1.3",
   
   // URLs and Domains - Single domain architecture
   urls: {
@@ -150,6 +150,18 @@ export const getBranchName = (): string => {
 
 // Updated URL helper functions for web app
 export const getWebUrl = (): string => {
+  // For Vercel deployments, always use VERCEL_URL if available
+  // This ensures branch deployments use their own URLs
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // Use NEXT_PUBLIC_APP_URL if explicitly set
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  
+  // Otherwise, use environment-based URLs
   const env = getEnvironmentType();
   
   switch (env) {

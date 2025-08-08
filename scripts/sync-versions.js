@@ -8,6 +8,8 @@ const packagesToSync = [
   'apps/web/package.json',
   'packages/config/package.json',
   'packages/types/package.json',
+  'packages/testing/package.json',
+  'packages/ui/package.json'
 ];
 
 function getVersionFromConfig() {
