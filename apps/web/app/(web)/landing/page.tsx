@@ -1,12 +1,17 @@
+'use client'
+
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle, Palette, Globe, Shield, Zap, Code, Database, Smartphone } from 'lucide-react'
-import { getGithubUrl } from '@boilerplate/config/project.config'
+import { getGithubUrl, getDisplayName } from '@boilerplate/config/project.config'
+import { useLanguageSettings } from '@/hooks/use-settings-store'
 
 export default function LandingPage() {
   const githubUrl = getGithubUrl()
+  const appName = getDisplayName()
+  const { t } = useLanguageSettings()
   
   return (
     <div>
@@ -30,28 +35,28 @@ export default function LandingPage() {
           </div>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-foreground mb-6 leading-tight">
-            Modern Web Application{" "}
+            {t("modernWebApp")}{" "}
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Boilerplate
+              {t("boilerplate")}
             </span>
           </h1>
           
           <p className="text-xl sm:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            A production-ready Next.js boilerplate with authentication, theming, internationalization, and modern development tools.{" "}
-            <span className="text-foreground font-medium">Build faster, deploy easier.</span>
+            {t("productionReadyDescription")}{" "}
+            <span className="text-foreground font-medium">{t("buildFasterDeployEasier")}</span>
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Button asChild size="lg" className="text-base px-8 py-6 h-auto">
               <Link href={githubUrl} target="_blank" rel="noopener noreferrer">
                 <Code className="mr-2 h-5 w-5" />
-                Get Started
+                {t("getStarted")}
               </Link>
             </Button>
             <Button variant="outline" asChild size="lg" className="text-base px-8 py-6 h-auto">
               <Link href="/login">
                 <Shield className="mr-2 h-5 w-5" />
-                Sign In
+                {t("signIn")}
               </Link>
             </Button>
           </div>
@@ -61,32 +66,32 @@ export default function LandingPage() {
               <div className="rounded-full bg-green-500/10 p-3 mb-3">
                 <CheckCircle className="h-6 w-6 text-green-500" />
               </div>
-              <h3 className="font-semibold text-sm text-center mb-1">Single Domain</h3>
-              <p className="text-xs text-muted-foreground text-center">No CORS issues</p>
+              <h3 className="font-semibold text-sm text-center mb-1">{t("singleDomain")}</h3>
+              <p className="text-xs text-muted-foreground text-center">{t("noCorsIssues")}</p>
             </div>
             
             <div className="flex flex-col items-center p-4 rounded-lg bg-card/50 border backdrop-blur-sm">
               <div className="rounded-full bg-blue-500/10 p-3 mb-3">
                 <Shield className="h-6 w-6 text-blue-500" />
               </div>
-              <h3 className="font-semibold text-sm text-center mb-1">Better Auth</h3>
-              <p className="text-xs text-muted-foreground text-center">Secure by default</p>
+              <h3 className="font-semibold text-sm text-center mb-1">{t("betterAuth")}</h3>
+              <p className="text-xs text-muted-foreground text-center">{t("secureByDefault")}</p>
             </div>
             
             <div className="flex flex-col items-center p-4 rounded-lg bg-card/50 border backdrop-blur-sm">
               <div className="rounded-full bg-purple-500/10 p-3 mb-3">
                 <Palette className="h-6 w-6 text-purple-500" />
               </div>
-              <h3 className="font-semibold text-sm text-center mb-1">8 Color Themes</h3>
-              <p className="text-xs text-muted-foreground text-center">Dark mode ready</p>
+              <h3 className="font-semibold text-sm text-center mb-1">{t("colorThemes")}</h3>
+              <p className="text-xs text-muted-foreground text-center">{t("darkModeReady")}</p>
             </div>
             
             <div className="flex flex-col items-center p-4 rounded-lg bg-card/50 border backdrop-blur-sm">
               <div className="rounded-full bg-teal-500/10 p-3 mb-3">
                 <Globe className="h-6 w-6 text-teal-500" />
               </div>
-              <h3 className="font-semibold text-sm text-center mb-1">i18n Ready</h3>
-              <p className="text-xs text-muted-foreground text-center">Multi-language</p>
+              <h3 className="font-semibold text-sm text-center mb-1">{t("i18nReady")}</h3>
+              <p className="text-xs text-muted-foreground text-center">{t("multiLanguage")}</p>
             </div>
           </div>
         </div>
@@ -97,10 +102,10 @@ export default function LandingPage() {
         <div className="landing-container-wide">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">
-              Everything you need to build modern apps
+              {t("everythingYouNeed")}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Pre-configured with the best tools and practices. Just clone, customize, and deploy.
+              {t("preConfiguredDescription")}
             </p>
           </div>
 
@@ -109,12 +114,12 @@ export default function LandingPage() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Zap className="h-5 w-5 text-yellow-500" />
-                  <CardTitle className="text-lg">Lightning Fast</CardTitle>
+                  <CardTitle className="text-lg">{t("lightningFast")}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Built with Next.js 15, React 19, and optimized for performance with modern build tools.
+                  {t("lightningFastDescription")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -123,12 +128,12 @@ export default function LandingPage() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Shield className="h-5 w-5 text-blue-500" />
-                  <CardTitle className="text-lg">Secure Authentication</CardTitle>
+                  <CardTitle className="text-lg">{t("secureAuthentication")}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Better Auth integration with session management, OAuth providers, and security best practices.
+                  {t("secureAuthDescription")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -137,12 +142,12 @@ export default function LandingPage() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Palette className="h-5 w-5 text-purple-500" />
-                  <CardTitle className="text-lg">Beautiful Themes</CardTitle>
+                  <CardTitle className="text-lg">{t("beautifulThemes")}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  8 carefully crafted color themes with dark mode support and customizable design tokens.
+                  {t("beautifulThemesDescription")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -151,12 +156,12 @@ export default function LandingPage() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Database className="h-5 w-5 text-green-500" />
-                  <CardTitle className="text-lg">Database Ready</CardTitle>
+                  <CardTitle className="text-lg">{t("databaseReady")}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Prisma ORM with PostgreSQL, migrations, and type-safe database operations out of the box.
+                  {t("databaseReadyDescription")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -165,12 +170,12 @@ export default function LandingPage() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Code className="h-5 w-5 text-orange-500" />
-                  <CardTitle className="text-lg">Developer Experience</CardTitle>
+                  <CardTitle className="text-lg">{t("developerExperience")}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  TypeScript, ESLint, Prettier, and modern tooling configured for the best development experience.
+                  {t("developerExperienceDescription")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -179,12 +184,12 @@ export default function LandingPage() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Smartphone className="h-5 w-5 text-pink-500" />
-                  <CardTitle className="text-lg">Mobile First</CardTitle>
+                  <CardTitle className="text-lg">{t("mobileFirst")}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Responsive design, PWA support, and mobile-optimized components using shadcn/ui.
+                  {t("mobileFirstDescription")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -197,23 +202,23 @@ export default function LandingPage() {
         <div className="landing-container">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">
-              Built with modern technologies
+              {t("builtWithModernTech")}
             </h2>
             <p className="text-lg text-muted-foreground">
-              Carefully selected tools and frameworks for optimal developer experience
+              {t("carefullySelectedTools")}
             </p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
             {[
-              { name: 'Next.js 15', category: 'Framework' },
-              { name: 'React 19', category: 'Library' }, 
-              { name: 'TypeScript', category: 'Language' },
-              { name: 'Tailwind CSS', category: 'Styling' },
-              { name: 'Better Auth', category: 'Authentication' },
-              { name: 'Prisma ORM', category: 'Database' },
-              { name: 'PostgreSQL', category: 'Database' },
-              { name: 'Vercel', category: 'Deployment' }
+              { name: 'Next.js 15', category: t('framework') },
+              { name: 'React 19', category: t('library') }, 
+              { name: 'TypeScript', category: t('language') },
+              { name: 'Tailwind CSS', category: t('styling') },
+              { name: 'Better Auth', category: t('authentication') },
+              { name: 'Prisma ORM', category: t('database') },
+              { name: 'PostgreSQL', category: t('database') },
+              { name: 'Vercel', category: t('deployment') }
             ].map((tech) => (
               <div key={tech.name} className="group relative">
                 <div className="rounded-lg border bg-card p-4 transition-all hover:shadow-md hover:border-primary/20">
@@ -230,20 +235,20 @@ export default function LandingPage() {
             <div className="relative z-10">
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-foreground mb-4">
-                  Ready to get started?
+                  {t("readyToGetStarted")}
                 </h3>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  Clone the repository and start building your next project with this production-ready boilerplate.
+                  {t("cloneRepositoryDescription")}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button asChild size="lg" className="text-base px-8">
                     <Link href={githubUrl} target="_blank" rel="noopener noreferrer">
-                      Start Building Now
+                      {t("startBuildingNow")}
                     </Link>
                   </Button>
                   <Button asChild variant="outline" size="lg" className="text-base px-8">
                     <Link href="/login">
-                      Sign In
+                      {t("signIn")}
                     </Link>
                   </Button>
                 </div>

@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle } from "lucide-react";
+import { useLanguageSettings } from "@/hooks/use-settings-store";
 
 export function SignupForm() {
   const router = useRouter();
+  const { t } = useLanguageSettings();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,12 +25,12 @@ export function SignupForm() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("passwordsDoNotMatch"));
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError(t("passwordTooShort"));
       return;
     }
 
@@ -43,12 +45,12 @@ export function SignupForm() {
       });
 
       if (error) {
-        setError(error.message || "Failed to create account");
+        setError(error.message || t("failedToCreateAccount"));
       } else if (data) {
         router.push("/");
       }
     } catch (err) {
-      setError("An unexpected error occurred");
+      setError(t("unexpectedError"));
     } finally {
       setIsLoading(false);
     }
@@ -57,11 +59,11 @@ export function SignupForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 w-full">
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">{t("name")}</Label>
         <Input
           id="name"
           type="text"
-          placeholder="John Doe"
+          placeholder={t("namePlaceholder")}
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={isLoading}
@@ -70,11 +72,11 @@ export function SignupForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t("email")}</Label>
         <Input
           id="email"
           type="email"
-          placeholder="you@example.com"
+          placeholder={t("emailPlaceholder")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={isLoading}
@@ -83,11 +85,11 @@ export function SignupForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t("password")}</Label>
         <Input
           id="password"
           type="password"
-          placeholder="••••••••"
+          placeholder={t("passwordPlaceholder")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={isLoading}
@@ -96,11 +98,11 @@ export function SignupForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
         <Input
           id="confirmPassword"
           type="password"
-          placeholder="••••••••"
+          placeholder={t("passwordPlaceholder")}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           disabled={isLoading}
@@ -118,10 +120,10 @@ export function SignupForm() {
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Creating account...
+            {t("creatingAccount")}
           </>
         ) : (
-          "Sign Up"
+          t("signUp")
         )}
       </Button>
     </form>
