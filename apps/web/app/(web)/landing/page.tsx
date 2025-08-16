@@ -3,10 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle, Palette, Globe, Shield, Zap, Code, Database, Smartphone } from 'lucide-react'
-import { getGithubUrl } from '@boilerplate/config/project.config'
+import { getGithubUrl, getDisplayName, getDescription } from '@boilerplate/config/project.config'
 
 export default function LandingPage() {
   const githubUrl = getGithubUrl()
+  const projectName = getDisplayName()
+  const projectDescription = getDescription()
   
   return (
     <div>
@@ -32,12 +34,12 @@ export default function LandingPage() {
           <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-foreground mb-6 leading-tight">
             Modern Web Application{" "}
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Boilerplate
+              {projectName}
             </span>
           </h1>
           
           <p className="text-xl sm:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            A production-ready Next.js boilerplate with authentication, theming, internationalization, and modern development tools.{" "}
+            {projectDescription}{" "}
             <span className="text-foreground font-medium">Build faster, deploy easier.</span>
           </p>
           
