@@ -7,6 +7,7 @@ import { GalleryVerticalEnd, Home, Settings } from "lucide-react"
 
 // Update import to use the consolidated file
 import { useLanguageSettings } from "@/hooks/use-settings-store"
+import { getDisplayName } from "@boilerplate/config/project.config"
 
 interface SidebarProps {
   version: string
@@ -59,7 +60,7 @@ export function Sidebar({ version }: SidebarProps) {
             <GalleryVerticalEnd className="size-5" />
           </div>
           <div className="flex flex-col gap-0.5 leading-none">
-            <span className="text-base font-semibold">Boilerplate</span>
+            <span className="text-base font-semibold">{getDisplayName()}</span>
             <span className="text-xs text-muted-foreground">v{version}</span>
           </div>
         </Link>
