@@ -129,6 +129,12 @@ async function collectProjectInfo(): Promise<ProjectAnswers> {
 
 function updateProjectConfig(answers: ProjectAnswers) {
   const configPath = join(process.cwd(), 'packages/config/project.config.ts');
+  
+  if (!existsSync(configPath)) {
+    console.log('⚠️  Project config file not found, skipping...');
+    return;
+  }
+  
   let config = readFileSync(configPath, 'utf-8');
 
   // Update basic info
@@ -210,6 +216,12 @@ function updatePackageJson(answers: ProjectAnswers) {
 
 function updateDockerCompose(answers: ProjectAnswers) {
   const dockerComposePath = join(process.cwd(), 'docker-compose.yml');
+  
+  if (!existsSync(dockerComposePath)) {
+    console.log('⚠️  docker-compose.yml not found, skipping...');
+    return;
+  }
+  
   let dockerCompose = readFileSync(dockerComposePath, 'utf-8');
 
   // Update container name
@@ -302,6 +314,12 @@ BETTER_AUTH_SECRET="your-super-secret-key-here-at-least-32-characters-long"
 
 function updateMakefile(answers: ProjectAnswers) {
   const makefilePath = join(process.cwd(), 'Makefile');
+  
+  if (!existsSync(makefilePath)) {
+    console.log('⚠️  Makefile not found, skipping...');
+    return;
+  }
+  
   let makefile = readFileSync(makefilePath, 'utf-8');
 
   // Update title comment
@@ -317,26 +335,35 @@ function updateMakefile(answers: ProjectAnswers) {
 function updateManifestJson(answers: ProjectAnswers) {
   const manifestPath = join(process.cwd(), 'apps/web/public/manifest.json');
   
-  if (existsSync(manifestPath)) {
-    const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
-    
-    // Update app metadata
-    manifest.name = answers.displayName;
-    manifest.short_name = answers.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-    manifest.description = answers.description;
-    
-    // Update start URL based on web URL
-    if (answers.productionWebUrl) {
-      manifest.start_url = new URL('/', answers.productionWebUrl).pathname;
-    }
-    
-    writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-    console.log('✅ Updated PWA manifest.json');
+  if (!existsSync(manifestPath)) {
+    console.log('ℹ️  PWA manifest.json not found, skipping...');
+    return;
   }
+  
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+  
+  // Update app metadata
+  manifest.name = answers.displayName;
+  manifest.short_name = answers.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  manifest.description = answers.description;
+  
+  // Update start URL based on web URL
+  if (answers.productionWebUrl) {
+    manifest.start_url = new URL('/', answers.productionWebUrl).pathname;
+  }
+  
+  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  console.log('✅ Updated PWA manifest.json');
 }
 
 function updateSetupGuide(answers: ProjectAnswers) {
   const setupPath = join(process.cwd(), 'SETUP.md');
+  
+  if (!existsSync(setupPath)) {
+    console.log('ℹ️  SETUP.md not found, skipping...');
+    return;
+  }
+  
   let setup = readFileSync(setupPath, 'utf-8');
 
   // Update title and descriptions
@@ -454,18 +481,22 @@ function validateSetup(answers: ProjectAnswers) {
   
   // Check if docker-compose.yml has been updated
   const dockerComposePath = join(process.cwd(), 'docker-compose.yml');
-  const dockerCompose = readFileSync(dockerComposePath, 'utf-8');
-  
-  if (dockerCompose.includes('auth_user') || dockerCompose.includes('auth_db')) {
-    console.log('⚠️  Warning: docker-compose.yml still contains default values. This is normal for the template.');
+  if (existsSync(dockerComposePath)) {
+    const dockerCompose = readFileSync(dockerComposePath, 'utf-8');
+    
+    if (dockerCompose.includes('auth_user') || dockerCompose.includes('auth_db')) {
+      console.log('⚠️  Warning: docker-compose.yml still contains default values. This is normal for the template.');
+    }
   }
   
   // Check if Makefile has been updated
   const makefilePath = join(process.cwd(), 'Makefile');
-  const makefile = readFileSync(makefilePath, 'utf-8');
-  
-  if (makefile.includes('auth_user:auth_password@localhost:5432/auth_db')) {
-    throw new Error('❌ Makefile still contains hardcoded database credentials. Setup may be incomplete.');
+  if (existsSync(makefilePath)) {
+    const makefile = readFileSync(makefilePath, 'utf-8');
+    
+    if (makefile.includes('auth_user:auth_password@localhost:5432/auth_db')) {
+      throw new Error('❌ Makefile still contains hardcoded database credentials. Setup may be incomplete.');
+    }
   }
   
   console.log('✅ Setup validation passed!');
