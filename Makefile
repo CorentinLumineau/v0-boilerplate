@@ -16,7 +16,7 @@ PROJECT_NAME ?= boilerplate
 # Construct DATABASE_URL from environment variables
 DATABASE_URL := postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5432/$(DB_NAME)
 
-.PHONY: all help db-up db-down db-restart db-logs db-clean db-migrate db-migrate-deploy db-migrate-reset db-studio dev dev-backend dev-frontend build install clean version-patch version-minor version-major version-sync release-patch release-minor release-major
+.PHONY: all help db-up db-down db-restart db-logs db-clean db-migrate db-migrate-deploy db-migrate-reset db-studio dev dev-backend dev-frontend build install clean verify version-patch version-minor version-major version-sync release-patch release-minor release-major
 
 # Default target - show help
 help:
@@ -38,6 +38,7 @@ help:
 	@echo "  make build        - Build all apps"
 	@echo "  make install      - Install all dependencies"
 	@echo "  make clean        - Clean build outputs"
+	@echo "  make verify       - Run tests, linting, type-check and build"
 	@echo ""
 	@echo "Database Configuration:"
 	@echo "  DB_USER: $(DB_USER)"
@@ -143,6 +144,19 @@ install:
 clean:
 	@echo "Cleaning build outputs..."
 	pnpm clean
+
+# Verify commands (test, lint, type-check, build)
+verify:
+	@echo "Running verification checks..."
+	@echo "1/4 Running tests..."
+	pnpm test
+	@echo "2/4 Running linter..."
+	pnpm lint
+	@echo "3/4 Running type-check..."
+	pnpm type-check
+	@echo "4/4 Building all apps..."
+	pnpm build
+	@echo "✅ All verification checks passed!"
 
 # Quick setup for new developers
 setup: install db-up
