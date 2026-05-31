@@ -43,7 +43,33 @@
       "outputs": []
     },
     "test": {
-      "outputs": ["coverage/**"]
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "DATABASE_URL"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true,
+      "env": ["NODE_ENV", "DATABASE_URL"]
+    },
+    "test:ci": {
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "DATABASE_URL", "CI"]
+    },
+    "test:unit": {
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV"]
+    },
+    "test:integration": {
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "DATABASE_URL"]
+    },
+    "test:e2e": {
+      "outputs": ["playwright-report/**"],
+      "env": ["NODE_ENV", "DATABASE_URL"]
+    },
+    "test:coverage": {
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "DATABASE_URL"]
     },
     "clean": {
       "cache": false
